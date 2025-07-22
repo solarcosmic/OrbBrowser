@@ -4,10 +4,20 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Orb Browser</title>
+    <style>
+        body {
+            background-color: #0f0f0f;
+        }
+    </style>
 </head>
 <body>
     <div id="container">
-        
+        <button id="create-tab">New Tab</button>
     </div>
+    <script>
+        document.getElementById("create-tab").addEventListener("click", () => {
+            window.electronAPI.createNewTab("https://www.google.com");
+        });
+    </script>
 </body>
 </html>
