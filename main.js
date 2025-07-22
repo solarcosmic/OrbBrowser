@@ -28,7 +28,7 @@ const createMainWindow = () => {
     mainView.setBorderRadius(5);
     win.on("resize", () => {
         bounds = win.getBounds();
-    overlayView.setBounds({x: 0, y: 0, width: bounds.width, height: bounds.height});
+        overlayView.setBounds({x: 0, y: 0, width: bounds.width, height: bounds.height});
         mainView.setBounds({x: 250, y: 50, width: bounds.width - 260, height: bounds.height - 60});
     });
     mainView.webContents.on("context-menu", (e, params) => {
