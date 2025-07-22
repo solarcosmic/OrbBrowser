@@ -6,13 +6,31 @@
     <title>Orb Browser</title>
     <style>
         body {
+            margin: 0;
+            padding: 0;
             background-color: #0f0f0f;
+        }
+
+        #sidebar {
+            width: 250px;
+            height: 100vh;
+            color: #ffffff;
+        }
+        #tablist {
+            display: flex;
+            flex-direction: column;
+            padding: 5px 5px;
+            margin-top: -7.7px;
         }
     </style>
 </head>
 <body>
     <div id="container">
-        <button id="create-tab">New Tab</button>
+        <div id="sidebar">
+            <div id="tablist">
+                <button id="create-tab">+ New Tab</button>
+            </div>
+        </div>
     </div>
     <script>
         document.getElementById("create-tab").addEventListener("click", () => {
