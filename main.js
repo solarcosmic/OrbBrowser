@@ -23,7 +23,6 @@ const { installChromeWebStore } = require("electron-chrome-web-store");
 const path = require("node:path");
 
 var win;
-var mainView;
 var browserSession;
 var extensions;
 const createMainWindow = async () => {
@@ -39,31 +38,20 @@ const createMainWindow = async () => {
     });
     win.setMenu(null);
     await installChromeWebStore({session: browserSession});
-    mainView = new WebContentsView({session: browserSession});
     //mainView.webContents.setUserAgent(session.defaultSession.getUserAgent());
-    extensions.addTab(mainView.webContents, win);
-    win.contentView.addChildView(mainView);
-    //win.loadFile("index.html");
-    var bounds = win.getBounds();
-    win.webContents.loadFile("index.html");
+    //extensions.addTab(mainView.webContents, win);
+    //win.contentView.addChildView(mainView);
+    win.loadFile("index.html");
+    //var bounds = win.getBounds();
+    //win.webContents.loadFile("index.html");
     //mainView.webContents.loadURL("https://chrome.google.com/webstore/category/extensions");
-    mainView.setBounds({x: 0, y: 0, width: 500, height: 500});
-    mainView.setBorderRadius(5);
-    win.on("resize", () => {
+    //mainView.setBounds({x: 0, y: 0, width: 500, height: 500});
+    //mainView.setBorderRadius(5);
+    // TODO: REIMPLEMENT BELOW
+    /*win.on("resize", () => {
         bounds = win.getBounds();
         mainView.setBounds({x: 250, y: 10, width: bounds.width - 260, height: bounds.height - 20});
-    });
-    mainView.webContents.on("context-menu", (e, params) => {
-        const menu = buildChromeContextMenu({
-            params,
-            webContents: mainView.webContents,
-            openLink: (url, disposition) => {
-                console.log("Link requested: " + url);
-                activateTab(createTab(url));
-            }
-        });
-        menu.popup();
-    });
+    });*/
 }
 
 app.whenReady().then(() => {
@@ -87,6 +75,17 @@ function createTab(url = "https://www.google.com") {
     tab.view.webContents.loadURL(url);
     extensions.addTab(tab.view.webContents, win);
     win.contentView.addChildView(tab.view);
+    tab.view.webContents.on("context-menu", (e, params) => {
+        const menu = buildChromeContextMenu({
+            params,
+            webContents: tab.view.webContents,
+            openLink: (url, disposition) => {
+                console.log("Link requested: " + url);
+                activateTab(createTab(url));
+            }
+        });
+        menu.popup();
+    });
     tabs.push(tab);
     sendTabsUpdate();
     return tab;
