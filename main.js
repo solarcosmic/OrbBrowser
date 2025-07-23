@@ -1,3 +1,21 @@
+/*
+ * Orb Browser
+ * Copyright (c) 2025 solarcosmic.
+
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+*/
+
 const { app, BrowserWindow, WebContentsView, session, ipcMain } = require("electron");
 const { ElectronChromeExtensions } = require("electron-chrome-extensions");
 const { buildChromeContextMenu } = require("electron-chrome-context-menu");
@@ -18,7 +36,6 @@ const createMainWindow = async () => {
             session: browserSession,
             preload: path.join(__dirname, "preload.js")
         },
-        //backgroundColor: "#0f0f0f"
     });
     win.setMenu(null);
     await installChromeWebStore({session: browserSession});
@@ -29,7 +46,7 @@ const createMainWindow = async () => {
     //win.loadFile("index.html");
     var bounds = win.getBounds();
     win.webContents.loadFile("index.html");
-    mainView.webContents.loadURL("https://chrome.google.com/webstore/category/extensions");
+    //mainView.webContents.loadURL("https://chrome.google.com/webstore/category/extensions");
     mainView.setBounds({x: 0, y: 0, width: 500, height: 500});
     mainView.setBorderRadius(5);
     win.on("resize", () => {
@@ -42,6 +59,7 @@ const createMainWindow = async () => {
             webContents: mainView.webContents,
             openLink: (url, disposition) => {
                 console.log("Link requested: " + url);
+                activateTab(createTab(url));
             }
         });
         menu.popup();
@@ -70,6 +88,7 @@ function createTab(url = "https://www.google.com") {
     extensions.addTab(tab.view.webContents, win);
     win.contentView.addChildView(tab.view);
     tabs.push(tab);
+    sendTabsUpdate();
     return tab;
 }
 
@@ -79,15 +98,16 @@ function activateTab(tab) {
         tab.view = new WebContentsView({session: browserSession});
         tab.view.webContents.loadURL(tab.url);
         extensions.addTab(tab.view.webContents, win);
-        win.contentView.addChildView(tab.view);
     }
     tabs.forEach(t => {
         if (t != tab && t.view) {
             win.contentView.removeChildView(t.view);
         }
     });
+    win.contentView.addChildView(tab.view);
     var bounds = win.getBounds();
     tab.view.setBounds({x: 250, y: 10, width: bounds.width - 260, height: bounds.height - 20});
+    sendTabsUpdate();
 }
 
 function createTabIPC(event, url) {
@@ -96,3 +116,21 @@ function createTabIPC(event, url) {
     activateTab(tab);
     console.log("activated tab with url: " + url);
 }
+
+function sendTabsUpdate() {
+    if (!win) return;
+    win.webContents.send("tabs-updated", tabs.map((tab, idx) => ({
+        url: tab.url,
+        active: tab.view ? true : false,
+        index: idx
+    })));
+}
+
+ipcMain.on("activate-tab", (_, idx) => {
+    if (tabs[idx]) {
+        console.log("tab idx: " + idx);
+        console.log(tabs[idx]);
+        activateTab(tabs[idx]);
+        sendTabsUpdate();
+    }
+})

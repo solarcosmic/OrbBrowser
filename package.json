@@ -2,7 +2,7 @@
   "name": "orbbrowser",
   "version": "1.0.0",
   "description": "Orb Browser",
-  "license": "MIT",
+  "license": "GPL-3.0-only",
   "author": "solarcosmic",
   "type": "commonjs",
   "main": "main.js",

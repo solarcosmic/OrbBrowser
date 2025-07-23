@@ -29,6 +29,9 @@
         <div id="sidebar">
             <div id="tablist">
                 <button id="create-tab">+ New Tab</button>
+                <div id="tab-buttons">
+                    
+                </div>
             </div>
         </div>
     </div>
@@ -36,6 +39,21 @@
         document.getElementById("create-tab").addEventListener("click", () => {
             window.electronAPI.createNewTab("https://www.google.com");
         });
+        function updateTabs(tabs) {
+            const tabButtons = document.getElementById("tab-buttons");
+            tabButtons.innerHTML = "";
+            tabs.forEach(tab => {
+                const btn = document.createElement("button");
+                btn.textContent = tab.url;
+                btn.style.fontWeight = tab.active ? "bold" : "normal";
+                btn.onclick = () => {
+                    console.log("Tab index: " + tab.index);
+                    window.electronAPI.activateTab(tab.index);
+                }
+                tabButtons.appendChild(btn);
+            })
+        }
+        window.electronAPI.onTabsUpdated(updateTabs);
     </script>
 </body>
 </html>
