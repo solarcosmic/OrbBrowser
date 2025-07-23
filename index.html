@@ -26,6 +26,7 @@
 </head>
 <body>
     <div id="container">
+        <browser-action-list></browser-action-list> <!-- supposed to do something with this element but i don't know what it does (injectBrowserAction) -->
         <div id="sidebar">
             <div id="tablist">
                 <button id="create-tab">+ New Tab</button>
@@ -36,6 +37,7 @@
         </div>
     </div>
     <script>
+        //injectBrowserAction()
         document.getElementById("create-tab").addEventListener("click", () => {
             window.electronAPI.createNewTab("https://www.google.com");
         });

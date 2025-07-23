@@ -26,8 +26,16 @@ var win;
 var browserSession;
 var extensions;
 const createMainWindow = async () => {
-    extensions = new ElectronChromeExtensions({license: "GPL-3.0"});
     browserSession = session.defaultSession;
+    extensions = new ElectronChromeExtensions({
+        license: "GPL-3.0",
+        session: browserSession,
+        createTab(details) {
+            console.log("Attempt to create tab: " + details);
+            //activateTab(createTab())
+        }
+    });
+    
     win = new BrowserWindow({
         width: 1280,
         height: 720,
@@ -42,6 +50,7 @@ const createMainWindow = async () => {
     //extensions.addTab(mainView.webContents, win);
     //win.contentView.addChildView(mainView);
     win.loadFile("index.html");
+    activateTab(createTab());
     //var bounds = win.getBounds();
     //win.webContents.loadFile("index.html");
     //mainView.webContents.loadURL("https://chrome.google.com/webstore/category/extensions");
@@ -64,6 +73,7 @@ app.on("window-all-closed", () => {
 })
 
 var tabs = [];
+
 const tab_timeout = 60000 * 5;
 function createTab(url = "https://www.google.com") {
     const tab = {
