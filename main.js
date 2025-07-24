@@ -61,6 +61,7 @@ const createMainWindow = async () => {
         bounds = win.getBounds();
         mainView.setBounds({x: 250, y: 10, width: bounds.width - 260, height: bounds.height - 20});
     });*/
+    win.webContents.openDevTools();
 }
 
 app.whenReady().then(() => {
@@ -98,6 +99,7 @@ function createTab(url = "https://www.google.com") {
     });
     tab.view.webContents.on("page-title-updated", (e, title) => {
         win.setTitle(title + " ⎯  Orb Browser");
+        tablist_setActiveTabTitle(title);
     });
     tabs.push(tab);
     sendTabsUpdate();
@@ -118,7 +120,7 @@ function activateTab(tab) {
     });
     win.contentView.addChildView(tab.view);
     var bounds = win.getBounds();
-    tab.view.setBounds({x: 290, y: 10, width: bounds.width - 320, height: bounds.height - 60});
+    tab.view.setBounds({x: 290, y: 10, width: bounds.width - 300, height: bounds.height - 20});
     tab.view.setBorderRadius(10);
     sendTabsUpdate();
 }
@@ -137,6 +139,10 @@ function sendTabsUpdate() {
         active: tab.view ? true : false,
         index: idx,
     })));
+}
+
+function tablist_setActiveTabTitle(title) {
+    win.webContents.send("tablist_set-tab-title", null, title);
 }
 
 ipcMain.on("activate-tab", (_, idx) => {

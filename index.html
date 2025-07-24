@@ -61,6 +61,8 @@
                 const btn = document.createElement("button");
                 btn.textContent = tab.url;
                 btn.style.fontWeight = tab.active ? "bold" : "normal";
+                //btn.classList.add("active-tab");
+                btn.setAttribute("id", "tab-button-" + tab.index);
                 btn.onclick = () => {
                     console.log("Tab index: " + tab.index);
                     window.electronAPI.activateTab(tab.index);
@@ -68,7 +70,17 @@
                 tabButtons.appendChild(btn);
             })
         }
+
+        /*
+         * Sets the tab title by index.
+        */
+        function setTabTitle(idx, title) {
+            console.log(idx, title);
+            var chosenIdx = document.getElementById("tab-button-" + idx) ||  document.querySelector(".active-tab");
+            chosenIdx.textContent = title;
+        }
         window.electronAPI.onTabsUpdated(updateTabs);
+        window.electronAPI.tablist_setTabTitle(setTabTitle);
     </script>
 </body>
 </html>
