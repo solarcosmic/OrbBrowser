@@ -32,10 +32,13 @@
             padding: 5px 5px;
             border-radius: 8px;
             border: none;
-            background-color: #222222;
+            background-color: #1a1a1a;
             color: #ffffff;
             min-width: 100%;
             text-align: left;
+        }
+        #tab-buttons .active-tab {
+            background-color: #303030;
         }
     </style>
 </head>
@@ -64,6 +67,7 @@
                     btn.setAttribute("id", "tab-button-" + tab.index);
                     btn.onclick = () => {
                         console.log("Tab index: " + tab.index);
+                        setActiveTab(tab.index);
                         window.electronAPI.activateTab(tab.index);
                     }
                     tabButtons.appendChild(btn);
@@ -88,8 +92,19 @@
          * Sets the tab title by index.
         */
         function setTabTitle(idx, title) {
-            var chosenIdx = document.getElementById("tab-button-" + idx) || document.querySelector(".active-tab");
+            var chosenIdx = getTabButtonByIndex(idx) || document.querySelector(".active-tab");
             chosenIdx.textContent = title;
+        }
+        function setActiveTab(idx) {
+            console.log(idx);
+            const buttons = Array.from(document.getElementById("tab-buttons").children);
+            buttons.forEach(button => {
+                button.classList.remove("active-tab");
+            });
+            getTabButtonByIndex(idx).classList.add("active-tab");
+        }
+        function getTabButtonByIndex(idx) {
+            return document.getElementById("tab-button-" + idx);
         }
         window.electronAPI.onTabsUpdated(updateTabs);
         window.electronAPI.tablist_setTabTitle(setTabTitle);
