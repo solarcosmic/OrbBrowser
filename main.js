@@ -79,9 +79,11 @@ const tab_timeout = 60000 * 5;
 function createTab(url = "https://www.google.com") {
     const tab = {
         url,
+        title: url,
         view: new WebContentsView({session: browserSession}),
         lastActive: Date.now(),
-        timeoutId: null
+        timeoutId: null,
+        index: tabs.length
     };
     tab.view.webContents.loadURL(url);
     extensions.addTab(tab.view.webContents, win);
@@ -98,8 +100,9 @@ function createTab(url = "https://www.google.com") {
         menu.popup();
     });
     tab.view.webContents.on("page-title-updated", (e, title) => {
+        tab.title = title;
         win.setTitle(title + " ⎯  Orb Browser");
-        tablist_setActiveTabTitle(title);
+        tablist_setTabTitle(tab.index, title);
     });
     tabs.push(tab);
     sendTabsUpdate();
@@ -118,6 +121,7 @@ function activateTab(tab) {
             win.contentView.removeChildView(t.view);
         }
     });
+    
     win.contentView.addChildView(tab.view);
     var bounds = win.getBounds();
     tab.view.setBounds({x: 290, y: 10, width: bounds.width - 300, height: bounds.height - 20});
@@ -136,13 +140,14 @@ function sendTabsUpdate() {
     if (!win) return;
     win.webContents.send("tabs-updated", tabs.map((tab, idx) => ({
         url: tab.url,
+        title: tab.title,
         active: tab.view ? true : false,
         index: idx,
     })));
 }
 
-function tablist_setActiveTabTitle(title) {
-    win.webContents.send("tablist_set-tab-title", null, title);
+function tablist_setTabTitle(idx, title) {
+    win.webContents.send("tablist_set-tab-title", idx, title);
 }
 
 ipcMain.on("activate-tab", (_, idx) => {

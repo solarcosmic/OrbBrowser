@@ -51,23 +51,33 @@
     </div>
     <script>
         //injectBrowserAction()
+        var currentTab = null;
         document.getElementById("create-tab").addEventListener("click", () => {
             window.electronAPI.createNewTab("https://www.google.com");
         });
         function updateTabs(tabs) {
             const tabButtons = document.getElementById("tab-buttons");
-            tabButtons.innerHTML = "";
             tabs.forEach(tab => {
-                const btn = document.createElement("button");
-                btn.textContent = tab.url;
+                var btn = document.getElementById("tab-button-" + tab.index);
+                if (!btn) {
+                    btn = document.createElement("button");
+                    btn.setAttribute("id", "tab-button-" + tab.index);
+                    btn.onclick = () => {
+                        console.log("Tab index: " + tab.index);
+                        window.electronAPI.activateTab(tab.index);
+                    }
+                    tabButtons.appendChild(btn);
+                }
+                btn.textContent = tab.title || tab.url;
                 btn.style.fontWeight = tab.active ? "bold" : "normal";
                 //btn.classList.add("active-tab");
-                btn.setAttribute("id", "tab-button-" + tab.index);
-                btn.onclick = () => {
-                    console.log("Tab index: " + tab.index);
-                    window.electronAPI.activateTab(tab.index);
+            });
+
+            Array.from(tabButtons.children).forEach(child => {
+                const idx = parseInt(child.id.replace("tab-button-", ""));
+                if (!tabs.some(tab => tab.index == idx)) {
+                    tabButtons.removeChild(child);
                 }
-                tabButtons.appendChild(btn);
             })
         }
 
@@ -75,8 +85,7 @@
          * Sets the tab title by index.
         */
         function setTabTitle(idx, title) {
-            console.log(idx, title);
-            var chosenIdx = document.getElementById("tab-button-" + idx) ||  document.querySelector(".active-tab");
+            var chosenIdx = document.getElementById("tab-button-" + idx) || document.querySelector(".active-tab");
             chosenIdx.textContent = title;
         }
         window.electronAPI.onTabsUpdated(updateTabs);
