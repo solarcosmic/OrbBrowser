@@ -73,6 +73,9 @@
                 //btn.classList.add("active-tab");
             });
 
+            /*
+             * Removes extra buttons (e.g. closed tab)
+            */
             Array.from(tabButtons.children).forEach(child => {
                 const idx = parseInt(child.id.replace("tab-button-", ""));
                 if (!tabs.some(tab => tab.index == idx)) {
