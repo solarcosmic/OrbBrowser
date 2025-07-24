@@ -96,6 +96,9 @@ function createTab(url = "https://www.google.com") {
         });
         menu.popup();
     });
+    tab.view.webContents.on("page-title-updated", (e, title) => {
+        win.setTitle(title + " ⎯  Orb Browser");
+    });
     tabs.push(tab);
     sendTabsUpdate();
     return tab;
@@ -115,7 +118,8 @@ function activateTab(tab) {
     });
     win.contentView.addChildView(tab.view);
     var bounds = win.getBounds();
-    tab.view.setBounds({x: 250, y: 10, width: bounds.width - 260, height: bounds.height - 20});
+    tab.view.setBounds({x: 290, y: 10, width: bounds.width - 320, height: bounds.height - 60});
+    tab.view.setBorderRadius(10);
     sendTabsUpdate();
 }
 
@@ -131,7 +135,7 @@ function sendTabsUpdate() {
     win.webContents.send("tabs-updated", tabs.map((tab, idx) => ({
         url: tab.url,
         active: tab.view ? true : false,
-        index: idx
+        index: idx,
     })));
 }
 
