@@ -43,6 +43,7 @@ const createMainWindow = async () => {
             session: browserSession,
             preload: path.join(__dirname, "preload.js")
         },
+        frame: false
     });
     win.setMenu(null);
     await installChromeWebStore({session: browserSession});
@@ -127,6 +128,24 @@ function activateTab(tab) {
     tab.view.setBounds({x: 290, y: 10, width: bounds.width - 300, height: bounds.height - 20});
     tab.view.setBorderRadius(10);
     sendTabsUpdate();
+    win.on("resize", () => {
+        const bounds = win.getBounds();
+        const contentX = 280 + 10;
+        const contentY = 10;
+        const contentWidth = bounds.width - contentX - 10;
+        const contentHeight = bounds.height - 20;
+
+        tabs.forEach(tab => {
+            if (tab.view) {
+                tab.view.setBounds({
+                    x: contentX,
+                    y: contentY,
+                    width: contentWidth,
+                    height: contentHeight
+                });
+            }
+        });
+    });
 }
 
 function createTabIPC(event, url) {
