@@ -29,14 +29,15 @@
             margin-top: 5px;
         }
         #tablist button {
-            padding: 5px 5px;
+            padding: 7px 5px;
             border-radius: 8px;
             border: none;
             background-color: #1a1a1a00;
             color: #ffffff;
-            min-width: 100%;
+            min-width: 95%;
             text-align: left;
             margin-top: 2.5px;
+            margin-left: 5px;
         }
         #tab-buttons .active-tab {
             background-color: #303030;
@@ -44,11 +45,27 @@
         #tablist button:hover {
             background-color: #222222;
         }
+        #tablist button:active {
+            transform: scale(0.95);
+        }
         #tablist button [id*="tab-icon-"] {
             width: 14px; height: 14px; margin-right: 2.5px; margin-bottom: -1.75px; margin-left: 5px;
         }
         #tablist button .page-title {
             margin-left: 10px;
+        }
+        .svg-white {
+            filter: invert(100%) sepia(21%) saturate(2%) hue-rotate(275deg) brightness(104%) contrast(101%);
+        }
+        #create-tab {
+            min-width: 90%;
+        }
+        /* https://stackoverflow.com/a/1457976 */
+        input:focus,
+        select:focus,
+        textarea:focus,
+        button:focus {
+            outline: none;
         }
     </style>
 </head>
@@ -56,10 +73,10 @@
     <div id="container">
         <div id="sidebar">
             <div id="tablist">
-                <button id="create-tab">+ New Tab</button>
-                <div id="tab-buttons">
-                    
+                <div id="extra-buttons">
+                    <button id="create-tab"><img id="tab-icon-nt" class="svg-white" style="margin-top: 2px;" src="assets/plus-solid-full.svg"></img><span class="page-title" style="margin-top: 2px;">New Tab</span></button>
                 </div>
+                <div id="tab-buttons"></div>
             </div>
         </div>
     </div>

@@ -57,7 +57,6 @@ const createMainWindow = async () => {
     //mainView.webContents.loadURL("https://chrome.google.com/webstore/category/extensions");
     //mainView.setBounds({x: 0, y: 0, width: 500, height: 500});
     //mainView.setBorderRadius(5);
-    win.webContents.openDevTools();
 }
 
 app.whenReady().then(() => {
@@ -109,7 +108,7 @@ function createTab(url = "https://www.google.com") {
     })
     tabs.push(tab);
     sendTabsUpdate();
-    /*win.on("resize", () => {
+    win.on("resize", () => {
         const bounds = win.getBounds();
         const contentX = 280 + 10;
         const contentY = 10;
@@ -126,23 +125,7 @@ function createTab(url = "https://www.google.com") {
                 });
             }
         });
-    });*/
-            const bounds = win.getBounds();
-        const contentX = 280 + 10;
-        const contentY = 10;
-        const contentWidth = bounds.width - contentX - 10;
-        const contentHeight = bounds.height - 20;
-
-        tabs.forEach(tab => {
-            if (tab.view) {
-                tab.view.setBounds({
-                    x: contentX,
-                    y: contentY,
-                    width: contentWidth,
-                    height: contentHeight
-                });
-            }
-        });
+    });
     return tab;
 }
 
