@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Orb Browser</title>
+    <style>
+        @font-face {
+            font-family: "Inter";
+            src: url("assets/Inter.ttf");
+        }
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: #0f0f0f;
+            color: #ffffff;
+        }
+        * {
+            font-family: "Inter";
+        }
+        .tab-view {
+            margin: 15px;
+            height: 97vh;
+            border-radius: 8px;
+            -electron-corner-smoothing: 60%; /* apparently this does something but I can't quite tell */
+            overflow: hidden;
+        }
+    </style>
+</head>
+<body>
+    <div id="webviews">
+        <webview src="https://google.com" class="tab-view"></webview>
+    </div>
+    <script>
+        const webview = document.querySelector("webview");
+    </script>
+</body>
+</html>
