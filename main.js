@@ -158,3 +158,7 @@ ipcMain.on("activate-tab", (_, idx) => {
         sendTabsUpdate();
     }
 })
+
+async function activateTabRenderer(idx) {
+    
+}

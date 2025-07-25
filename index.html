@@ -66,15 +66,12 @@
                     btn = document.createElement("button");
                     btn.setAttribute("id", "tab-button-" + tab.index);
                     btn.onclick = () => {
-                        console.log("Tab index: " + tab.index);
-                        setActiveTab(tab.index);
-                        window.electronAPI.activateTab(tab.index);
+                        activateTab(tab.index);
                     }
                     tabButtons.appendChild(btn);
                 }
                 btn.textContent = tab.title || tab.url;
                 btn.style.fontWeight = tab.active ? "bold" : "normal";
-                //btn.classList.add("active-tab");
             });
 
             /*
@@ -95,16 +92,37 @@
             var chosenIdx = getTabButtonByIndex(idx) || document.querySelector(".active-tab");
             chosenIdx.textContent = title;
         }
+
+        /*
+         * Sets the active tab by removing the "active-tab" classes from all buttons, then adds it to the corresponding tab.
+         * Requires: idx (index)
+        */
         function setActiveTab(idx) {
             console.log(idx);
             const buttons = Array.from(document.getElementById("tab-buttons").children);
             buttons.forEach(button => {
                 button.classList.remove("active-tab");
             });
-            getTabButtonByIndex(idx).classList.add("active-tab");
+            getTabButtonByIndex(idx)?.classList.add("active-tab"); // the ? operator is really cool
         }
+
+        /*
+         * Gets the tab button by its index value.
+         * Note that the first tab starts at 0, second 1, etc.
+        */
         function getTabButtonByIndex(idx) {
-            return document.getElementById("tab-button-" + idx);
+            const button = document.getElementById("tab-button-" + idx);
+            if (button) {
+                return button;
+            } else {
+                error("No tab button that corresponds to the given index!");
+            }
+        }
+
+        // TODO: make it on callback (setActiveTab) instead of before (to make sure activateTab has run correctly)
+        function activateTab(idx) {
+            setActiveTab(idx);
+            window.electronAPI.activateTab(idx);
         }
         window.electronAPI.onTabsUpdated(updateTabs);
         window.electronAPI.tablist_setTabTitle(setTabTitle);
