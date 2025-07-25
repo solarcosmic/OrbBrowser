@@ -16,7 +16,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-const { app, BrowserWindow, WebContentsView, session, ipcMain } = require("electron");
+const { app, BrowserWindow, WebContentsView, session, ipcMain, globalShortcut } = require("electron");
 const { ElectronChromeExtensions } = require("electron-chrome-extensions");
 const { buildChromeContextMenu } = require("electron-chrome-context-menu");
 const { installChromeWebStore } = require("electron-chrome-web-store");
@@ -57,17 +57,15 @@ const createMainWindow = async () => {
     //mainView.webContents.loadURL("https://chrome.google.com/webstore/category/extensions");
     //mainView.setBounds({x: 0, y: 0, width: 500, height: 500});
     //mainView.setBorderRadius(5);
-    // TODO: REIMPLEMENT BELOW
-    /*win.on("resize", () => {
-        bounds = win.getBounds();
-        mainView.setBounds({x: 250, y: 10, width: bounds.width - 260, height: bounds.height - 20});
-    });*/
     win.webContents.openDevTools();
 }
 
 app.whenReady().then(() => {
     ipcMain.on("new-tab", createTabIPC);
     createMainWindow();
+    globalShortcut.register("CommandOrControl+T", () => {
+        activateTab(createTab());
+    })
 })
 
 app.on("window-all-closed", () => {
@@ -105,8 +103,46 @@ function createTab(url = "https://www.google.com") {
         win.setTitle(title + " ⎯  Orb Browser");
         tablist_setTabTitle(tab.index, title);
     });
+    tab.view.webContents.on("page-favicon-updated", (e, favicon) => {
+        tab.favicon = favicon;
+        tablist_setTabIcon(tab.index, favicon[0]);
+    })
     tabs.push(tab);
     sendTabsUpdate();
+    /*win.on("resize", () => {
+        const bounds = win.getBounds();
+        const contentX = 280 + 10;
+        const contentY = 10;
+        const contentWidth = bounds.width - contentX - 10;
+        const contentHeight = bounds.height - 20;
+
+        tabs.forEach(tab => {
+            if (tab.view) {
+                tab.view.setBounds({
+                    x: contentX,
+                    y: contentY,
+                    width: contentWidth,
+                    height: contentHeight
+                });
+            }
+        });
+    });*/
+            const bounds = win.getBounds();
+        const contentX = 280 + 10;
+        const contentY = 10;
+        const contentWidth = bounds.width - contentX - 10;
+        const contentHeight = bounds.height - 20;
+
+        tabs.forEach(tab => {
+            if (tab.view) {
+                tab.view.setBounds({
+                    x: contentX,
+                    y: contentY,
+                    width: contentWidth,
+                    height: contentHeight
+                });
+            }
+        });
     return tab;
 }
 
@@ -127,25 +163,8 @@ function activateTab(tab) {
     var bounds = win.getBounds();
     tab.view.setBounds({x: 290, y: 10, width: bounds.width - 300, height: bounds.height - 20});
     tab.view.setBorderRadius(10);
+    win.webContents.send("set-active-tab", tab.index);
     sendTabsUpdate();
-    win.on("resize", () => {
-        const bounds = win.getBounds();
-        const contentX = 280 + 10;
-        const contentY = 10;
-        const contentWidth = bounds.width - contentX - 10;
-        const contentHeight = bounds.height - 20;
-
-        tabs.forEach(tab => {
-            if (tab.view) {
-                tab.view.setBounds({
-                    x: contentX,
-                    y: contentY,
-                    width: contentWidth,
-                    height: contentHeight
-                });
-            }
-        });
-    });
 }
 
 function createTabIPC(event, url) {
@@ -169,6 +188,10 @@ function tablist_setTabTitle(idx, title) {
     win.webContents.send("tablist_set-tab-title", idx, title);
 }
 
+function tablist_setTabIcon(idx, icon) {
+    win.webContents.send("tablist_set-tab-icon", idx, icon);
+}
+
 ipcMain.on("activate-tab", (_, idx) => {
     if (tabs[idx]) {
         console.log("tab idx: " + idx);
@@ -177,7 +200,3 @@ ipcMain.on("activate-tab", (_, idx) => {
         sendTabsUpdate();
     }
 })
-
-async function activateTabRenderer(idx) {
-    
-}

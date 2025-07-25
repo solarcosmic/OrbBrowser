@@ -36,12 +36,19 @@
             color: #ffffff;
             min-width: 100%;
             text-align: left;
+            margin-top: 2.5px;
         }
         #tab-buttons .active-tab {
             background-color: #303030;
         }
         #tablist button:hover {
             background-color: #222222;
+        }
+        #tablist button [id*="tab-icon-"] {
+            width: 14px; height: 14px; margin-right: 2.5px; margin-bottom: -1.75px; margin-left: 5px;
+        }
+        #tablist button .page-title {
+            margin-left: 10px;
         }
     </style>
 </head>
@@ -71,9 +78,17 @@
                     btn.onclick = () => {
                         activateTab(tab.index);
                     }
+                    const favicon = document.createElement("img");
+                    favicon.src = tab.favicon;
+                    favicon.setAttribute("id", "tab-icon-" + tab.index);
+                    btn.appendChild(favicon);
+                    const txt = document.createElement("span");
+                    txt.textContent = tab.title || tab.url;
+                    txt.classList.add("page-title");
+                    btn.appendChild(txt);
                     tabButtons.appendChild(btn);
                 }
-                btn.textContent = tab.title || tab.url;
+                //btn.textContent = tab.title || tab.url;
                 btn.style.fontWeight = tab.active ? "bold" : "normal";
             });
 
@@ -93,7 +108,17 @@
         */
         function setTabTitle(idx, title) {
             var chosenIdx = getTabButtonByIndex(idx) || document.querySelector(".active-tab");
-            chosenIdx.textContent = title;
+            chosenIdx.querySelector(".page-title").textContent = title;
+        }
+
+        function setTabIcon(idx, icon) {
+            console.log(idx, icon);
+            //var chosenIdx = getTabButtonByIndex(idx) || document.querySelector(".active-tab");
+            var chosenImg = document.getElementById("tab-icon-" + idx);
+            if (chosenImg) {
+                console.log(chosenImg.innerHTML);
+                chosenImg.src = icon;
+            }
         }
 
         /*
@@ -124,11 +149,12 @@
 
         // TODO: make it on callback (setActiveTab) instead of before (to make sure activateTab has run correctly)
         function activateTab(idx) {
-            setActiveTab(idx);
             window.electronAPI.activateTab(idx);
         }
         window.electronAPI.onTabsUpdated(updateTabs);
         window.electronAPI.tablist_setTabTitle(setTabTitle);
+        window.electronAPI.setActiveTab(setActiveTab);
+        window.electronAPI.tablist_setTabIcon(setTabIcon);
     </script>
 </body>
 </html>
