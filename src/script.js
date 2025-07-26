@@ -39,22 +39,42 @@ function createTabButton(tab) {
     if (!tab.view || !tab.id) error("Missing tab view and/or ID! Cannot create a tab button.");
     const btn = document.createElement("button");
     btn.setAttribute("id", "tab-button-" + tab.id);
-    btn.onclick = () => {
+    btn.addEventListener("click", () => {
         activateTab(tab);
-    }
+    });
     const favicon = document.createElement("img");
     favicon.setAttribute("id", "tab-icon-" + tab.id);
     btn.appendChild(favicon);
     const txt = document.createElement("span");
-    console.log(tab.view);
-    //txt.textContent = tab.view.getTitle() || tab.view.getURL();
     txt.classList.add("page-title");
+    txt.textContent = tab.view.src || "Loading...";
     btn.appendChild(txt);
     document.getElementById("tab-buttons").appendChild(btn);
+    return {
+        button: btn,
+        icon: favicon,
+        text: txt
+    };
 }
 
 function getTabButtonByID(id) {
-
+    
 }
 
-createTabButton(createTab());
+/* https://stackoverflow.com/a/53637828 */
+function truncateString(str, num) {
+    if (str.length > num) {
+        return str.slice(0, num) + "...";
+    } else {
+        return str;
+    }
+}
+
+const tab = createTab();
+const btn = createTabButton(tab);
+tab.view.addEventListener("page-title-updated", (event) => {
+    btn.text.textContent = truncateString((event.title || tab.view.src), 29);
+});
+tab.view.addEventListener("page-favicon-updated", (event) => {
+    btn.icon.src = event.favicons[0];
+});
