@@ -25,6 +25,7 @@ function createTab(url = "https://www.google.com") {
         view: document.createElement("webview"),
     }
     tab.view.classList.add("tab-view");
+    tab.view.style.display = "none";
     views.appendChild(tab.view);
     tab.view.src = url;
     tabs.push(tab);
@@ -36,7 +37,7 @@ function createTab(url = "https://www.google.com") {
  * [tab]: A tab object (one that consists of id and view).
 */
 function createTabButton(tab) {
-    if (!tab.view || !tab.id) error("Missing tab view and/or ID! Cannot create a tab button.");
+    if (!tab.view || !tab.id) console.error("Missing tab view and/or ID! Cannot create a tab button.");
     const btn = document.createElement("button");
     btn.setAttribute("id", "tab-button-" + tab.id);
     btn.addEventListener("click", () => {
@@ -49,7 +50,16 @@ function createTabButton(tab) {
     txt.classList.add("page-title");
     txt.textContent = tab.view.src || "Loading...";
     btn.appendChild(txt);
+    const closeBtn = document.createElement("img");
+    closeBtn.src = "../assets/xmark-solid-full.svg";
+    closeBtn.classList.add("tab-close");
+    closeBtn.classList.add("svg-white");
+    closeBtn.addEventListener("click", () => {
+        closeTab(tab);
+    })
+    btn.appendChild(closeBtn);
     document.getElementById("tab-buttons").appendChild(btn);
+    tab.button = btn;
     return {
         button: btn,
         icon: favicon,
@@ -57,8 +67,35 @@ function createTabButton(tab) {
     };
 }
 
-function getTabButtonByID(id) {
-    
+function hideAllTabs() {
+    Array.from(document.getElementById("webviews").childNodes).forEach((item) => {
+        item.style.display = "none";
+    });
+}
+
+function removeAllActiveTabs() {
+    Array.from(document.getElementById("tab-buttons").childNodes).forEach((item) => {
+        item.classList.remove("active-tab");
+    });
+}
+
+function activateTab(tab) {
+    if (!(tab.view || tab.id || tab.button)) console.error("Missing tab view and/or ID, button! Cannot activate tab.");
+    removeAllActiveTabs();
+    hideAllTabs();
+    tab.button.classList.add("active-tab");
+    tab.view.style.display = "flex";
+}
+
+function closeTab(tab) {
+    /*console.log(tabs);
+    const idx = tabs.indexOf(tab);
+    tabs.splice(idx, 1);
+    console.log(tabs);
+    tabs.*/
+    tab.view.remove();
+    tab.button.remove();
+    // switch selected tab
 }
 
 /* https://stackoverflow.com/a/53637828 */
@@ -70,11 +107,20 @@ function truncateString(str, num) {
     }
 }
 
-const tab = createTab();
-const btn = createTabButton(tab);
-tab.view.addEventListener("page-title-updated", (event) => {
-    btn.text.textContent = truncateString((event.title || tab.view.src), 29);
+function createTabInstance(url) {
+    const tab = createTab(url);
+    const btn = createTabButton(tab);
+    tab.view.addEventListener("page-title-updated", (event) => {
+        btn.text.textContent = truncateString((event.title || tab.view.src), 29);
+    });
+    // TODO: base64 encoding for favicons? that way, they can be stored as text, and retrieved on next open of browser.
+    tab.view.addEventListener("page-favicon-updated", (event) => {
+        btn.icon.src = event.favicons[0];
+    });
+    return tab;
+}
+document.getElementById("create-tab").addEventListener("click", () => {
+    const tab = createTabInstance();
+    activateTab(tab);
 });
-tab.view.addEventListener("page-favicon-updated", (event) => {
-    btn.icon.src = event.favicons[0];
-});
+activateTab(createTabInstance());

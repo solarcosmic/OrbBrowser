@@ -31,6 +31,7 @@
             height: 100vh;
             flex-shrink: 0;
             color: #ffffff;
+            background-color:rgb(22, 22, 22);
         }
         #tablist {
             display: flex;
@@ -41,6 +42,7 @@
         #tablist button {
             padding: 7px 5px;
             border-radius: 8px;
+            position: relative;
             border: none;
             background-color: #1a1a1a00;
             color: #ffffff;
@@ -63,6 +65,7 @@
         }
         #tablist button .page-title {
             margin-left: 10px;
+            /*mask-image: linear-gradient(to right, black 80%, transparent);*/
         }
         .svg-white {
             filter: invert(100%) sepia(21%) saturate(2%) hue-rotate(275deg) brightness(104%) contrast(101%);
@@ -90,6 +93,14 @@
             display: flex;
             align-items: stretch;
         }
+        .tab-close {
+            width: 16px;
+            height: 16px;
+            position: absolute;
+            top: 15px;
+            right: 7px;
+            transform: translateY(-50%);
+        }
     </style>
 </head>
 <body>
@@ -102,9 +113,7 @@
                 <div id="tab-buttons"></div>
             </div>
         </div>
-        <div id="webviews">
-            
-        </div>
+        <div id="webviews"></div>
     </div>
     <script src="script.js"></script>
 </body>

@@ -24,6 +24,7 @@ function createMainWindow() {
     const win = new BrowserWindow({
         width: 1280,
         height: 720,
+        show: false,
         webPreferences: {
             preload: path.join(__dirname, "preload.js"),
             webviewTag: true
@@ -32,6 +33,9 @@ function createMainWindow() {
     win.setMenu(null);
     win.loadFile("src/index.html");
     win.webContents.openDevTools();
+    win.webContents.on("did-finish-load", function() {
+        win.show();
+    })
 }
 app.whenReady().then(() => {
     createMainWindow();
