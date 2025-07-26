@@ -31,6 +31,7 @@ function createMainWindow() {
     })
     win.setMenu(null);
     win.loadFile("src/index.html");
+    win.webContents.openDevTools();
 }
 app.whenReady().then(() => {
     createMainWindow();

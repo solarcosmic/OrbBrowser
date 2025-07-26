@@ -7,7 +7,7 @@
     <style>
         @font-face {
             font-family: "Inter";
-            src: url("assets/Inter.ttf");
+            src: url("../assets/Inter.ttf");
         }
         body {
             margin: 0;
@@ -19,20 +19,93 @@
             font-family: "Inter";
         }
         .tab-view {
-            margin: 15px;
-            height: 97vh;
-            border-radius: 8px;
+            width: 97%;
+            height: 98%;
+            border-radius: 12px;
             -electron-corner-smoothing: 60%; /* apparently this does something but I can't quite tell */
             overflow: hidden;
+            margin: 10px;
+        }
+        #sidebar {
+            width: 280px;
+            height: 100vh;
+            flex-shrink: 0;
+            color: #ffffff;
+        }
+        #tablist {
+            display: flex;
+            flex-direction: column;
+            padding: 5px 5px;
+            margin-top: 5px;
+        }
+        #tablist button {
+            padding: 7px 5px;
+            border-radius: 8px;
+            border: none;
+            background-color: #1a1a1a00;
+            color: #ffffff;
+            min-width: 95%;
+            text-align: left;
+            margin-top: 2.5px;
+            margin-left: 5px;
+        }
+        #tab-buttons .active-tab {
+            background-color: #303030;
+        }
+        #tablist button:hover {
+            background-color: #222222;
+        }
+        #tablist button:active {
+            transform: scale(0.95);
+        }
+        #tablist button [id*="tab-icon-"] {
+            width: 14px; height: 14px; margin-right: 2.5px; margin-bottom: -1.75px; margin-left: 5px;
+        }
+        #tablist button .page-title {
+            margin-left: 10px;
+        }
+        .svg-white {
+            filter: invert(100%) sepia(21%) saturate(2%) hue-rotate(275deg) brightness(104%) contrast(101%);
+        }
+        #create-tab {
+            min-width: 90%;
+        }
+        /* https://stackoverflow.com/a/1457976 */
+        input:focus,
+        select:focus,
+        textarea:focus,
+        button:focus {
+            outline: none;
+        }
+        #container {
+            display: flex;
+            flex-direction: row;
+            height: 100vh;
+        }
+        #webviews {
+            flex: 1;
+            height: 100vh;
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            align-items: stretch;
         }
     </style>
 </head>
 <body>
-    <div id="webviews">
-        <webview src="https://google.com" class="tab-view"></webview>
+    <div id="container">
+        <div id="sidebar">
+            <div id="tablist">
+                <div id="extra-buttons">
+                    <button id="create-tab"><img id="tab-icon-nt" class="svg-white" style="margin-top: 2px;" src="../assets/plus-solid-full.svg"></img><span class="page-title" style="margin-top: 2px;">New Tab</span></button>
+                </div>
+                <div id="tab-buttons"></div>
+            </div>
+        </div>
+        <div id="webviews">
+            
+        </div>
     </div>
-    <script>
-        const webview = document.querySelector("webview");
-    </script>
+    <script src="script.js"></script>
 </body>
 </html>
