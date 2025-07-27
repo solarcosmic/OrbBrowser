@@ -146,6 +146,9 @@ function getActiveTab() {
     return;
 }
 
+/*
+ * Switches to the next tab according to the index you give it.
+*/
 function switchToNextTab(idx) {
     if (tabs.length === 0) return;
     let nextTab = tabs[idx] || tabs[idx - 1] || tabs[0];
@@ -164,6 +167,10 @@ function truncateString(str, num) {
     }
 }
 
+/*
+ * The main function for creating tab instances.
+ * Sets up the tab, button, and other event listeners.
+*/
 function createTabInstance(url = "https://google.com") {
     const tab = createTab(url);
     const btn = createTabButton(tab);
