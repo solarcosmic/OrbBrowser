@@ -80,22 +80,34 @@ function removeAllActiveTabs() {
 }
 
 function activateTab(tab) {
-    if (!(tab.view || tab.id || tab.button)) console.error("Missing tab view and/or ID, button! Cannot activate tab.");
+    if (!(tab.view || tab.id || tab.button)) return console.error("Missing tab view and/or ID, button! Cannot activate tab.");
     removeAllActiveTabs();
     hideAllTabs();
-    tab.button.classList.add("active-tab");
-    tab.view.style.display = "flex";
+    requestAnimationFrame(() => { // for some reason THIS WORKS. requestAnimationFrame is needed for it to function correctly
+        tab.button.classList.add("active-tab");
+        tab.view.style.display = "flex";
+    });
 }
 
+
 function closeTab(tab) {
-    /*console.log(tabs);
     const idx = tabs.indexOf(tab);
-    tabs.splice(idx, 1);
-    console.log(tabs);
-    tabs.*/
+    if (idx !== -1) {
+        tabs.splice(idx, 1);
+    }
     tab.view.remove();
     tab.button.remove();
-    // switch selected tab
+    console.log(idx);
+    switchToNextTab(idx);
+}
+
+function switchToNextTab(idx) {
+    if (tabs.length === 0) return;
+    let nextTab = tabs[idx] || tabs[idx - 1] || tabs[0];
+    console.log(nextTab);
+    if (nextTab) {
+        activateTab(nextTab);
+    }
 }
 
 /* https://stackoverflow.com/a/53637828 */
