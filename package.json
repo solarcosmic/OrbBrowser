@@ -1,5 +1,6 @@
 {
   "name": "orbbrowser",
+  "productName": "Orb Browser",
   "version": "1.0.0",
   "description": "Orb Browser",
   "license": "GPL-3.0-only",

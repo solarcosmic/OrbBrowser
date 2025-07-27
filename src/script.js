@@ -16,9 +16,13 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 var tabs = [];
+const truncateAmount = 25;
 
 const views = document.getElementById("webviews");
 
+/*
+ * Creates a tab and loads a URL.
+*/
 function createTab(url = "https://www.google.com") {
     const tab = {
         id: crypto.randomUUID(),
@@ -26,8 +30,8 @@ function createTab(url = "https://www.google.com") {
     }
     tab.view.classList.add("tab-view");
     tab.view.style.display = "none";
-    views.appendChild(tab.view);
     tab.view.src = url;
+    views.appendChild(tab.view);
     tabs.push(tab);
     return tab;
 }
@@ -68,18 +72,28 @@ function createTabButton(tab) {
     };
 }
 
+/*
+ * Hides all of the tabs from view.
+*/
 function hideAllTabs() {
     Array.from(document.getElementById("webviews").childNodes).forEach((item) => {
         item.style.display = "none";
     });
 }
 
+/*
+ * Removes all of the tabs from being active.
+*/
 function removeAllActiveTabs() {
     Array.from(document.getElementById("tab-buttons").childNodes).forEach((item) => {
         item.classList.remove("active-tab");
     });
 }
 
+/*
+ * Activates a tab and sets its tab button to be active.
+ * [tab]: A tab object (one that consists of id and view).
+*/
 function activateTab(tab) {
     if (!(tab.view || tab.id || tab.button)) return console.error("Missing tab view and/or ID, button! Cannot activate tab.");
     removeAllActiveTabs();
@@ -88,8 +102,26 @@ function activateTab(tab) {
         tab.button.classList.add("active-tab");
         tab.view.style.display = "flex";
     });
+    try {
+        changeWindowTitle(tab.view.getTitle());
+    } catch (e) {
+        console.log("Failed to change window title: " + e);
+    }
 }
 
+/*
+ * Changes the title of the window.
+ * [title]: string
+*/
+function changeWindowTitle(title) {
+    const tr = truncateString(title, truncateAmount + 10);
+    document.title = (tr + " ⎯ Orb Browser") || "Orb Browser";
+}
+
+/*
+ * Closes a tab and removes it from the tabs array.
+ * [tab]: A tab object (one that consists of id and view).
+*/
 function closeTab(tab) {
     const idx = tabs.indexOf(tab);
     if (idx !== -1) {
@@ -101,6 +133,9 @@ function closeTab(tab) {
     switchToNextTab(idx);
 }
 
+/*
+ * Returns the currently active tab, dependent on the active button.
+*/
 function getActiveTab() {
     const active = document.querySelector(".active-tab");
     if (!active) return;
@@ -135,11 +170,15 @@ function createTabInstance(url = "https://google.com") {
     const urlObj = new URL(url);
     var lastFavicon = null;
 
-    btn.text.textContent = truncateString(url, 25);
+    btn.text.textContent = truncateString(url, truncateAmount);
     btn.icon.src = "../assets/loading.gif";
     tab.view.addEventListener("page-title-updated", (event) => {
+        document.getElementById("url-box").value = tab.view.getURL();
         if (event.title?.trim()) {
             btn.text.textContent = truncateString(event.title, 25);
+            if (getActiveTab()?.id == tab.id) {
+                changeWindowTitle(event.title);
+            }
         }
     });
     tab.view.addEventListener("page-favicon-updated", (event) => {
@@ -178,4 +217,14 @@ activateTab(createTabInstance());
 window.addEventListener("keyup", (event) => {
     if (event.ctrlKey && event.key.toLowerCase() == "t") return activateTab(createTabInstance());
     if (event.ctrlKey && event.key.toLowerCase() == "w") return closeTab(getActiveTab());
+})
+document.getElementById("url-box").addEventListener("keyup", (event) => {
+    if (event.key == "Enter") {
+        var pattern = /^((http|https|chrome):\/\/)/; /* https://stackoverflow.com/a/11300963 */
+        if (pattern.test(document.getElementById("url-box").value)) {
+            getActiveTab().view.loadURL(document.getElementById("url-box").value);
+        } else {
+            getActiveTab().view.loadURL("https://google.com/search?client=orb&q=" + document.getElementById("url-box").value);
+        }
+    }
 })
