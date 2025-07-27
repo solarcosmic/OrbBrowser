@@ -45,6 +45,7 @@ function createTabButton(tab) {
     });
     const favicon = document.createElement("img");
     favicon.setAttribute("id", "tab-icon-" + tab.id);
+    favicon.src = "../assets/loading.gif";
     btn.appendChild(favicon);
     const txt = document.createElement("span");
     txt.classList.add("page-title");
@@ -89,7 +90,6 @@ function activateTab(tab) {
     });
 }
 
-
 function closeTab(tab) {
     const idx = tabs.indexOf(tab);
     if (idx !== -1) {
@@ -99,6 +99,16 @@ function closeTab(tab) {
     tab.button.remove();
     console.log(idx);
     switchToNextTab(idx);
+}
+
+function getActiveTab() {
+    const active = document.querySelector(".active-tab");
+    if (!active) return;
+    const sliced = active.id.slice(11);
+    for (const tab of tabs) {
+        if (tab.id == sliced) return tab;
+    }
+    return;
 }
 
 function switchToNextTab(idx) {
@@ -119,16 +129,44 @@ function truncateString(str, num) {
     }
 }
 
-function createTabInstance(url) {
+function createTabInstance(url = "https://google.com") {
     const tab = createTab(url);
     const btn = createTabButton(tab);
+    const urlObj = new URL(url);
+    var lastFavicon = null;
+
+    btn.text.textContent = truncateString(url, 25);
+    btn.icon.src = "../assets/loading.gif";
     tab.view.addEventListener("page-title-updated", (event) => {
-        btn.text.textContent = truncateString((event.title || tab.view.src), 29);
+        if (event.title?.trim()) {
+            btn.text.textContent = truncateString(event.title, 25);
+        }
     });
-    // TODO: base64 encoding for favicons? that way, they can be stored as text, and retrieved on next open of browser.
     tab.view.addEventListener("page-favicon-updated", (event) => {
-        btn.icon.src = event.favicons[0];
+        const favicon = event.favicons[0];
+        if (favicon) {
+            lastFavicon = favicon;
+            btn.icon.src = lastFavicon;
+            localStorage.setItem(`favicon:${urlObj.hostname}`, lastFavicon);
+        }
     });
+    tab.view.addEventListener("did-start-loading", () => {
+        btn.icon.src = "../assets/loading.gif";
+    });
+    tab.view.addEventListener("did-stop-loading", () => {
+        if (lastFavicon) {
+            btn.icon.src = lastFavicon;
+        } else {
+            const cached = localStorage.getItem(`favicon:${urlObj.hostname}`);
+            btn.icon.src = cached || "";
+        }
+    });
+    /*tab.view.addEventListener("dom-ready", () => {
+        tab.view.insertCSS(`        html {
+            scroll-behavior: smooth;
+        }  
+        `);
+    }) */
     return tab;
 }
 document.getElementById("create-tab").addEventListener("click", () => {
@@ -136,3 +174,8 @@ document.getElementById("create-tab").addEventListener("click", () => {
     activateTab(tab);
 });
 activateTab(createTabInstance());
+
+window.addEventListener("keyup", (event) => {
+    if (event.ctrlKey && event.key.toLowerCase() == "t") return activateTab(createTabInstance());
+    if (event.ctrlKey && event.key.toLowerCase() == "w") return closeTab(getActiveTab());
+})

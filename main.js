@@ -43,6 +43,7 @@ app.whenReady().then(() => {
 app.on("web-contents-created", (evt, webContents) => {
     webContents.on("context-menu", (e, params) => {
         const isWebView = webContents.getType && webContents.getType() == "webview";
+        // TODO: filter webview?? (idk if needed)
         if (!isWebView) return;
         buildChromeContextMenu({
             params,
