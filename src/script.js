@@ -167,6 +167,22 @@ function truncateString(str, num) {
     }
 }
 
+function updateOmniboxHostname(hostname, url) {
+    const omniboxtxt = document.getElementById("url-txt");
+    omniboxtxt.textContent = hostname;
+        const omniSecure = document.getElementById("omniSecure") || document.createElement("img");
+        omniSecure.style.width = "16px";
+        omniSecure.style.height = "16px";
+        omniSecure.classList.add("svg-white");
+        omniSecure.setAttribute("id", "omniSecure");
+    if (url.startsWith("https:")) {
+        omniSecure.src = "../assets/lock-solid-full.svg";
+    } else if (url.startsWith("http:")) {
+        omniSecure.src = "../assets/unlock-solid-full.svg";
+    }
+    document.getElementById("omnibox-entry").prepend(omniSecure);
+}
+
 /*
  * The main function for creating tab instances.
  * Sets up the tab, button, and other event listeners.
@@ -185,6 +201,7 @@ function createTabInstance(url = "https://google.com") {
             btn.text.textContent = truncateString(event.title, 25);
             if (getActiveTab()?.id == tab.id) {
                 changeWindowTitle(event.title);
+                updateOmniboxHostname(new URL(tab.view.getURL()).hostname, tab.view.getURL());
             }
         }
     });

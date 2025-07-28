@@ -18,6 +18,7 @@
         * {
             font-family: "Inter";
             font-smooth: 2em;
+            user-select: none;
         }
         .tab-view {
             width: 97%;
@@ -118,14 +119,36 @@
             padding: 0.5px 0.5px;
             max-width: 88%;
         }
+        #omnibox-entry {
+            margin-top: 15px;
+            padding: 10px 10px;
+            min-width: 90%;
+            height: 35px;
+            margin-left: 10px;
+            text-align: left;
+            background-color: #202020;
+            color: #ffffff;
+            border: none;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+        }
+        #omnibox-entry:hover {
+            background-color: #303030;
+        }
+        #url-txt {
+            text-align: left;
+            margin-left: 15px;
+        }
     </style>
 </head>
 <body>
     <div id="container">
         <div id="sidebar">
-            <input type="text" id="url-box"></input>
+            <button id="omnibox-entry"><span id="url-txt">google.com</span></button>
+            <input type="text" id="url-box" style="display: none;"></input>
             <div id="space">
-                <p style="color: #9c9c9c; font-size: 15px; margin-left: 15px; user-select: none;">This Space</p>
+                <p style="color: #9c9c9c; font-size: 15px; margin-left: 15px;">This Space</p>
             </div>
             <div id="pinned-tabs"></div>
             <hr>
