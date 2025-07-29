@@ -170,15 +170,17 @@ function truncateString(str, num) {
 function updateOmniboxHostname(hostname, url) {
     const omniboxtxt = document.getElementById("url-txt");
     omniboxtxt.textContent = hostname;
-        const omniSecure = document.getElementById("omniSecure") || document.createElement("img");
-        omniSecure.style.width = "16px";
-        omniSecure.style.height = "16px";
-        omniSecure.classList.add("svg-white");
-        omniSecure.setAttribute("id", "omniSecure");
+    const omniSecure = document.getElementById("omniSecure") || document.createElement("img");
+    omniSecure.style.width = "16px";
+    omniSecure.style.height = "16px";
+    omniSecure.classList.add("svg-white");
+    omniSecure.setAttribute("id", "omniSecure");
     if (url.startsWith("https:")) {
         omniSecure.src = "../assets/lock-solid-full.svg";
+        omniSecure.classList.remove("svg-grey");
     } else if (url.startsWith("http:")) {
         omniSecure.src = "../assets/unlock-solid-full.svg";
+        omniSecure.classList.add("svg-grey");
     }
     document.getElementById("omnibox-entry").prepend(omniSecure);
 }
