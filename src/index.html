@@ -33,7 +33,7 @@
             height: 100vh;
             flex-shrink: 0;
             color: #ffffff;
-            background-color:rgb(22, 22, 22);
+            background-color:#0c0c0c;
         }
         #tablist, #pinned-tabs {
             display: flex;
@@ -43,7 +43,7 @@
         }
         #tablist button {
             padding: 10px 5px;
-            border-radius: 5px;
+            border-radius: 8px;
             position: relative;
             border: none;
             background-color: #1a1a1a00;
@@ -54,10 +54,10 @@
             margin-left: 5px;
         }
         #tab-buttons .active-tab {
-            background-color: #303030;
+            background-color: #151515;
         }
         #tablist button:hover {
-            background-color: #303030;
+            background-color: #202020;
         }
         #tablist button:active {
             transform: scale(0.98);
@@ -74,7 +74,7 @@
         }
         #create-tab {
             min-width: 90%;
-            color: #303030;
+            color: #202020;
         }
         /* https://stackoverflow.com/a/1457976 */
         input:focus,
@@ -108,7 +108,7 @@
             display: none;
         }
         .tab-close:hover {
-            background-color: #bbbbbb;
+            background-color: #d1d1d1;
         }
         #tab-buttons button:hover .tab-close {
             display: block;
@@ -126,7 +126,7 @@
             height: 35px;
             margin-left: 10px;
             text-align: left;
-            background-color: #202020;
+            background-color: #151515;
             color: #ffffff;
             border: none;
             border-radius: 8px;
@@ -134,7 +134,7 @@
             align-items: center;
         }
         #omnibox-entry:hover {
-            background-color: #303030;
+            background-color: #202020;
         }
         #url-txt {
             text-align: left;
@@ -164,12 +164,32 @@
             border: none;
             color: #ffffff;
             font-size: 16px;
+            background-color: #0c0c0c;
+        }
+        #url-box::selection {
+            color: #0c0c0c;
+            background-color: #ffffff;
         }
         #omnibox-search-bar {
             display: flex;
             padding: 8px 3px;
             align-items: center;
             gap: 10px;
+        }
+        #omnibox-search-list {
+            display: flex;
+            flex-direction: column;
+        }
+        .suggestion-button {
+            width: 95%;
+            background-color: #151515;
+            color: #ffffff;
+            border: none;
+            border-radius: 8px;
+            padding: 5px 5px;
+        }
+        .suggestion-button:hover {
+            background-color: #202020;
         }
     </style>
 </head>
@@ -184,10 +204,12 @@
                 </div>
                 <hr>
                 <p style="color: #9c9c9c; font-size: 15px; margin-left: 15px;">Continue where you left off</p>
+                <div id="omnibox-search-list">
+                </div>
             </div>
-            <div id="space">
+            <!-- <div id="space">
                 <p style="color: #9c9c9c; font-size: 15px; margin-left: 15px;">This Space</p>
-            </div>
+            </div> -->
             <div id="pinned-tabs"></div>
             <hr>
             <div id="tablist">
@@ -199,6 +221,7 @@
         </div>
         <div id="webviews"></div>
     </div>
+    <script src="../assets/xml-to-json.min.js"></script>
     <script src="script.js"></script>
 </body>
 </html>

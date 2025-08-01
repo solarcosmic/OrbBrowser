@@ -246,25 +246,90 @@ window.addEventListener("keyup", (event) => {
 })
 document.getElementById("url-box").addEventListener("keyup", (event) => {
     if (event.key == "Enter") {
-        var pattern = /^((http|https|chrome):\/\/)/; /* https://stackoverflow.com/a/11300963 */
-        if (pattern.test(document.getElementById("url-box").value)) {
-            getActiveTab().view.loadURL(document.getElementById("url-box").value);
-        } else {
-            getActiveTab().view.loadURL("https://google.com/search?client=orb&q=" + document.getElementById("url-box").value);
-        }
-        document.getElementById("omnibox").style.display = "none";
+        goToLink(document.getElementById("url-box").value);
     }
 })
 document.getElementById("omnibox-entry").addEventListener("click", () => {
+    if (document.getElementById("omnibox").style.display == "block") return;
     document.getElementById("omnibox").style.display = "block";
+    document.getElementById("url-box").select();
 });
 window.electronAPI.onMouseClick((x, y) => {
     const omnibox = document.getElementById("omnibox");
     const element = document.elementFromPoint(x, y);
+    if (element.parentElement.id == "omnibox-entry") return;
+    if (element.id == "omnibox-entry") return;
     console.log(element?.parentElement.id)
     console.log(element);
     if (element?.id != "omnibox") {
-        if (element?.parentElement.id == "omnibox") return;
+        if (element.closest("#omnibox")) return;
         if (omnibox.style.display == "block") omnibox.style.display = "none";
     }
 })
+
+/*
+KNOWN BUGS:
+- Clicking to the right of the box doesn't close it
+- Sometimes setting the search box to "" leaves the last suggestion up
+*/
+var typeTimer;
+var typeInterval = 150;
+var urlBox = document.getElementById("url-box");
+
+urlBox.addEventListener("keyup", () => {
+    clearTimeout(typeTimer);
+    if (urlBox.value) typeTimer = setTimeout(searchSuggestions, typeInterval);
+})
+
+function goToLink(txt) {
+    var pattern = /^((http|https|chrome):\/\/)/; /* https://stackoverflow.com/a/11300963 */
+    if (pattern.test(txt)) {
+        getActiveTab().view.loadURL(txt);
+    } else {
+        getActiveTab().view.loadURL("https://google.com/search?client=orb&q=" + txt);
+    }
+    document.getElementById("omnibox").style.display = "none";
+}
+
+async function searchSuggestions() {
+    try {
+        if (urlBox.value.trim() == "") {
+            clearSearchSuggestionButtons();
+            return;
+        }
+        await fetch("https://google.com/complete/search?output=toolbar&q=" + urlBox.value)
+            .then(res => {
+                if (!res.ok) throw new Error("Fetching suggestion error: " + res.status);
+                return res.text();
+            })
+            .then(data => {
+                const res = xmlToJSON.parseString(data);
+                if (!res) throw new Error("Did not return JSON response!");
+                clearSearchSuggestionButtons();
+                for (var step = 0; step < 7; step++) {
+                    try {
+                        addSearchSuggestionButton(res["toplevel"][0]["CompleteSuggestion"][step]["suggestion"][0]["_attr"]["data"]["_value"]);
+                    } catch (e) {
+                        console.log("Couldn't find search suggestion #" + step + ". Possible it doesn't exist? Error: " + e);
+                    }
+                    
+                }
+            })
+    } catch (err) {
+        console.error(err.message);
+    }
+}
+function clearSearchSuggestionButtons() {
+    document.getElementById("omnibox-search-list").innerHTML = "";
+}
+function addSearchSuggestionButton(txt) {
+    const btn = document.createElement("button");
+    btn.classList.add("suggestion-button");
+    btn.textContent = txt;
+    btn.addEventListener("click", () => {
+        goToLink(txt);
+    })
+    document.getElementById("omnibox-search-list").appendChild(btn);
+    return btn;
+}
+document.getElementById("url-box").spellcheck = false;
