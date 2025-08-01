@@ -20,8 +20,9 @@ const { app, BrowserWindow, WebContentsView, session, ipcMain, globalShortcut } 
 const { default: buildChromeContextMenu } = require("electron-chrome-context-menu");
 const path = require("node:path");
 
+var win;
 function createMainWindow() {
-    const win = new BrowserWindow({
+    win = new BrowserWindow({
         width: 1280,
         height: 720,
         show: false,
@@ -54,5 +55,10 @@ app.on("web-contents-created", (evt, webContents) => {
                 webContents.loadURL(url);
             }
         }).popup();
+    });
+    webContents.on("before-mouse-event", (evt, mouse) => { // TODO: check to make sure this won't memory leak?
+        if (mouse.type == "mouseDown") {
+            if (win) win.webContents.send("mouse-click", mouse.x, mouse.y); // can add x and y args later
+        }
     });
 });

@@ -257,4 +257,14 @@ document.getElementById("url-box").addEventListener("keyup", (event) => {
 })
 document.getElementById("omnibox-entry").addEventListener("click", () => {
     document.getElementById("omnibox").style.display = "block";
+});
+window.electronAPI.onMouseClick((x, y) => {
+    const omnibox = document.getElementById("omnibox");
+    const element = document.elementFromPoint(x, y);
+    console.log(element?.parentElement.id)
+    console.log(element);
+    if (element?.id != "omnibox") {
+        if (element?.parentElement.id == "omnibox") return;
+        if (omnibox.style.display == "block") omnibox.style.display = "none";
+    }
 })
