@@ -144,8 +144,8 @@
             filter: invert(62%) sepia(0%) saturate(0%) hue-rotate(241deg) brightness(96%) contrast(90%);
         }
         #omnibox {
-            width: 250px;
-            height: 250px;
+            /*width: 250px;
+            height: 250px;*/
             background-color: #0c0c0c;
             /*position: absolute;*/
             z-index: 9999999;
@@ -156,13 +156,20 @@
             margin: auto;
             border-radius: 8px;
             box-shadow: 10px 10px 20px #00000086;
+            padding: 8px 9px;
         }
         #url-box {
-            width: 85%;
-            padding: 5px 5px;
+            width: 90%;
             background-color: transparent;
             border: none;
             color: #ffffff;
+            font-size: 16px;
+        }
+        #omnibox-search-bar {
+            display: flex;
+            padding: 8px 3px;
+            align-items: center;
+            gap: 10px;
         }
     </style>
 </head>
@@ -171,7 +178,12 @@
         <div id="sidebar">
             <button id="omnibox-entry"><span id="url-txt">google.com</span></button>
             <div id="omnibox" style="display: none;">
-                <input type="text" id="url-box" placeholder="Search with Google or enter address"></input>
+                <div id="omnibox-search-bar">
+                    <img class="svg-grey" style="margin-bottom: -2px; width: 16px; height: 16px;" src="../assets/magnifying-glass-solid-full.svg"></img>
+                    <input type="text" id="url-box" placeholder="Search with Google or enter address"></input>
+                </div>
+                <hr>
+                <p style="color: #9c9c9c; font-size: 15px; margin-left: 15px;">Continue where you left off</p>
             </div>
             <div id="space">
                 <p style="color: #9c9c9c; font-size: 15px; margin-left: 15px;">This Space</p>
