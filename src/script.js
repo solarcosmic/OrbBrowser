@@ -266,6 +266,9 @@ window.electronAPI.onMouseClick((x, y) => {
         if (omnibox.style.display == "block") omnibox.style.display = "none";
     }
 })
+window.electronAPI.onLinkOpen((url) => {
+    activateTab(createTabInstance(url));
+})
 
 /*
 KNOWN BUGS:
@@ -306,7 +309,7 @@ async function searchSuggestions() {
                 const res = xmlToJSON.parseString(data);
                 if (!res) throw new Error("Did not return JSON response!");
                 clearSearchSuggestionButtons();
-                for (var step = 0; step < 7; step++) {
+                for (var step = 0; step < 5; step++) {
                     try {
                         addSearchSuggestionButton(res["toplevel"][0]["CompleteSuggestion"][step]["suggestion"][0]["_attr"]["data"]["_value"]);
                     } catch (e) {
@@ -325,10 +328,18 @@ function clearSearchSuggestionButtons() {
 function addSearchSuggestionButton(txt) {
     const btn = document.createElement("button");
     btn.classList.add("suggestion-button");
-    btn.textContent = txt;
+    const text = document.createElement("p");
+    text.classList.add("suggestion-text");
+    text.textContent = txt;
+    const srcimg = document.createElement("img");
+    srcimg.classList.add("svg-grey");
+    srcimg.style = "margin-bottom: -3px; width: 16px; height: 16px;";
+    srcimg.src = "../assets/magnifying-glass-solid-full.svg";
     btn.addEventListener("click", () => {
         goToLink(txt);
     })
+    btn.appendChild(srcimg);
+    btn.appendChild(text);
     document.getElementById("omnibox-search-list").appendChild(btn);
     return btn;
 }

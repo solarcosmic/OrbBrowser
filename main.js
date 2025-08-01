@@ -52,7 +52,7 @@ app.on("web-contents-created", (evt, webContents) => {
             params,
             webContents,
             openLink: (url, dis) => {
-                webContents.loadURL(url);
+                if (win) win.webContents.send("open-link", url);
             }
         }).popup();
     });

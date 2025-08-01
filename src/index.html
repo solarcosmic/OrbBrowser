@@ -21,7 +21,8 @@
             user-select: none;
         }
         .tab-view {
-            width: 97%;
+            background-color: #ffffff;
+            flex: 1;
             height: 98%;
             border-radius: 12px;
             -electron-corner-smoothing: 60%; /* apparently this does something but I can't quite tell */
@@ -94,6 +95,7 @@
             position: relative;
             overflow: hidden;
             display: flex;
+            flex-direction: column; /* or row if we gonna do that split tab thing. will have to see if we do that */
             align-items: stretch;
         }
         .tab-close {
@@ -151,8 +153,10 @@
             z-index: 9999999;
             position: fixed;
             inset: 0;
-            width: 500px;
-            height: 300px;
+            width: 60%;
+            max-width: 700px;
+            max-height: 300px;
+            height: auto;
             margin: auto;
             border-radius: 8px;
             box-shadow: 10px 10px 20px #00000086;
@@ -173,6 +177,7 @@
         #omnibox-search-bar {
             display: flex;
             padding: 8px 3px;
+            margin-left: 5px;
             align-items: center;
             gap: 10px;
         }
@@ -181,15 +186,22 @@
             flex-direction: column;
         }
         .suggestion-button {
-            width: 95%;
-            background-color: #151515;
+            text-align: left;
+            display: inline;
+            width: 100%;
+            background-color: transparent;
             color: #ffffff;
             border: none;
             border-radius: 8px;
-            padding: 5px 5px;
+            padding: 11px 5px;
         }
         .suggestion-button:hover {
             background-color: #202020;
+        }
+        .suggestion-text {
+            margin-left: 15px;
+            font-size: 15px;
+            display: inline;
         }
     </style>
 </head>
@@ -202,8 +214,7 @@
                     <img class="svg-grey" style="margin-bottom: -2px; width: 16px; height: 16px;" src="../assets/magnifying-glass-solid-full.svg"></img>
                     <input type="text" id="url-box" placeholder="Search with Google or enter address"></input>
                 </div>
-                <hr>
-                <p style="color: #9c9c9c; font-size: 15px; margin-left: 15px;">Continue where you left off</p>
+                <hr style="max-width: 85%;">
                 <div id="omnibox-search-list">
                 </div>
             </div>
