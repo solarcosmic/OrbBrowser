@@ -252,5 +252,9 @@ document.getElementById("url-box").addEventListener("keyup", (event) => {
         } else {
             getActiveTab().view.loadURL("https://google.com/search?client=orb&q=" + document.getElementById("url-box").value);
         }
+        document.getElementById("omnibox").style.display = "none";
     }
+})
+document.getElementById("omnibox-entry").addEventListener("click", () => {
+    document.getElementById("omnibox").style.display = "block";
 })

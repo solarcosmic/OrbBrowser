@@ -143,13 +143,36 @@
         .svg-grey {
             filter: invert(62%) sepia(0%) saturate(0%) hue-rotate(241deg) brightness(96%) contrast(90%);
         }
+        #omnibox {
+            width: 250px;
+            height: 250px;
+            background-color: #0c0c0c;
+            /*position: absolute;*/
+            z-index: 9999999;
+            position: fixed;
+            inset: 0;
+            width: 500px;
+            height: 300px;
+            margin: auto;
+            border-radius: 8px;
+            box-shadow: 10px 10px 20px #00000086;
+        }
+        #url-box {
+            width: 85%;
+            padding: 5px 5px;
+            background-color: transparent;
+            border: none;
+            color: #ffffff;
+        }
     </style>
 </head>
 <body>
     <div id="container">
         <div id="sidebar">
             <button id="omnibox-entry"><span id="url-txt">google.com</span></button>
-            <input type="text" id="url-box" style="display: none;"></input>
+            <div id="omnibox" style="display: none;">
+                <input type="text" id="url-box" placeholder="Search with Google or enter address"></input>
+            </div>
             <div id="space">
                 <p style="color: #9c9c9c; font-size: 15px; margin-left: 15px;">This Space</p>
             </div>
