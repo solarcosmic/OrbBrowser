@@ -42,6 +42,7 @@ function createMainWindow() {
 }
 app.whenReady().then(() => {
     createMainWindow();
+    ipcMain.on("renderer:console-log", handleRendererLog);
 });
 app.on("web-contents-created", (evt, webContents) => {
     webContents.on("context-menu", (e, params) => {
@@ -62,3 +63,6 @@ app.on("web-contents-created", (evt, webContents) => {
         }
     });
 });
+function handleRendererLog(evt, txt) {
+    console.log("[net.solarcosmic.orbbrowser.renderer]: " + txt);
+}

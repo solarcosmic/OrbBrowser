@@ -155,12 +155,13 @@
             inset: 0;
             width: 60%;
             max-width: 700px;
-            max-height: 300px;
+            max-height: 265px;
             height: auto;
             margin: auto;
             border-radius: 8px;
             box-shadow: 10px 10px 20px #00000086;
             padding: 8px 9px;
+            overflow: hidden;
         }
         #url-box {
             width: 90%;
@@ -186,6 +187,7 @@
             flex-direction: column;
         }
         .suggestion-button {
+            position: relative;
             text-align: left;
             display: inline;
             width: 100%;
@@ -203,11 +205,43 @@
             font-size: 15px;
             display: inline;
         }
+        .suggestion-text-right {
+            float: right;
+            text-align: right;
+            font-size: 15px;
+            display: inline;
+        }
+        #navigations {
+            display: flex;
+            justify-content: flex-end;
+            margin-right: 15px;
+            margin-top: 10px;
+        }
+        .navigation-button {
+            padding: 5px 5px;
+            width: 18px;
+            height: 18px;
+            border-radius: 8px;
+        }
+        .navigation-button:hover {
+            background-color: #f5f5f579;
+        }
+        .navigation-button:not(.greyed-out) {
+            filter: invert(62%) sepia(0%) saturate(0%) hue-rotate(241deg) brightness(96%) contrast(90%);
+        }
+        .navigation-button .greyed-out {
+            filter: invert(0%) sepia(7%) saturate(536%) hue-rotate(322deg) brightness(87%) contrast(75%);
+        }
     </style>
 </head>
 <body>
     <div id="container">
         <div id="sidebar">
+            <div id="navigations">
+                <img class="navigation-button" id="left-nav" src="../assets/arrow-left-solid-full.svg"></img>
+                <img class="navigation-button" id="right-nav" src="../assets/arrow-right-solid-full.svg"></img>
+                <img class="navigation-button" id="refresh-nav" src="../assets/rotate-right-solid-full.svg"></img>
+            </div>
             <button id="omnibox-entry"><span id="url-txt">google.com</span></button>
             <div id="omnibox" style="display: none;">
                 <div id="omnibox-search-bar">

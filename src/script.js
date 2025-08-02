@@ -105,7 +105,7 @@ function activateTab(tab) {
     try {
         changeWindowTitle(tab.view.getTitle());
     } catch (e) {
-        console.log("Failed to change window title: " + e);
+        log("Failed to change window title: " + e);
     }
 }
 
@@ -129,7 +129,6 @@ function closeTab(tab) {
     }
     tab.view.remove();
     tab.button.remove();
-    console.log(idx);
     switchToNextTab(idx);
 }
 
@@ -152,7 +151,6 @@ function getActiveTab() {
 function switchToNextTab(idx) {
     if (tabs.length === 0) return;
     let nextTab = tabs[idx] || tabs[idx - 1] || tabs[0];
-    console.log(nextTab);
     if (nextTab) {
         activateTab(nextTab);
     }
@@ -198,6 +196,7 @@ function createTabInstance(url = "https://google.com") {
     btn.text.textContent = truncateString(url, truncateAmount);
     btn.icon.src = "../assets/loading.gif";
     tab.view.addEventListener("page-title-updated", (event) => {
+        document.getElementById("url-box").setAttribute("value", tab.view.getURL());
         document.getElementById("url-box").value = tab.view.getURL();
         if (event.title?.trim()) {
             btn.text.textContent = truncateString(event.title, 25);
@@ -259,8 +258,6 @@ window.electronAPI.onMouseClick((x, y) => {
     const element = document.elementFromPoint(x, y);
     if (element.parentElement.id == "omnibox-entry") return;
     if (element.id == "omnibox-entry") return;
-    console.log(element?.parentElement.id)
-    console.log(element);
     if (element?.id != "omnibox") {
         if (element.closest("#omnibox")) return;
         if (omnibox.style.display == "block") omnibox.style.display = "none";
@@ -296,9 +293,13 @@ function goToLink(txt) {
 
 async function searchSuggestions() {
     try {
+        clearSearchSuggestionButtons();
         if (urlBox.value.trim() == "") {
             clearSearchSuggestionButtons();
             return;
+        }
+        if (urlBox.value.toLowerCase().startsWith("fav")) {
+            addSearchSuggestionButton("Favorite Tab", "../assets/star-solid-full.svg", "Quick Action");
         }
         await fetch("https://google.com/complete/search?output=toolbar&q=" + urlBox.value)
             .then(res => {
@@ -308,14 +309,12 @@ async function searchSuggestions() {
             .then(data => {
                 const res = xmlToJSON.parseString(data);
                 if (!res) throw new Error("Did not return JSON response!");
-                clearSearchSuggestionButtons();
                 for (var step = 0; step < 5; step++) {
                     try {
                         addSearchSuggestionButton(res["toplevel"][0]["CompleteSuggestion"][step]["suggestion"][0]["_attr"]["data"]["_value"]);
                     } catch (e) {
-                        console.log("Couldn't find search suggestion #" + step + ". Possible it doesn't exist? Error: " + e);
+                        log("Couldn't find search suggestion #" + step + ". Possible it doesn't exist? Error: " + e);
                     }
-                    
                 }
             })
     } catch (err) {
@@ -325,7 +324,16 @@ async function searchSuggestions() {
 function clearSearchSuggestionButtons() {
     document.getElementById("omnibox-search-list").innerHTML = "";
 }
-function addSearchSuggestionButton(txt) {
+var lists = [
+    {
+        name: "Favorite Tab",
+        icon: "../assets/star-solid-full.svg",
+        action: (table) => {
+            log("Favouriting tab!");
+        }
+    }
+];
+function addSearchSuggestionButton(txt, icon = "../assets/magnifying-glass-solid-full.svg") {
     const btn = document.createElement("button");
     btn.classList.add("suggestion-button");
     const text = document.createElement("p");
@@ -334,9 +342,25 @@ function addSearchSuggestionButton(txt) {
     const srcimg = document.createElement("img");
     srcimg.classList.add("svg-grey");
     srcimg.style = "margin-bottom: -3px; width: 16px; height: 16px;";
-    srcimg.src = "../assets/magnifying-glass-solid-full.svg";
+    srcimg.src = icon;
+    /*if (hint_txt) {
+        const hint_text = document.createElement("p");
+        hint_text.classList.add("suggestion-text-right");
+        hint_text.textContent = hint_txt;
+        btn.appendChild(hint_text)
+    }*/
+    
     btn.addEventListener("click", () => {
-        goToLink(txt);
+        var hasItem = false;
+        lists.forEach(item => {
+            if (item.name == txt) {
+                hasItem = true;
+                log(`Called quick action \"${item.name}\" at ${new Date().toLocaleString()}.`)
+                item.action();
+            }
+        })
+        if (!hasItem) goToLink(txt);
+        document.getElementById("omnibox").style.display = "none";
     })
     btn.appendChild(srcimg);
     btn.appendChild(text);
@@ -344,3 +368,17 @@ function addSearchSuggestionButton(txt) {
     return btn;
 }
 document.getElementById("url-box").spellcheck = false;
+/* https://stackoverflow.com/a/56159793 */
+const observer = new MutationObserver(list => {
+    document.getElementById("omnibox-search-list").innerHTML = "";
+});
+observer.observe(document.getElementById("url-box"), {
+    attributes: true,
+    childList: false,
+    subtree: false
+});
+function log(...args) {
+    console.log(...args);
+    const format = args.map(arg => typeof arg == "object" ? JSON.stringify(arg) : String(arg)).join(" "); // idk what this is lol
+    window.electronAPI.sendConsoleLog(format);
+}
