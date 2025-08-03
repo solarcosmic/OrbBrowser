@@ -301,6 +301,9 @@ async function searchSuggestions() {
         if (urlBox.value.toLowerCase().startsWith("fav")) {
             addSearchSuggestionButton("Favorite Tab", "../assets/star-solid-full.svg", "Quick Action");
         }
+        if (urlBox.value.toLowerCase().startsWith("chat")) {
+            addSearchSuggestionButton("Ask ChatGPT", "../assets/star-solid-full.svg", "Quick Action");
+        }
         await fetch("https://google.com/complete/search?output=toolbar&q=" + urlBox.value)
             .then(res => {
                 if (!res.ok) throw new Error("Fetching suggestion error: " + res.status);
@@ -331,7 +334,15 @@ var lists = [
         action: (table) => {
             log("Favouriting tab!");
         }
-    }
+    },
+    {
+        name: "Ask ChatGPT",
+        icon: "../assets/star-solid-full.svg",
+        action: (table) => {
+            // TODO: maybe add ask prompt within the omnibox itself?
+            activateTab(createTabInstance("https://chatgpt.com"));
+        }
+    },
 ];
 function addSearchSuggestionButton(txt, icon = "../assets/magnifying-glass-solid-full.svg") {
     const btn = document.createElement("button");
