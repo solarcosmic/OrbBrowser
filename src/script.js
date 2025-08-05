@@ -202,10 +202,13 @@ function createTabInstance(url = "https://google.com") {
             btn.text.textContent = truncateString(event.title, 25);
             if (getActiveTab()?.id == tab.id) {
                 changeWindowTitle(event.title);
-                updateOmniboxHostname(new URL(tab.view.getURL()).hostname, tab.view.getURL());
             }
         }
     });
+    tab.view.addEventListener("did-navigate", (event) => {
+        checkNavigation(tab);
+        updateOmniboxHostname(new URL(tab.view.getURL()).hostname, tab.view.getURL());
+    })
     tab.view.addEventListener("page-favicon-updated", (event) => {
         const favicon = event.favicons[0];
         if (favicon) {
@@ -233,6 +236,48 @@ function createTabInstance(url = "https://google.com") {
     }) */
     return tab;
 }
+
+function checkNavigation(tab) {
+    if (!tab.view) return log("Error: No valid tab provided for checkNavigation!");
+    var currentTab = getActiveTab();
+    if (!currentTab.id == tab.id) return;
+    if (tab.view.canGoBack()) {
+        document.getElementById("left-nav").classList.remove("greyed-out");
+    } else {
+        document.getElementById("left-nav").classList.add("greyed-out");
+    }
+    if (tab.view.canGoForward()) {
+        document.getElementById("right-nav").classList.remove("greyed-out");
+    } else {
+        document.getElementById("right-nav").classList.add("greyed-out");
+    }
+}
+
+/*
+ * Navigates to a specific tab.
+ * Defaults to the currently active tab if no tab is provided.
+*/
+function navigate(tab = getActiveTab(), direction) {
+    if (!tab.view) return;
+    if (direction == "back") tab.view.goBack();
+    if (direction == "forward") tab.view.goForward();
+    if (direction == "refresh") tab.view.reload();
+    if (direction == "refreshNoCache") tab.view.reloadIgnoringCache();
+}
+
+const left_nav = document.getElementById("left-nav");
+const right_nav = document.getElementById("right-nav");
+const refresh_nav = document.getElementById("refresh-nav");
+left_nav.addEventListener("click", () => {
+    if (!left_nav.classList.contains("greyed-out")) navigate(getActiveTab(), "back");
+});
+right_nav.addEventListener("click", () => {
+    if (!right_nav.classList.contains("greyed-out")) navigate(getActiveTab(), "forward");
+});
+refresh_nav.addEventListener("click", () => {
+    if (!refresh_nav.classList.contains("greyed-out")) navigate(getActiveTab(), "refresh");
+});
+
 document.getElementById("create-tab").addEventListener("click", () => {
     const tab = createTabInstance();
     activateTab(tab);
