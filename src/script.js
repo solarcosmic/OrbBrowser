@@ -438,3 +438,16 @@ function log(...args) {
     const format = args.map(arg => typeof arg == "object" ? JSON.stringify(arg) : String(arg)).join(" "); // idk what this is lol
     window.electronAPI.sendConsoleLog(format);
 }
+function updateHyperlink() {
+    
+}
+window.electronAPI.onAppBlur(() => {
+    console.log("app blur");
+    document.body.style.backgroundColor = "#191919";
+    document.getElementById("sidebar").style.backgroundColor = "#161616";
+})
+window.electronAPI.onAppFocus(() => {
+    console.log("app focus");
+    document.body.style.backgroundColor = "#0f0f0f";
+    document.getElementById("sidebar").style.backgroundColor = "#0c0c0c";
+})

@@ -39,6 +39,12 @@ function createMainWindow() {
     win.webContents.on("did-finish-load", function() {
         win.show();
     })
+    win.on("focus", () => {
+        if (win) win.webContents.send("app-focus");
+    });
+    win.on("blur", () => {
+        if (win) win.webContents.send("app-blur");
+    });
 }
 app.whenReady().then(() => {
     createMainWindow();
