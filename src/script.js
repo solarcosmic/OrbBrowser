@@ -102,6 +102,7 @@ function activateTab(tab) {
     requestAnimationFrame(() => { // for some reason THIS WORKS. requestAnimationFrame is needed for it to function correctly
         tab.button.classList.add("active-tab");
         tab.view.style.display = "flex";
+        updateOmniboxHostname(new URL(tab.view.getURL()).hostname, tab.view.getURL());
     });
     try {
         changeWindowTitle(tab.view.getTitle());
