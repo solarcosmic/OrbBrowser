@@ -11,7 +11,7 @@
     "start": "electron ."
   },
   "devDependencies": {
-    "electron": "^37.2.3"
+    "electron": "github:castlabs/electron-releases#v37.2.3+wvcus"
   },
   "dependencies": {
     "electron-chrome-context-menu": "^1.1.0",

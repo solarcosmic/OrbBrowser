@@ -16,7 +16,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-const { app, BrowserWindow, WebContentsView, session, ipcMain, globalShortcut } = require("electron");
+const { app, BrowserWindow, WebContentsView, session, ipcMain, globalShortcut, components } = require("electron");
 const { default: buildChromeContextMenu } = require("electron-chrome-context-menu");
 const path = require("node:path");
 
@@ -47,7 +47,8 @@ function createMainWindow() {
         if (win) win.webContents.send("app-blur");
     });
 }
-app.whenReady().then(() => {
+app.whenReady().then(async () => {
+    await components.whenReady();
     createMainWindow();
     ipcMain.on("renderer:console-log", handleRendererLog);
 });
