@@ -43,6 +43,7 @@ function createTab(url = "https://www.google.com") {
 function createTabButton(tab) {
     if (!tab.view || !tab.id) console.error("Missing tab view and/or ID! Cannot create a tab button.");
     const btn = document.createElement("button");
+    btn.classList.add("fade-in-element");
     btn.setAttribute("id", "tab-button-" + tab.id);
     btn.addEventListener("click", () => {
         activateTab(tab);
@@ -240,7 +241,7 @@ function createTabInstance(url = "https://google.com") {
 function checkNavigation(tab) {
     if (!tab.view) return log("Error: No valid tab provided for checkNavigation!");
     var currentTab = getActiveTab();
-    if (!currentTab.id == tab.id) return;
+    if (!currentTab?.id == tab?.id) return;
     if (tab.view.canGoBack()) {
         document.getElementById("left-nav").classList.remove("greyed-out");
     } else {
@@ -282,7 +283,6 @@ document.getElementById("create-tab").addEventListener("click", () => {
     const tab = createTabInstance();
     activateTab(tab);
 });
-activateTab(createTabInstance());
 
 window.addEventListener("keyup", (event) => {
     if (event.ctrlKey && event.key.toLowerCase() == "t") return activateTab(createTabInstance());
@@ -450,4 +450,30 @@ window.electronAPI.onAppFocus(() => {
     console.log("app focus");
     document.body.style.backgroundColor = "#0f0f0f";
     document.getElementById("sidebar").style.backgroundColor = "#0c0c0c";
+})
+
+window.addEventListener("beforeunload", () => {
+    const collected = [];
+    for (const tab of tabs) {
+        collected.push(tab.view?.src);
+    };
+    localStorage.setItem("orb:tabs_list", JSON.stringify(collected));
+})
+document.addEventListener("DOMContentLoaded", async () => {
+    let restored = false;
+    const savedTabs = localStorage.getItem("orb:tabs_list");
+    if (!savedTabs) return;
+    try {
+        const urls = JSON.parse(savedTabs);
+        if (Array.isArray(urls) && urls.length > 0) {
+            urls.forEach((url) => {
+                createTabInstance(url);
+            })
+            restored = true;
+        }
+    } catch (e) {}
+    if (!restored) {
+        var newTab = createTabInstance();
+        activateTab(newTab);
+    }
 })

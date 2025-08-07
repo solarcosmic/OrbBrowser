@@ -36,9 +36,10 @@ function createMainWindow() {
     win.setBackgroundColor("#000000");
     win.loadFile("src/index.html");
     win.webContents.openDevTools();
-    win.webContents.on("did-finish-load", function() {
+    /*win.webContents.on("did-finish-load", function() {
         win.show();
-    })
+    })*/
+   win.show();
     win.on("focus", () => {
         if (win) win.webContents.send("app-focus");
     });
