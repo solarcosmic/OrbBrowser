@@ -1,3 +1,5 @@
+<img width="1920" height="534" alt="orb_browser_banner" src="https://github.com/user-attachments/assets/a873f127-4652-4abb-9c9f-e23be7baf331" />
+
 # Orb Browser
 Another proof-of-concept browser written in Electron!
 
