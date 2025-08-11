@@ -329,9 +329,16 @@ urlBox.addEventListener("keyup", () => {
 
 function goToLink(txt) {
     var pattern = /^((http|https|chrome):\/\/)/; /* https://stackoverflow.com/a/11300963 */
+    var dm_regex = /^(?:(?:(?:[a-zA-z\-]+):\/{1,3})?(?:[a-zA-Z0-9])(?:[a-zA-Z0-9\-\.]){1,61}(?:\.[a-zA-Z]{2,})+|\[(?:(?:(?:[a-fA-F0-9]){1,4})(?::(?:[a-fA-F0-9]){1,4}){7}|::1|::)\]|(?:(?:[0-9]{1,3})(?:\.[0-9]{1,3}){3}))(?:\:[0-9]{1,5})?$/; /* https://stackoverflow.com/a/38578855 */
+    var activeTab = getActiveTab();
     if (pattern.test(txt)) {
+        if (!activeTab) return activateTab(createTabInstance(txt));
         getActiveTab().view.loadURL(txt);
+    } else if (dm_regex.test(txt)) {
+        if (!activeTab) return activateTab(createTabInstance("http://" + txt));
+        getActiveTab().view.loadURL("http://" + txt);
     } else {
+        if (!activeTab) return activateTab(createTabInstance("https://google.com/search?client=orb&q=" + txt));
         getActiveTab().view.loadURL("https://google.com/search?client=orb&q=" + txt);
     }
     document.getElementById("omnibox").style.display = "none";
@@ -344,12 +351,12 @@ async function searchSuggestions() {
             clearSearchSuggestionButtons();
             return;
         }
-        if (urlBox.value.toLowerCase().startsWith("fav")) {
+        /*if (urlBox.value.toLowerCase().startsWith("fav")) {
             addSearchSuggestionButton("Favorite Tab", "../assets/star-solid-full.svg", "Quick Action");
         }
         if (urlBox.value.toLowerCase().startsWith("chat")) {
             addSearchSuggestionButton("Ask ChatGPT", "../assets/star-solid-full.svg", "Quick Action");
-        }
+        }*/
         await fetch("https://google.com/complete/search?output=toolbar&q=" + urlBox.value)
             .then(res => {
                 if (!res.ok) throw new Error("Fetching suggestion error: " + res.status);
@@ -373,7 +380,7 @@ async function searchSuggestions() {
 function clearSearchSuggestionButtons() {
     document.getElementById("omnibox-search-list").innerHTML = "";
 }
-var lists = [
+/*var lists = [
     {
         name: "Favorite Tab",
         icon: "../assets/star-solid-full.svg",
@@ -389,7 +396,8 @@ var lists = [
             activateTab(createTabInstance("https://chatgpt.com"));
         }
     },
-];
+];*/
+var lists = []
 function addSearchSuggestionButton(txt, icon = "../assets/magnifying-glass-solid-full.svg") {
     const btn = document.createElement("button");
     btn.classList.add("suggestion-button");

@@ -35,11 +35,11 @@ function createMainWindow() {
     win.setMenu(null);
     win.setBackgroundColor("#000000");
     win.loadFile("src/index.html");
-    win.webContents.openDevTools();
+    //win.webContents.openDevTools();
     /*win.webContents.on("did-finish-load", function() {
         win.show();
     })*/
-   win.show();
+    win.show();
     win.on("focus", () => {
         if (win) win.webContents.send("app-focus");
     });
@@ -55,7 +55,6 @@ app.whenReady().then(async () => {
 app.on("web-contents-created", (evt, webContents) => {
     webContents.on("context-menu", (e, params) => {
         const isWebView = webContents.getType && webContents.getType() == "webview";
-        // TODO: filter webview?? (idk if needed)
         if (!isWebView) return;
         buildChromeContextMenu({
             params,
