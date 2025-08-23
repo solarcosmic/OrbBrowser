@@ -169,7 +169,7 @@ function truncateString(str, num) {
 
 function updateOmniboxHostname(hostname, url) {
     const omniboxtxt = document.getElementById("url-txt");
-    omniboxtxt.textContent = hostname;
+    omniboxtxt.textContent = url.startsWith("orb:") ? url : hostname;
     const omniSecure = document.getElementById("omniSecure") || document.createElement("img");
     omniSecure.style.width = "16px";
     omniSecure.style.height = "16px";
@@ -181,6 +181,9 @@ function updateOmniboxHostname(hostname, url) {
     } else if (url.startsWith("http:")) {
         omniSecure.src = "../assets/unlock-solid-full.svg";
         omniSecure.classList.add("svg-grey");
+    } else if (url.startsWith("orb:")) {
+        omniSecure.src = "../assets/unlock-solid-full.svg";
+        omniSecure.classList.add("svg-grey");
     }
     document.getElementById("omnibox-entry").prepend(omniSecure);
 }
@@ -190,6 +193,8 @@ function updateOmniboxHostname(hostname, url) {
  * Sets up the tab, button, and other event listeners.
 */
 function createTabInstance(url = "https://google.com") {
+    const isLocal = url.startsWith("orb-file://");
+    if (isLocal) url = url.substring(11);
     const tab = createTab(url);
     const btn = createTabButton(tab);
     const urlObj = new URL(url);
@@ -197,6 +202,10 @@ function createTabInstance(url = "https://google.com") {
 
     btn.text.textContent = truncateString(url, truncateAmount);
     btn.icon.src = "../assets/loading.gif";
+    if (isLocal && url.includes("orb://history")) {
+        btn.text.textContent = "History";
+        changeWindowTitle("History");
+    }
     tab.view.addEventListener("page-title-updated", (event) => {
         document.getElementById("url-box").setAttribute("value", tab.view.getURL());
         document.getElementById("url-box").value = tab.view.getURL();
@@ -330,8 +339,22 @@ urlBox.addEventListener("keyup", () => {
 function goToLink(txt) {
     var pattern = /^((http|https|chrome):\/\/)/; /* https://stackoverflow.com/a/11300963 */
     var dm_regex = /^(?:(?:(?:[a-zA-z\-]+):\/{1,3})?(?:[a-zA-Z0-9])(?:[a-zA-Z0-9\-\.]){1,61}(?:\.[a-zA-Z]{2,})+|\[(?:(?:(?:[a-fA-F0-9]){1,4})(?::(?:[a-fA-F0-9]){1,4}){7}|::1|::)\]|(?:(?:[0-9]{1,3})(?:\.[0-9]{1,3}){3}))(?:\:[0-9]{1,5})?$/; /* https://stackoverflow.com/a/38578855 */
+    var orb_pattern = /^((orb):\/\/)/;
     var activeTab = getActiveTab();
-    if (pattern.test(txt)) {
+    if (orb_pattern.test(txt)) {
+        var default_url = txt || "orb://about";
+        if (default_url == "orb://history") {
+            if (!activeTab) {
+                const tab = createTabInstance("orb-file://history.html");
+                activateTab(tab);
+            } else {
+                activeTab.view.loadFile("history.html");
+                activateTab(activeTab);
+            }
+            document.getElementById("omnibox").style.display = "none";
+            return;
+        }
+    } if (pattern.test(txt)) {
         if (!activeTab) return activateTab(createTabInstance(txt));
         getActiveTab().view.loadURL(txt);
     } else if (dm_regex.test(txt)) {

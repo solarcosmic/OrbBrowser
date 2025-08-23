@@ -14,6 +14,8 @@
             padding: 0;
             background-color: #0f0f0f;
             color: #ffffff;
+            height: 100%;
+            overflow: hidden;
         }
         * {
             font-family: "Golos Text";
@@ -35,6 +37,14 @@
             flex-shrink: 0;
             color: #ffffff;
             background-color:#0c0c0c;
+            overflow-y: scroll;
+            scrollbar-gutter: stable;
+        }
+        #sidebar::-webkit-scrollbar {
+            opacity: 0;
+        }
+        #sidebar:hover::-webkit-scrollbar {
+            opacity: 1;
         }
         #tablist, #pinned-tabs {
             display: flex;
@@ -244,6 +254,19 @@
         @keyframes fadeIn {
             from { opacity: 0; }
             to { opacity: 1; }
+        }
+          /* Chrome, Edge, and Safari */
+        #sidebar::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        #sidebar::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        #sidebar::-webkit-scrollbar-thumb {
+            background-color: #2e2e2e;
+            border-radius: 10px;
         }
     </style>
 </head>

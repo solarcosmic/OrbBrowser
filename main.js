@@ -48,7 +48,7 @@ function createMainWindow() {
     });
 }
 app.whenReady().then(async () => {
-    await components.whenReady();
+    if (process.platform != "linux") await components.whenReady();
     createMainWindow();
     ipcMain.on("renderer:console-log", handleRendererLog);
 });
