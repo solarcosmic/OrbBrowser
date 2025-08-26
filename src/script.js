@@ -169,7 +169,7 @@ function truncateString(str, num) {
 
 function updateOmniboxHostname(hostname, url) {
     const omniboxtxt = document.getElementById("url-txt");
-    omniboxtxt.textContent = url.startsWith("orb:") ? url : hostname;
+    omniboxtxt.textContent = url.startsWith("orb://") ? url : hostname;
     const omniSecure = document.getElementById("omniSecure") || document.createElement("img");
     omniSecure.style.width = "16px";
     omniSecure.style.height = "16px";
@@ -181,7 +181,7 @@ function updateOmniboxHostname(hostname, url) {
     } else if (url.startsWith("http:")) {
         omniSecure.src = "../assets/unlock-solid-full.svg";
         omniSecure.classList.add("svg-grey");
-    } else if (url.startsWith("orb:")) {
+    } else if (url.startsWith("orb://")) {
         omniSecure.src = "../assets/unlock-solid-full.svg";
         omniSecure.classList.add("svg-grey");
     }
@@ -193,12 +193,30 @@ function updateOmniboxHostname(hostname, url) {
  * Sets up the tab, button, and other event listeners.
 */
 function createTabInstance(url = "https://google.com") {
+    const isOrb = url.startsWith("orb://");
     const isLocal = url.startsWith("orb-file://");
     if (isLocal) url = url.substring(11);
-    const tab = createTab(url);
+    const tab = createTab(isOrb ? "orb://history" : url);
     const btn = createTabButton(tab);
-    const urlObj = new URL(url);
+    var urlObj;
+    try {urlObj = new URL(url);} catch {}
     var lastFavicon = null;
+
+    if (isOrb) {
+        btn.text.textContent = truncateString(url, truncateAmount);
+        changeWindowTitle("History");
+        btn.icon.src = "favicon.png";
+        tab.view.src = "history.html";
+        tab.view.addEventListener("dom-ready", () => {
+            tab.view.executeJavaScript("document.title").then(title => {
+                btn.text.textContent = "History";
+                changeWindowTitle(title || "History");
+            })
+        })
+    } else {
+        btn.text.textContent = truncateString(url, truncateAmount);
+        btn.icon.src = "../assets/loading.gif";
+    }
 
     btn.text.textContent = truncateString(url, truncateAmount);
     btn.icon.src = "../assets/loading.gif";
@@ -218,14 +236,14 @@ function createTabInstance(url = "https://google.com") {
     });
     tab.view.addEventListener("did-navigate", (event) => {
         checkNavigation(tab);
-        updateOmniboxHostname(new URL(tab.view.getURL()).hostname, tab.view.getURL());
+        updateOmniboxHostname(isOrb ? url : new URL(tab.view.getURL()).hostname, isOrb ? url : tab.view.getURL());
     })
     tab.view.addEventListener("page-favicon-updated", (event) => {
         const favicon = event.favicons[0];
         if (favicon) {
             lastFavicon = favicon;
             btn.icon.src = lastFavicon;
-            localStorage.setItem(`favicon:${urlObj.hostname}`, lastFavicon);
+            if (urlObj) localStorage.setItem(`favicon:${urlObj.hostname}`, lastFavicon);
         }
     });
     tab.view.addEventListener("did-start-loading", () => {
@@ -348,8 +366,11 @@ function goToLink(txt) {
                 const tab = createTabInstance("orb-file://history.html");
                 activateTab(tab);
             } else {
-                activeTab.view.loadFile("history.html");
+                activeTab.view.src = "history.html";
                 activateTab(activeTab);
+                activeTab.button.querySelector(".page-title").textContent = "History";
+                document.getElementById("url-box").value = "orb://history";
+                updateOmniboxHostname("history", "orb://history");
             }
             document.getElementById("omnibox").style.display = "none";
             return;
@@ -487,7 +508,11 @@ window.electronAPI.onAppFocus(() => {
 window.addEventListener("beforeunload", () => {
     const collected = [];
     for (const tab of tabs) {
-        collected.push(tab.view?.src);
+        if (tab.view.src == "history.html") {
+            collected.push("orb://history");
+        } else {
+            collected.push(tab.view?.src);
+        }
     };
     localStorage.setItem("orb:tabs_list", JSON.stringify(collected));
 })
