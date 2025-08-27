@@ -20,6 +20,15 @@ const truncateAmount = 25;
 
 const views = document.getElementById("webviews");
 
+var customLinks = {
+    "orb": {
+        "history": {
+            file: "history.html"
+        }
+    }
+}
+var browseHistory = JSON.parse(localStorage.getItem("orb:browsing_history") || "[]");
+
 /*
  * Creates a tab and loads a URL.
 */
@@ -102,7 +111,8 @@ function activateTab(tab) {
     requestAnimationFrame(() => { // for some reason THIS WORKS. requestAnimationFrame is needed for it to function correctly
         tab.button.classList.add("active-tab");
         tab.view.style.display = "flex";
-        updateOmniboxHostname(new URL(tab.view.getURL()).hostname, tab.view.getURL());
+        updateOmniboxHostname(tab.displayURL || new URL(tab.view.getURL()).hostname, tab.displayURL || tab.view.getURL());
+        document.getElementById("url-box").value = tab.displayURL || tab.view?.getURL();
     });
     try {
         changeWindowTitle(tab.view.getTitle());
@@ -169,7 +179,7 @@ function truncateString(str, num) {
 
 function updateOmniboxHostname(hostname, url) {
     const omniboxtxt = document.getElementById("url-txt");
-    omniboxtxt.textContent = hostname;
+    omniboxtxt.textContent = hostname || url || "";
     const omniSecure = document.getElementById("omniSecure") || document.createElement("img");
     omniSecure.style.width = "16px";
     omniSecure.style.height = "16px";
@@ -182,6 +192,17 @@ function updateOmniboxHostname(hostname, url) {
         omniSecure.src = "../assets/unlock-solid-full.svg";
         omniSecure.classList.add("svg-grey");
     }
+    for (const [protocol, protoItems] of Object.entries(customLinks)) {
+        for (const [linkName, linkItem] of Object.entries(protoItems)) {
+            const exampleProtocol = `${protocol.toLowerCase()}://${linkName.toLowerCase()}`;
+            if (hostname == exampleProtocol) {
+                omniSecure.src = "../assets/star-solid-full.svg";
+                omniSecure.classList.remove("svg-grey");
+                omniboxtxt.textContent = hostname || url || "";
+                break;
+            }
+        }
+    }
     document.getElementById("omnibox-entry").prepend(omniSecure);
 }
 
@@ -192,12 +213,30 @@ function updateOmniboxHostname(hostname, url) {
 function createTabInstance(url = "https://google.com") {
     const tab = createTab(url);
     const btn = createTabButton(tab);
-    const urlObj = new URL(url);
+    var urlObj;
+    try {
+        urlObj = new URL(url);
+    } catch (e) {
+        log(e);
+        urlObj = null;
+    }
     var lastFavicon = null;
+
+    for (const [protocol, protoItems] of Object.entries(customLinks)) {
+        for (const [linkName, linkItem] of Object.entries(protoItems)) {
+            if (url == linkItem.file) {
+                log("same!");
+                tab.displayURL = `${protocol.toLowerCase()}://${linkName.toLowerCase()}`;
+                btn.text.textContent = tab.displayURL;
+                btn.icon.src = "../assets/star-solid-full.svg";
+            }
+        }
+    }
 
     btn.text.textContent = truncateString(url, truncateAmount);
     btn.icon.src = "../assets/loading.gif";
     tab.view.addEventListener("page-title-updated", (event) => {
+        console.log(url);
         document.getElementById("url-box").setAttribute("value", tab.view.getURL());
         document.getElementById("url-box").value = tab.view.getURL();
         if (event.title?.trim()) {
@@ -209,14 +248,15 @@ function createTabInstance(url = "https://google.com") {
     });
     tab.view.addEventListener("did-navigate", (event) => {
         checkNavigation(tab);
-        updateOmniboxHostname(new URL(tab.view.getURL()).hostname, tab.view.getURL());
+        updateOmniboxHostname(tab.displayURL || new URL(tab.view.getURL()).hostname, tab.displayURL || tab.view.getURL());
+        document.getElementById("url-box").value = tab.displayURL || tab.view.getURL();
     })
     tab.view.addEventListener("page-favicon-updated", (event) => {
         const favicon = event.favicons[0];
         if (favicon) {
             lastFavicon = favicon;
             btn.icon.src = lastFavicon;
-            localStorage.setItem(`favicon:${urlObj.hostname}`, lastFavicon);
+            localStorage.setItem(`favicon:${urlObj?.hostname}`, lastFavicon);
         }
     });
     tab.view.addEventListener("did-start-loading", () => {
@@ -226,7 +266,7 @@ function createTabInstance(url = "https://google.com") {
         if (lastFavicon) {
             btn.icon.src = lastFavicon;
         } else {
-            const cached = localStorage.getItem(`favicon:${urlObj.hostname}`);
+            const cached = localStorage.getItem(`favicon:${urlObj?.hostname}`);
             btn.icon.src = cached || "";
         }
     });
@@ -331,7 +371,27 @@ function goToLink(txt) {
     var pattern = /^((http|https|chrome):\/\/)/; /* https://stackoverflow.com/a/11300963 */
     var dm_regex = /^(?:(?:(?:[a-zA-z\-]+):\/{1,3})?(?:[a-zA-Z0-9])(?:[a-zA-Z0-9\-\.]){1,61}(?:\.[a-zA-Z]{2,})+|\[(?:(?:(?:[a-fA-F0-9]){1,4})(?::(?:[a-fA-F0-9]){1,4}){7}|::1|::)\]|(?:(?:[0-9]{1,3})(?:\.[0-9]{1,3}){3}))(?:\:[0-9]{1,5})?$/; /* https://stackoverflow.com/a/38578855 */
     var activeTab = getActiveTab();
-    if (pattern.test(txt)) {
+
+    var formedProtocol;
+    var protocolItems;
+    for (const [protocol, protoItems] of Object.entries(customLinks)) {
+        for (const [linkName, linkItem] of Object.entries(protoItems)) {
+            const exampleProtocol = `${protocol.toLowerCase()}://${linkName.toLowerCase()}`;
+            if (txt == exampleProtocol) {
+                formedProtocol = exampleProtocol;
+                protocolItems = linkItem;
+                break;
+            }
+        }
+    }
+    if (txt == formedProtocol && protocolItems?.file != null) {
+        const tab = createTabInstance(protocolItems.file);
+        tab.displayURL = formedProtocol;
+        activateTab(tab);
+        tab.button.querySelector(".page-title").textContent = formedProtocol;
+        updateOmniboxHostname(formedProtocol, formedProtocol);
+        tab.button.querySelector("img").src = "../assets/star-solid-full.svg";
+    } else if (pattern.test(txt)) {
         if (!activeTab) return activateTab(createTabInstance(txt));
         getActiveTab().view.loadURL(txt);
     } else if (dm_regex.test(txt)) {
@@ -357,6 +417,9 @@ async function searchSuggestions() {
         if (urlBox.value.toLowerCase().startsWith("chat")) {
             addSearchSuggestionButton("Ask ChatGPT", "../assets/star-solid-full.svg", "Quick Action");
         }*/
+        if (urlBox.value.toLowerCase().startsWith("hist")) {
+            addSearchSuggestionButton("Browsing History", "../assets/gear-solid-full.svg", "Quick Action");
+        }
         await fetch("https://google.com/complete/search?output=toolbar&q=" + urlBox.value)
             .then(res => {
                 if (!res.ok) throw new Error("Fetching suggestion error: " + res.status);
@@ -380,8 +443,8 @@ async function searchSuggestions() {
 function clearSearchSuggestionButtons() {
     document.getElementById("omnibox-search-list").innerHTML = "";
 }
-/*var lists = [
-    {
+var lists = [
+    /*{
         name: "Favorite Tab",
         icon: "../assets/star-solid-full.svg",
         action: (table) => {
@@ -395,9 +458,16 @@ function clearSearchSuggestionButtons() {
             // TODO: maybe add ask prompt within the omnibox itself?
             activateTab(createTabInstance("https://chatgpt.com"));
         }
-    },
-];*/
-var lists = []
+    },*/
+    {
+        name: "Browsing History",
+        icon: "../assets/gear-solid-full.svg",
+        action: (table) => {
+            log(table);
+            goToLink("orb://history");
+        }
+    }
+];
 function addSearchSuggestionButton(txt, icon = "../assets/magnifying-glass-solid-full.svg") {
     const btn = document.createElement("button");
     btn.classList.add("suggestion-button");
@@ -476,7 +546,15 @@ document.addEventListener("DOMContentLoaded", async () => {
         const urls = JSON.parse(savedTabs);
         if (Array.isArray(urls) && urls.length > 0) {
             urls.forEach((url) => {
-                createTabInstance(url);
+                const tab = createTabInstance(url);
+                console.log("URL: " + url);
+                for (const [protocol, protoItems] of Object.entries(customLinks)) {
+                    for (const [linkName, linkItem] of Object.entries(protoItems)) {
+                        if (url.replace(/^.*[\\/]/, '') == linkItem.file) {
+                            tab.displayURL = `${protocol.toLowerCase()}://${linkName.toLowerCase()}`;
+                        }
+                    }
+                }
             })
             restored = true;
         }
