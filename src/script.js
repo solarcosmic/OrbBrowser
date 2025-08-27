@@ -19,7 +19,6 @@ var tabs = [];
 const truncateAmount = 25;
 
 const views = document.getElementById("webviews");
-var selectedUrl;
 
 /*
  * Creates a tab and loads a URL.
@@ -103,14 +102,7 @@ function activateTab(tab) {
     requestAnimationFrame(() => { // for some reason THIS WORKS. requestAnimationFrame is needed for it to function correctly
         tab.button.classList.add("active-tab");
         tab.view.style.display = "flex";
-        const selected = tab.view.src.replace(/^.*[\\/]/, ''); /* https://stackoverflow.com/a/423385 */
-        if (selected == "history.html" || selected == "orb://history") {
-            updateOmniboxHostname("orb://history", "orb://history");
-            document.getElementById("url-box").value = "orb://history";
-        } else {
-            updateOmniboxHostname(new URL(tab.view.getURL()).hostname, tab.view.getURL());
-            document.getElementById("url-box").value = tab.view.getURL();
-        }
+        updateOmniboxHostname(new URL(tab.view.getURL()).hostname, tab.view.getURL());
     });
     try {
         changeWindowTitle(tab.view.getTitle());
@@ -177,15 +169,7 @@ function truncateString(str, num) {
 
 function updateOmniboxHostname(hostname, url) {
     const omniboxtxt = document.getElementById("url-txt");
-    //omniboxtxt.textContent = url.startsWith("orb://") ? url : hostname;
-    const selected = url.replace(/^.*[\\/]/, '');
-    if (selected == "history.html" || selected == "orb://history") {
-        omniboxtxt.textContent = "orb://history";
-    } else if (selected.startsWith("orb://")) {
-        omniboxtxt.textContent = url;
-    } else {
-        omniboxtxt.textContent = hostname;
-    }
+    omniboxtxt.textContent = hostname;
     const omniSecure = document.getElementById("omniSecure") || document.createElement("img");
     omniSecure.style.width = "16px";
     omniSecure.style.height = "16px";
@@ -197,9 +181,6 @@ function updateOmniboxHostname(hostname, url) {
     } else if (url.startsWith("http:")) {
         omniSecure.src = "../assets/unlock-solid-full.svg";
         omniSecure.classList.add("svg-grey");
-    } else if (url.startsWith("orb://") || url.replace(/^.*[\\/]/, '') == "history.html") {
-        omniSecure.src = "../assets/unlock-solid-full.svg";
-        omniSecure.classList.add("svg-grey");
     }
     document.getElementById("omnibox-entry").prepend(omniSecure);
 }
@@ -209,55 +190,16 @@ function updateOmniboxHostname(hostname, url) {
  * Sets up the tab, button, and other event listeners.
 */
 function createTabInstance(url = "https://google.com") {
-    const isOrb = url.startsWith("orb");
-    const isLocal = url.startsWith("orb-file://");
-    var displayUrl = url;
-    var loadUrl = url;
-    if (isOrb && url == "orb://history") {
-        loadUrl = "history.html";
-        displayUrl = "orb://history";
-    } else if (isLocal) {
-        loadUrl = url.substring(11);
-        displayUrl = loadUrl;
-    }
-
-    const tab = createTab(displayUrl);
+    const tab = createTab(url);
     const btn = createTabButton(tab);
-    var urlObj;
-    try {urlObj = new URL(url);} catch {}
+    const urlObj = new URL(url);
     var lastFavicon = null;
-
-    if (isOrb) {
-        btn.text.textContent = truncateString(url, truncateAmount);
-        changeWindowTitle("History");
-        btn.icon.src = "favicon.png";
-        tab.view.src = "history.html";
-        tab.view.addEventListener("dom-ready", () => {
-            tab.view.executeJavaScript("document.title").then(title => {
-                btn.text.textContent = "History";
-                changeWindowTitle(title || "History");
-                document.getElementById("url-box").value = "orb://history";
-            })
-        })
-    } else {
-        btn.text.textContent = truncateString(url, truncateAmount);
-        btn.icon.src = "../assets/loading.gif";
-    }
 
     btn.text.textContent = truncateString(url, truncateAmount);
     btn.icon.src = "../assets/loading.gif";
-    if (isLocal && url.includes("orb://history")) {
-        btn.text.textContent = "History";
-        changeWindowTitle("History");
-    }
     tab.view.addEventListener("page-title-updated", (event) => {
-        if (tab.view.src.replace(/^.*[\\/]/, '') == "history.html" || tab.view.src == "orb://history") {
-            document.getElementById("url-box").value = "orb://history";
-        } else {
-            document.getElementById("url-box").value = tab.view.getURL();
-        }
-        //document.getElementById("url-box").setAttribute("value", tab.view.getURL());
-        //document.getElementById("url-box").value = tab.view.getURL();
+        document.getElementById("url-box").setAttribute("value", tab.view.getURL());
+        document.getElementById("url-box").value = tab.view.getURL();
         if (event.title?.trim()) {
             btn.text.textContent = truncateString(event.title, 25);
             if (getActiveTab()?.id == tab.id) {
@@ -267,20 +209,14 @@ function createTabInstance(url = "https://google.com") {
     });
     tab.view.addEventListener("did-navigate", (event) => {
         checkNavigation(tab);
-        if (tab.view.src.replace(/^.*[\\/]/, '') == "history.html" || tab.view.src == "orb://history") {
-            updateOmniboxHostname("orb://history", "orb://history");
-            document.getElementById("url-box").value = "orb://history";
-        } else {
-            updateOmniboxHostname(isOrb ? url : new URL(tab.view.getURL()).hostname, isOrb ? url : tab.view.getURL());
-            document.getElementById("url-box").value = tab.view.getURL();
-        }
+        updateOmniboxHostname(new URL(tab.view.getURL()).hostname, tab.view.getURL());
     })
     tab.view.addEventListener("page-favicon-updated", (event) => {
         const favicon = event.favicons[0];
         if (favicon) {
             lastFavicon = favicon;
             btn.icon.src = lastFavicon;
-            if (urlObj) localStorage.setItem(`favicon:${urlObj.hostname}`, lastFavicon);
+            localStorage.setItem(`favicon:${urlObj.hostname}`, lastFavicon);
         }
     });
     tab.view.addEventListener("did-start-loading", () => {
@@ -394,27 +330,8 @@ urlBox.addEventListener("keyup", () => {
 function goToLink(txt) {
     var pattern = /^((http|https|chrome):\/\/)/; /* https://stackoverflow.com/a/11300963 */
     var dm_regex = /^(?:(?:(?:[a-zA-z\-]+):\/{1,3})?(?:[a-zA-Z0-9])(?:[a-zA-Z0-9\-\.]){1,61}(?:\.[a-zA-Z]{2,})+|\[(?:(?:(?:[a-fA-F0-9]){1,4})(?::(?:[a-fA-F0-9]){1,4}){7}|::1|::)\]|(?:(?:[0-9]{1,3})(?:\.[0-9]{1,3}){3}))(?:\:[0-9]{1,5})?$/; /* https://stackoverflow.com/a/38578855 */
-    var orb_pattern = /^((orb):\/\/)/;
     var activeTab = getActiveTab();
-    if (orb_pattern.test(txt)) {
-        var default_url = txt || "orb://about";
-        if (default_url == "orb://history") {
-            if (!activeTab) {
-                const tab = createTabInstance("orb-file://history.html");
-                activateTab(tab);
-            } else {
-                console.log("go to link");
-                activeTab.view.src = "history.html";
-                console.log("go to link #2");
-                activateTab(activeTab);
-                //activeTab.button.querySelector(".page-title").textContent = "History";
-                document.getElementById("url-box").value = "orb://history";
-                updateOmniboxHostname("history", "orb://history");
-            }
-            document.getElementById("omnibox").style.display = "none";
-            return;
-        }
-    } if (pattern.test(txt)) {
+    if (pattern.test(txt)) {
         if (!activeTab) return activateTab(createTabInstance(txt));
         getActiveTab().view.loadURL(txt);
     } else if (dm_regex.test(txt)) {
@@ -547,11 +464,7 @@ window.electronAPI.onAppFocus(() => {
 window.addEventListener("beforeunload", () => {
     const collected = [];
     for (const tab of tabs) {
-        if (tab.view.src.replace(/^.*[\\/]/, '') == "history.html") {
-            collected.push("orb://history");
-        } else {
-            collected.push(tab.view?.src);
-        }
+        collected.push(tab.view?.src);
     };
     localStorage.setItem("orb:tabs_list", JSON.stringify(collected));
 })
