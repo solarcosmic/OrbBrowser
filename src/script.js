@@ -19,6 +19,7 @@ var tabs = [];
 const truncateAmount = 25;
 
 const views = document.getElementById("webviews");
+var selectedUrl;
 
 /*
  * Creates a tab and loads a URL.
@@ -102,7 +103,14 @@ function activateTab(tab) {
     requestAnimationFrame(() => { // for some reason THIS WORKS. requestAnimationFrame is needed for it to function correctly
         tab.button.classList.add("active-tab");
         tab.view.style.display = "flex";
-        updateOmniboxHostname(new URL(tab.view.getURL()).hostname, tab.view.getURL());
+        const selected = tab.view.src.replace(/^.*[\\/]/, ''); /* https://stackoverflow.com/a/423385 */
+        if (selected == "history.html" || selected == "orb://history") {
+            updateOmniboxHostname("orb://history", "orb://history");
+            document.getElementById("url-box").value = "orb://history";
+        } else {
+            updateOmniboxHostname(new URL(tab.view.getURL()).hostname, tab.view.getURL());
+            document.getElementById("url-box").value = tab.view.getURL();
+        }
     });
     try {
         changeWindowTitle(tab.view.getTitle());
@@ -169,7 +177,15 @@ function truncateString(str, num) {
 
 function updateOmniboxHostname(hostname, url) {
     const omniboxtxt = document.getElementById("url-txt");
-    omniboxtxt.textContent = url.startsWith("orb://") ? url : hostname;
+    //omniboxtxt.textContent = url.startsWith("orb://") ? url : hostname;
+    const selected = url.replace(/^.*[\\/]/, '');
+    if (selected == "history.html" || selected == "orb://history") {
+        omniboxtxt.textContent = "orb://history";
+    } else if (selected.startsWith("orb://")) {
+        omniboxtxt.textContent = url;
+    } else {
+        omniboxtxt.textContent = hostname;
+    }
     const omniSecure = document.getElementById("omniSecure") || document.createElement("img");
     omniSecure.style.width = "16px";
     omniSecure.style.height = "16px";
@@ -181,7 +197,7 @@ function updateOmniboxHostname(hostname, url) {
     } else if (url.startsWith("http:")) {
         omniSecure.src = "../assets/unlock-solid-full.svg";
         omniSecure.classList.add("svg-grey");
-    } else if (url.startsWith("orb://")) {
+    } else if (url.startsWith("orb://") || url.replace(/^.*[\\/]/, '') == "history.html") {
         omniSecure.src = "../assets/unlock-solid-full.svg";
         omniSecure.classList.add("svg-grey");
     }
@@ -193,10 +209,19 @@ function updateOmniboxHostname(hostname, url) {
  * Sets up the tab, button, and other event listeners.
 */
 function createTabInstance(url = "https://google.com") {
-    const isOrb = url.startsWith("orb://");
+    const isOrb = url.startsWith("orb");
     const isLocal = url.startsWith("orb-file://");
-    if (isLocal) url = url.substring(11);
-    const tab = createTab(isOrb ? "orb://history" : url);
+    var displayUrl = url;
+    var loadUrl = url;
+    if (isOrb && url == "orb://history") {
+        loadUrl = "history.html";
+        displayUrl = "orb://history";
+    } else if (isLocal) {
+        loadUrl = url.substring(11);
+        displayUrl = loadUrl;
+    }
+
+    const tab = createTab(displayUrl);
     const btn = createTabButton(tab);
     var urlObj;
     try {urlObj = new URL(url);} catch {}
@@ -211,6 +236,7 @@ function createTabInstance(url = "https://google.com") {
             tab.view.executeJavaScript("document.title").then(title => {
                 btn.text.textContent = "History";
                 changeWindowTitle(title || "History");
+                document.getElementById("url-box").value = "orb://history";
             })
         })
     } else {
@@ -225,8 +251,13 @@ function createTabInstance(url = "https://google.com") {
         changeWindowTitle("History");
     }
     tab.view.addEventListener("page-title-updated", (event) => {
-        document.getElementById("url-box").setAttribute("value", tab.view.getURL());
-        document.getElementById("url-box").value = tab.view.getURL();
+        if (tab.view.src.replace(/^.*[\\/]/, '') == "history.html" || tab.view.src == "orb://history") {
+            document.getElementById("url-box").value = "orb://history";
+        } else {
+            document.getElementById("url-box").value = tab.view.getURL();
+        }
+        //document.getElementById("url-box").setAttribute("value", tab.view.getURL());
+        //document.getElementById("url-box").value = tab.view.getURL();
         if (event.title?.trim()) {
             btn.text.textContent = truncateString(event.title, 25);
             if (getActiveTab()?.id == tab.id) {
@@ -236,7 +267,13 @@ function createTabInstance(url = "https://google.com") {
     });
     tab.view.addEventListener("did-navigate", (event) => {
         checkNavigation(tab);
-        updateOmniboxHostname(isOrb ? url : new URL(tab.view.getURL()).hostname, isOrb ? url : tab.view.getURL());
+        if (tab.view.src.replace(/^.*[\\/]/, '') == "history.html" || tab.view.src == "orb://history") {
+            updateOmniboxHostname("orb://history", "orb://history");
+            document.getElementById("url-box").value = "orb://history";
+        } else {
+            updateOmniboxHostname(isOrb ? url : new URL(tab.view.getURL()).hostname, isOrb ? url : tab.view.getURL());
+            document.getElementById("url-box").value = tab.view.getURL();
+        }
     })
     tab.view.addEventListener("page-favicon-updated", (event) => {
         const favicon = event.favicons[0];
@@ -366,9 +403,11 @@ function goToLink(txt) {
                 const tab = createTabInstance("orb-file://history.html");
                 activateTab(tab);
             } else {
+                console.log("go to link");
                 activeTab.view.src = "history.html";
+                console.log("go to link #2");
                 activateTab(activeTab);
-                activeTab.button.querySelector(".page-title").textContent = "History";
+                //activeTab.button.querySelector(".page-title").textContent = "History";
                 document.getElementById("url-box").value = "orb://history";
                 updateOmniboxHostname("history", "orb://history");
             }
@@ -508,7 +547,7 @@ window.electronAPI.onAppFocus(() => {
 window.addEventListener("beforeunload", () => {
     const collected = [];
     for (const tab of tabs) {
-        if (tab.view.src == "history.html") {
+        if (tab.view.src.replace(/^.*[\\/]/, '') == "history.html") {
             collected.push("orb://history");
         } else {
             collected.push(tab.view?.src);
