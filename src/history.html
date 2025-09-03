@@ -16,7 +16,6 @@
             color: #ffffff;
             height: 100%;
             overflow: hidden;
-            text-align: center;
         }
         * {
             font-family: "Golos Text";
@@ -33,21 +32,69 @@
         }
         .grey-text {
             color: grey;
-            margin-left: 35px;
+            margin-left: 10px;
         }
         .vertical-list li {
             cursor: pointer;
+            padding: 5px 5px;
         }
     </style>
     <link rel="icon" type="image/svg" href="../assets/gear-solid-full.svg">
 </head>
 <body>
     <h1>History</h1>
+    <button id="clear-browsing-data">Clear Browsing Data</button>
     <div id="container">
-        <p>Today - Saturday 23 August 2025</p>
-        <ul class="vertical-list">
-            <li>Google<span class="grey-text">google.com</span></li>
-        </ul>
+        <div history-date="23/05/2025">
+            <p>Today - Saturday 23 August 2025</p>
+            <ul class="vertical-list">
+            </ul>
+        </div>
     </div>
+    <script>
+        const history = JSON.parse(localStorage.getItem("orb:browsing_history"));
+        for (const item of history.reverse()) {
+            var hostname = item.url;
+            try {
+                hostname = new URL(item.url).hostname;
+            } catch (e) {}
+            const date_then = new Date(item.timestamp);
+            const li_element = document.createElement("li");
+            const grey_text_1 = document.createElement("span");
+            grey_text_1.classList.add("grey-text");
+            grey_text_1.style.marginRight = "10px";
+            grey_text_1.textContent = date_then.getHours() + ":" + date_then.getMinutes();
+            const grey_text_2 = document.createElement("span");
+            grey_text_2.classList.add("grey-text");
+            grey_text_2.textContent = truncateString(hostname, 25);
+            const main_text = document.createElement("span");
+            main_text.textContent = truncateString((item.title || item.url), 50);
+            li_element.appendChild(grey_text_1);
+            li_element.appendChild(main_text);
+            li_element.appendChild(grey_text_2);
+            document.querySelector(".vertical-list").appendChild(li_element);
+            li_element.addEventListener("click", () => {
+                console.log(item.url);
+                window.electronAPI.requestTabOpen(item.url);
+            });
+            /*document.querySelector(".vertical-list").innerHTML += `
+            <li><span class="grey-text" style="margin-right: 10px;"></span></li>
+            `*/
+        }
+
+        /* https://stackoverflow.com/a/53637828 */
+        function truncateString(str, num) {
+            if (str.length > num) {
+                return str.slice(0, num) + "...";
+            } else {
+                return str;
+            }
+        }
+
+        document.getElementById("clear-browsing-data").addEventListener("click", () => {
+            window.electronAPI.clearBrowsingHistory();
+            document.querySelector(".vertical-list").innerHTML = "";
+        })
+    </script>
 </body>
 </html>

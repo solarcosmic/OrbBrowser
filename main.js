@@ -51,6 +51,8 @@ app.whenReady().then(async () => {
     if (process.platform != "linux") await components.whenReady();
     createMainWindow();
     ipcMain.on("renderer:console-log", handleRendererLog);
+    ipcMain.on("renderer:open-new-tab", openLinkInNewTab);
+    ipcMain.on("renderer:clear-browsing-history", clearBrowsingHistory);
 });
 app.on("web-contents-created", (evt, webContents) => {
     webContents.on("context-menu", (e, params) => {
@@ -72,4 +74,10 @@ app.on("web-contents-created", (evt, webContents) => {
 });
 function handleRendererLog(evt, txt) {
     console.log("[net.solarcosmic.orbbrowser.renderer]: " + txt);
+}
+function openLinkInNewTab(evt, url) {
+    win.webContents.send("open-link", url);
+}
+function clearBrowsingHistory() {
+    if (win) win.webContents.send("send-function-message-to-renderer", "clearBrowsingData");
 }

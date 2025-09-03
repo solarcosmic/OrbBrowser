@@ -6,4 +6,7 @@ contextBridge.exposeInMainWorld("electronAPI", {
     sendConsoleLog: (txt) => ipcRenderer.send("renderer:console-log", txt),
     onAppBlur: (callback) => ipcRenderer.on("app-blur", (_evt) => callback()),
     onAppFocus: (callback) => ipcRenderer.on("app-focus", (_evt) => callback()),
+    requestTabOpen: (url) => ipcRenderer.send("renderer:open-new-tab", url),
+    clearBrowsingHistory: () => ipcRenderer.send("renderer:clear-browsing-history"),
+    sendToRenderer: (callback) => ipcRenderer.on("send-function-message-to-renderer", (_evt, data) => callback(data)),
 });

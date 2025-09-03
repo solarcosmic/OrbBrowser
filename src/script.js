@@ -32,7 +32,7 @@ var browseHistory = JSON.parse(localStorage.getItem("orb:browsing_history") || "
 /*
  * Creates a tab and loads a URL.
 */
-function createTab(url = "https://www.google.com") {
+function createTab(url = "https://www.google.com", preloadPath = null) {
     const tab = {
         id: crypto.randomUUID(),
         view: document.createElement("webview"),
@@ -40,6 +40,10 @@ function createTab(url = "https://www.google.com") {
     tab.view.classList.add("tab-view");
     tab.view.style.display = "none";
     tab.view.src = url;
+    if (preloadPath) {
+        console.log("preload path!");
+        tab.view.setAttribute("preload", preloadPath);
+    }
     views.appendChild(tab.view);
     tabs.push(tab);
     return tab;
@@ -211,7 +215,30 @@ function updateOmniboxHostname(hostname, url) {
  * Sets up the tab, button, and other event listeners.
 */
 function createTabInstance(url = "https://google.com") {
-    const tab = createTab(url);
+    var preloadPath = null;
+    var resolvedUrl = url;
+
+    for (const [protocol, protoItems] of Object.entries(customLinks)) {
+        for (const [linkName, linkItem] of Object.entries(protoItems)) {
+            const exampleProtocol = `${protocol.toLowerCase()}://${linkName.toLowerCase()}`;
+            if (url == exampleProtocol) {
+                resolvedUrl = linkItem.file;
+                break;
+            }
+            if (url.replace(/^.*[\\/]/, "") == linkItem.file) {
+                resolvedUrl = linkItem.file;
+                break;
+            }
+        }
+    }
+    for (const [protocol, protoItems] of Object.entries(customLinks)) {
+        for (const [linkName, linkItem] of Object.entries(protoItems)) {
+            if (resolvedUrl.replace(/^.*[\\/]/, '') == linkItem.file) {
+                preloadPath = "../preload.js";
+            }
+        }
+    }
+    const tab = createTab(resolvedUrl, preloadPath);
     const btn = createTabButton(tab);
     var urlObj;
     try {
@@ -221,11 +248,10 @@ function createTabInstance(url = "https://google.com") {
         urlObj = null;
     }
     var lastFavicon = null;
-
+    // probably inefficient implementation with 2 for loops, but it works for now (i think)
     for (const [protocol, protoItems] of Object.entries(customLinks)) {
         for (const [linkName, linkItem] of Object.entries(protoItems)) {
-            if (url == linkItem.file) {
-                log("same!");
+            if (resolvedUrl == linkItem.file) {
                 tab.displayURL = `${protocol.toLowerCase()}://${linkName.toLowerCase()}`;
                 btn.text.textContent = tab.displayURL;
                 btn.icon.src = "../assets/star-solid-full.svg";
@@ -248,8 +274,16 @@ function createTabInstance(url = "https://google.com") {
     });
     tab.view.addEventListener("did-navigate", (event) => {
         checkNavigation(tab);
+        console.log(tab.displayURL);
         updateOmniboxHostname(tab.displayURL || new URL(tab.view.getURL()).hostname, tab.displayURL || tab.view.getURL());
         document.getElementById("url-box").value = tab.displayURL || tab.view.getURL();
+        browseHistory.push({
+            url: tab.displayURL || tab.view?.getURL() || "about:blank",
+            title: tab.view?.getTitle() || "Webpage",
+            timestamp: Date.now(),
+        })
+        localStorage.setItem("orb:browsing_history", JSON.stringify(browseHistory));
+        console.log(browseHistory);
     })
     tab.view.addEventListener("page-favicon-updated", (event) => {
         const favicon = event.favicons[0];
@@ -350,7 +384,17 @@ window.electronAPI.onMouseClick((x, y) => {
     }
 })
 window.electronAPI.onLinkOpen((url) => {
-    activateTab(createTabInstance(url));
+    log("link open: " + url);
+    for (const [protocol, protoItems] of Object.entries(customLinks)) {
+        for (const [linkName, linkItem] of Object.entries(protoItems)) {
+            if (url.replace(/^.*[\\/]/, '') == linkItem.file) {
+                log(url);
+                goToLink(url);
+                return;
+            }
+        }
+    }
+    return activateTab(createTabInstance(url));
 })
 
 /*
@@ -367,10 +411,9 @@ urlBox.addEventListener("keyup", () => {
     if (urlBox.value) typeTimer = setTimeout(searchSuggestions, typeInterval);
 })
 
-function goToLink(txt) {
+function goToLink(txt, activeTab = getActiveTab()) {
     var pattern = /^((http|https|chrome):\/\/)/; /* https://stackoverflow.com/a/11300963 */
     var dm_regex = /^(?:(?:(?:[a-zA-z\-]+):\/{1,3})?(?:[a-zA-Z0-9])(?:[a-zA-Z0-9\-\.]){1,61}(?:\.[a-zA-Z]{2,})+|\[(?:(?:(?:[a-fA-F0-9]){1,4})(?::(?:[a-fA-F0-9]){1,4}){7}|::1|::)\]|(?:(?:[0-9]{1,3})(?:\.[0-9]{1,3}){3}))(?:\:[0-9]{1,5})?$/; /* https://stackoverflow.com/a/38578855 */
-    var activeTab = getActiveTab();
 
     var formedProtocol;
     var protocolItems;
@@ -562,5 +605,12 @@ document.addEventListener("DOMContentLoaded", async () => {
     if (!restored) {
         var newTab = createTabInstance();
         activateTab(newTab);
+    }
+})
+window.electronAPI.sendToRenderer((data) => {
+    log(data);
+    if (data == "clearBrowsingData") {
+        browseHistory = [];
+        localStorage.setItem("orb:browsing_history", JSON.stringify(browseHistory));
     }
 })
