@@ -13,10 +13,10 @@
     "app:dist": "electron-builder"
   },
   "devDependencies": {
-    "electron": "github:castlabs/electron-releases#v37.2.3+wvcus",
     "electron-builder": "^26.0.12"
   },
   "dependencies": {
+    "electron": "github:castlabs/electron-releases#v38.0.0+wvcus",
     "electron-chrome-context-menu": "^1.1.0",
     "electron-chrome-extensions": "^4.9.0",
     "electron-chrome-web-store": "^0.13.0"
