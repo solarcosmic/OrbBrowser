@@ -105,7 +105,7 @@ function createTabButton(tab) {
     });
     btn.addEventListener("contextmenu", (e) => {
         e.preventDefault();
-        window.electronAPI.contextMenuShow("pin-tab", {tabId: tab.id});
+        window.electronAPI.contextMenuShow("right-click-button", {tabId: tab.id, isPinned: tab.pinned});
     })
     btn.appendChild(closeBtn);
     const containerId = tab.pinned ? "pinned-tab-buttons" : "tab-buttons";
@@ -138,8 +138,29 @@ function getTabButtonByTabId(tabId) {
     return document.getElementById("tab-button-" + tabId);
 }
 
-function pinTab(button) {
+function pinTab(tabId) {
+    const button = getTabButtonByTabId(tabId);
+    if (!button) return log("No button!");
+    const tabObject = getTabObjectFromId(tabId);
+    if (!tabObject) return log("No tab!");
+    tabObject["pinned"] = true;
     document.getElementById("pinned-tab-buttons").appendChild(button);
+}
+
+function unpinTab(tabId) {
+    const button = getTabButtonByTabId(tabId);
+    if (!button) return log("No button!");
+    const tabObject = getTabObjectFromId(tabId);
+    if (!tabObject) return log("No tab!");
+    tabObject["pinned"] = false;
+    document.getElementById("tab-buttons").prepend(button);
+}
+
+function getTabObjectFromId(tabId) {
+    for (const item of tabs) {
+        if (item.id == tabId) return item;
+    }
+    return null;
 }
 
 /*
@@ -692,7 +713,9 @@ window.electronAPI.sendToRenderer((data) => {
         localStorage.setItem("orb:browsing_history", JSON.stringify(browseHistory));
     } else if (json.action == "pin-tab") {
         if (!json.tabId) return log("Missing tab ID on pin tab!");
-        const button = getTabButtonByTabId(json.tabId); // todo: add assume check
-        pinTab(button);
+        pinTab(json.tabId);
+    } else if (json.action == "unpin-tab") {
+        if (!json.tabId) return log("Missing tab ID on pin tab!");
+        unpinTab(json.tabId);
     }
 });

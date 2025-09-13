@@ -87,17 +87,34 @@ function clearBrowsingHistory() {
 }
 function contextMenuShow(evt, menu, args) {
     console.log(menu, args);
-    const built = Menu.buildFromTemplate([
-        {
-            label: "Pin Tab",
-            click: () => {
-                if (win) win.webContents.send("send-to-renderer", JSON.stringify({
-                    action: "pin-tab",
-                    success: true,
-                    tabId: args["tabId"]
-                }));
+    // right-click-button is the name
+    var curmenu = null;
+    if (args["isPinned"] == true) {
+        curmenu = Menu.buildFromTemplate([
+            {
+                label: "Unpin Tab",
+                click: () => {
+                    if (win) win.webContents.send("send-to-renderer", JSON.stringify({
+                        action: "unpin-tab",
+                        success: true,
+                        tabId: args["tabId"]
+                    }));
+                }
             }
-        }
-    ]);
-    built.popup();
+        ]);
+    } else {
+        curmenu = Menu.buildFromTemplate([
+            {
+                label: "Pin Tab",
+                click: () => {
+                    if (win) win.webContents.send("send-to-renderer", JSON.stringify({
+                        action: "pin-tab",
+                        success: true,
+                        tabId: args["tabId"]
+                    }));
+                }
+            }
+        ]);
+    }
+    if (curmenu) curmenu.popup();
 }

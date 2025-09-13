@@ -18,7 +18,7 @@ It can do almost everything Cascade can do:
 - Save tabs on exit, so it loads them on next load
 - Smart URL bar (direct URL, search, etc.)
 - Widevine DRM support (Windows/macOS)
-- Pinned tabs *
+- Pinned tabs
 
 However, it can also do these new extra features (ones with * are planned):
 - Ultimate Omnibox! (popup, search suggestions)
