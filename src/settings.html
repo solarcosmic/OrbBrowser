@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Orb Settings</title>
+    <style>
+        @font-face {
+            font-family: "Golos Text";
+            src: url("../assets/GolosText.ttf");
+        }
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: #0f0f0f;
+            color: #ffffff;
+            height: 100%;
+            overflow: hidden;
+        }
+        * {
+            font-family: "Golos Text";
+            font-smooth: 2em;
+            user-select: none;
+        }
+        #container {
+            padding: 5px 5px;
+        }
+        .vertical-list {
+            list-style: none;
+            margin: 0;
+            padding: 0;
+        }
+        .grey-text {
+            color: grey;
+            margin-left: 10px;
+        }
+        .vertical-list li {
+            cursor: pointer;
+            padding: 5px 5px;
+        }
+    </style>
+    <link rel="icon" type="image/svg" href="../assets/gear-solid-full.svg">
+</head>
+<body>
+    <h1>Orb Settings</h1>
+    <button id="clear-browsing-data">Clear Browsing Data</button>
+    <div id="container">
+        <div history-date="23/05/2025">
+            <p>Today - Saturday 23 August 2025</p>
+            <ul class="vertical-list">
+            </ul>
+        </div>
+    </div>
+    <script>
+        /* https://stackoverflow.com/a/53637828 */
+        function truncateString(str, num) {
+            if (str.length > num) {
+                return str.slice(0, num) + "...";
+            } else {
+                return str;
+            }
+        }
+    </script>
+</body>
+</html>

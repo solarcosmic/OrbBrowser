@@ -24,6 +24,9 @@ var customLinks = {
     "orb": {
         "history": {
             file: "history.html"
+        },
+        "settings": {
+            file: "settings.html"
         }
     }
 }
@@ -61,6 +64,7 @@ function createTabButton(tab) {
     btn.addEventListener("click", () => {
         activateTab(tab);
     });
+    btn.setAttribute("draggable", true);
     const favicon = document.createElement("img");
     favicon.setAttribute("id", "tab-icon-" + tab.id);
     favicon.src = "../assets/loading.gif";
@@ -75,6 +79,28 @@ function createTabButton(tab) {
     closeBtn.classList.add("svg-white");
     closeBtn.addEventListener("click", () => {
         closeTab(tab);
+    });
+    btn.addEventListener("dragstart", (e) => {
+        e.dataTransfer.setData("tabId", tab.id);
+        btn.classList.add("dragging");
+    });
+    btn.addEventListener("dragend", () => {
+        btn.classList.remove("dragging");
+    });
+    btn.addEventListener("dragover", (e) => {
+        e.preventDefault();
+        btn.classList.add("drag-over");
+    })
+    btn.addEventListener("dragleave", () => {
+        btn.classList.remove("drag-over");
+    });
+    btn.addEventListener("drop", (e) => {
+        e.preventDefault();
+        btn.classList.remove("drag-over");
+        const dragIdThing = e.dataTransfer.getData("tabId");
+        if (dragIdThing && dragIdThing != tab.id) {
+            reorderTabs(dragIdThing, tab.id);
+        }
     })
     btn.appendChild(closeBtn);
     document.getElementById("tab-buttons").appendChild(btn);
@@ -84,6 +110,22 @@ function createTabButton(tab) {
         icon: favicon,
         text: txt
     };
+};
+
+/*
+ * A function to rewrite tabs.
+ * I'll admit I don't know what I'm looking at, thanks AI
+*/
+function reorderTabs(dragId, targetId) {
+    const tabButtons = document.getElementById("tab-buttons");
+    const dragIdx = tabs.findIndex(t => t.id == dragId);
+    const targetIdx = tabs.findIndex(t => t.id == targetId);
+    if (dragIdx == -1 || targetIdx == -1) return;
+    const [dragTab] = tabs.splice(dragIdx, 1);
+    tabs.splice(targetIdx, 0, dragTab);
+    const dragBtn = document.getElementById("tab-button-" + dragId);
+    const targetBtn = document.getElementById("tab-button-" + targetId);
+    tabButtons.insertBefore(dragBtn, targetIdx > dragIdx ? targetBtn.nextSibling : targetBtn);
 }
 
 /*
@@ -115,13 +157,27 @@ function activateTab(tab) {
     requestAnimationFrame(() => { // for some reason THIS WORKS. requestAnimationFrame is needed for it to function correctly
         tab.button.classList.add("active-tab");
         tab.view.style.display = "flex";
-        updateOmniboxHostname(tab.displayURL || new URL(tab.view.getURL()).hostname, tab.displayURL || tab.view.getURL());
-        document.getElementById("url-box").value = tab.displayURL || tab.view?.getURL();
+        var hostname;
+        var url;
+        if (tab.displayURL) {
+            hostname = tab.displayURL;
+            url = tab.displayURL;
+        } else {
+            try {
+                hostname = new URL(tab.view.getURL()).hostname;
+                url = tab.view.getURL();
+            } catch (e) {
+                hostname = tab.view.getURL();
+                url = tab.view.getURL();
+            }
+        }
+        updateOmniboxHostname(hostname, url);
+        document.getElementById("url-box").value = url;
     });
     try {
         changeWindowTitle(tab.view.getTitle());
     } catch (e) {
-        log("Failed to change window title: " + e);
+        //log("Failed to change window title: " + e);
     }
 }
 
@@ -140,6 +196,14 @@ function changeWindowTitle(title) {
 */
 function closeTab(tab) {
     const idx = tabs.indexOf(tab);
+    console.log(`idx: ${idx}, tab url: ${tabs[idx].url}, tab displayURL: ${tabs[idx].displayURL}, current tab: ${tabs[idx]}, tab advance: ${tabs[idx + 1]}, tab before: ${tabs[idx - 1]}, tab as string: ${tabs[idx].toString()}`)
+    for (const item in tab) {
+        console.log(item);
+    }
+    if (tabs[idx - 1] != null) {
+        const hostTab = tabs[idx - 1];
+        updateOmniboxHostname(hostTab.displayURL || new URL(hostTab.view.getURL()).hostname, hostTab.displayURL || hostTab.view.getURL());
+    }
     if (idx !== -1) {
         tabs.splice(idx, 1);
     }
@@ -613,4 +677,4 @@ window.electronAPI.sendToRenderer((data) => {
         browseHistory = [];
         localStorage.setItem("orb:browsing_history", JSON.stringify(browseHistory));
     }
-})
+});
