@@ -64,7 +64,7 @@
             margin-top: 2.5px;
             margin-left: 5px;
         }
-        #tab-buttons .active-tab {
+        #tablist [id^="tab-button-"].active-tab {
             background-color: #151515;
         }
         #tablist button:hover {
@@ -122,14 +122,16 @@
         .tab-close:hover {
             background-color: #d1d1d1;
         }
-        #tab-buttons button:hover .tab-close {
+        #tablist [id^="tab-button-"]:hover .tab-close {
             display: block;
         }
         hr {
             background-color: #303030;
             border: none;
-            padding: 0.5px 0.5px;
-            max-width: 88%;
+            height: 1px;
+            width: 85%;
+            margin: 8px auto;
+            display: block;
         }
         #omnibox-entry {
             margin-top: 15px;
@@ -268,10 +270,10 @@
             background-color: #2e2e2e;
             border-radius: 10px;
         }
-        #tab-buttons .dragging {
+        #tablist [id^="tab-button-"].dragging {
             opacity: 0.5;
         }
-        #tab-buttons .drag-over {
+        #tablist [id^="tab-button-"].drag-over {
             border: 2px dashed #ffffff;
         }
     </style>
@@ -298,12 +300,12 @@
                 <p style="color: #9c9c9c; font-size: 15px; margin-left: 15px;">This Space</p>
             </div> -->
             
-            <hr>
             <div id="tablist">
+                <div id="pinned-tab-buttons"></div>
+                <hr>
                 <div id="extra-buttons">
                     <button id="create-tab"><img id="tab-icon-nt" class="svg-white" style="margin-top: 2px;" src="../assets/plus-solid-full.svg"></img><span class="page-title" style="margin-top: 2px;">New Tab</span></button>
                 </div>
-                <!--<div id="pinned-tabs"></div>-->
                 <div id="tab-buttons"></div>
             </div>
         </div>

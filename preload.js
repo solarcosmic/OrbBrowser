@@ -8,5 +8,6 @@ contextBridge.exposeInMainWorld("electronAPI", {
     onAppFocus: (callback) => ipcRenderer.on("app-focus", (_evt) => callback()),
     requestTabOpen: (url) => ipcRenderer.send("renderer:open-new-tab", url),
     clearBrowsingHistory: () => ipcRenderer.send("renderer:clear-browsing-history"),
-    sendToRenderer: (callback) => ipcRenderer.on("send-function-message-to-renderer", (_evt, data) => callback(data)),
+    sendToRenderer: (callback) => ipcRenderer.on("send-to-renderer", (_evt, data) => callback(data)),
+    contextMenuShow: (menu, args) => ipcRenderer.send("menu:context-menu-show", menu, args),
 });

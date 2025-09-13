@@ -16,7 +16,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-const { app, BrowserWindow, WebContentsView, session, ipcMain, globalShortcut, components } = require("electron");
+const { app, BrowserWindow, WebContentsView, session, ipcMain, globalShortcut, components, Menu } = require("electron");
 const { default: buildChromeContextMenu } = require("electron-chrome-context-menu");
 const path = require("node:path");
 
@@ -53,6 +53,7 @@ app.whenReady().then(async () => {
     ipcMain.on("renderer:console-log", handleRendererLog);
     ipcMain.on("renderer:open-new-tab", openLinkInNewTab);
     ipcMain.on("renderer:clear-browsing-history", clearBrowsingHistory);
+    ipcMain.on("menu:context-menu-show", contextMenuShow);
 });
 app.on("web-contents-created", (evt, webContents) => {
     webContents.on("context-menu", (e, params) => {
@@ -73,11 +74,30 @@ app.on("web-contents-created", (evt, webContents) => {
     });
 });
 function handleRendererLog(evt, txt) {
-    console.log("[net.solarcosmic.orbbrowser.renderer]: " + txt);
+    console.log("[net.solarcosmic.orbbrowser.main]: " + txt);
 }
 function openLinkInNewTab(evt, url) {
     win.webContents.send("open-link", url);
 }
 function clearBrowsingHistory() {
-    if (win) win.webContents.send("send-function-message-to-renderer", "clearBrowsingData");
+    if (win) win.webContents.send("send-to-renderer", JSON.stringify({
+        action: "clear-browsing-data",
+        success: true
+    }));
+}
+function contextMenuShow(evt, menu, args) {
+    console.log(menu, args);
+    const built = Menu.buildFromTemplate([
+        {
+            label: "Pin Tab",
+            click: () => {
+                if (win) win.webContents.send("send-to-renderer", JSON.stringify({
+                    action: "pin-tab",
+                    success: true,
+                    tabId: args["tabId"]
+                }));
+            }
+        }
+    ]);
+    built.popup();
 }

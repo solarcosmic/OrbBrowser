@@ -39,6 +39,7 @@ function createTab(url = "https://www.google.com", preloadPath = null) {
     const tab = {
         id: crypto.randomUUID(),
         view: document.createElement("webview"),
+        pinned: false
     }
     tab.view.classList.add("tab-view");
     tab.view.style.display = "none";
@@ -101,9 +102,14 @@ function createTabButton(tab) {
         if (dragIdThing && dragIdThing != tab.id) {
             reorderTabs(dragIdThing, tab.id);
         }
+    });
+    btn.addEventListener("contextmenu", (e) => {
+        e.preventDefault();
+        window.electronAPI.contextMenuShow("pin-tab", {tabId: tab.id});
     })
     btn.appendChild(closeBtn);
-    document.getElementById("tab-buttons").appendChild(btn);
+    const containerId = tab.pinned ? "pinned-tab-buttons" : "tab-buttons";
+    document.getElementById(containerId).appendChild(btn);
     tab.button = btn;
     return {
         button: btn,
@@ -128,6 +134,14 @@ function reorderTabs(dragId, targetId) {
     tabButtons.insertBefore(dragBtn, targetIdx > dragIdx ? targetBtn.nextSibling : targetBtn);
 }
 
+function getTabButtonByTabId(tabId) {
+    return document.getElementById("tab-button-" + tabId);
+}
+
+function pinTab(button) {
+    document.getElementById("pinned-tab-buttons").appendChild(button);
+}
+
 /*
  * Hides all of the tabs from view.
 */
@@ -141,7 +155,7 @@ function hideAllTabs() {
  * Removes all of the tabs from being active.
 */
 function removeAllActiveTabs() {
-    Array.from(document.getElementById("tab-buttons").childNodes).forEach((item) => {
+    Array.from(document.querySelectorAll("[id^=tab-button-]")).forEach((item) => {
         item.classList.remove("active-tab");
     });
 }
@@ -672,9 +686,13 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
 })
 window.electronAPI.sendToRenderer((data) => {
-    log(data);
-    if (data == "clearBrowsingData") {
+    const json = JSON.parse(data);
+    if (json.action == "clear-browsing-data") {
         browseHistory = [];
         localStorage.setItem("orb:browsing_history", JSON.stringify(browseHistory));
+    } else if (json.action == "pin-tab") {
+        if (!json.tabId) return log("Missing tab ID on pin tab!");
+        const button = getTabButtonByTabId(json.tabId); // todo: add assume check
+        pinTab(button);
     }
 });
