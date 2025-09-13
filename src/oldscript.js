@@ -1,14 +1,24 @@
-import * as Globals from "./framework/globals.js";
-import * as Tabs from "./framework/tabs.js";
-import * as Omnibox from "./framework/omnibox.js";
-import * as History from "./framework/history.js";
-import * as Navigation from "./framework/navigation.js";
-import * as Utils from "./framework/utils.js";
+/*
+ * Orb Browser
+ * Copyright (c) 2025 solarcosmic.
 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+*/
 var tabs = [];
 const truncateAmount = 25;
 
-
+const views = document.getElementById("webviews");
 
 var customLinks = {
     "orb": {
@@ -66,8 +76,8 @@ function createTabInstance(url = "https://google.com") {
             }
         }
     }
-    const tab = Tabs.createTab(resolvedUrl, preloadPath);
-    const btn = Tabs.createTabButton(tab);
+    const tab = createTab(resolvedUrl, preloadPath);
+    const btn = createTabButton(tab);
     var urlObj;
     try {
         urlObj = new URL(url);

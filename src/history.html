@@ -66,9 +66,9 @@
             grey_text_1.textContent = date_then.getHours() + ":" + date_then.getMinutes();
             const grey_text_2 = document.createElement("span");
             grey_text_2.classList.add("grey-text");
-            grey_text_2.textContent = truncateString(hostname, 25);
+            grey_text_2.textContent = Utils.truncateString(hostname, 25);
             const main_text = document.createElement("span");
-            main_text.textContent = truncateString((item.title || item.url), 50);
+            main_text.textContent = Utils.truncateString((item.title || item.url), 50);
             li_element.appendChild(grey_text_1);
             li_element.appendChild(main_text);
             li_element.appendChild(grey_text_2);
@@ -83,7 +83,7 @@
         }
 
         /* https://stackoverflow.com/a/53637828 */
-        function truncateString(str, num) {
+        function Utils.truncateString(str, num) {
             if (str.length > num) {
                 return str.slice(0, num) + "...";
             } else {
