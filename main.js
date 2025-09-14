@@ -18,9 +18,12 @@
 
 const { app, BrowserWindow, WebContentsView, session, ipcMain, globalShortcut, components, Menu } = require("electron");
 const { default: buildChromeContextMenu } = require("electron-chrome-context-menu");
+const { ElectronChromeExtensions } = require("electron-chrome-extensions");
+const { installChromeWebStore } = require("electron-chrome-web-store");
 const path = require("node:path");
 
 var win;
+var extensions;
 function createMainWindow() {
     win = new BrowserWindow({
         width: 1280,
@@ -46,6 +49,18 @@ function createMainWindow() {
     win.on("blur", () => {
         if (win) win.webContents.send("app-blur");
     });
+    const browserSession = session.fromPartition("persist:custom");
+    extensions = new ElectronChromeExtensions({
+        license: "GPL-3.0",
+        session: browserSession,
+        createTab(details) {
+            console.log("Create tab called:", details);
+            for (const key in details) {
+                console.log("Create tab key: " + key);
+            }
+        }
+    });
+    installChromeWebStore({session: browserSession});
 }
 app.whenReady().then(async () => {
     if (process.platform != "linux") await components.whenReady();
@@ -56,9 +71,11 @@ app.whenReady().then(async () => {
     ipcMain.on("menu:context-menu-show", contextMenuShow);
 });
 app.on("web-contents-created", (evt, webContents) => {
+    const isWebView = webContents.getType && webContents.getType() == "webview";
+    if (!isWebView) return;
+    //console.log(extensions, webContents, win);
+    if (extensions) extensions.addTab(webContents, win);
     webContents.on("context-menu", (e, params) => {
-        const isWebView = webContents.getType && webContents.getType() == "webview";
-        if (!isWebView) return;
         buildChromeContextMenu({
             params,
             webContents,

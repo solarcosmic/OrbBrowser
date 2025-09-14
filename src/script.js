@@ -42,6 +42,7 @@ function createTab(url = "https://www.google.com", preloadPath = null) {
         pinned: false
     }
     tab.view.classList.add("tab-view");
+    tab.view.setAttribute("partition", "persist:custom");
     tab.view.style.display = "none";
     tab.view.src = url;
     if (preloadPath) {
