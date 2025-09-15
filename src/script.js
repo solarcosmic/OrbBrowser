@@ -42,6 +42,7 @@ function createTab(url = "https://www.google.com", preloadPath = null) {
         pinned: false
     }
     tab.view.classList.add("tab-view");
+    //tab.view.setAttribute("partition", "persist:default");
     tab.view.style.display = "none";
     tab.view.src = url;
     if (preloadPath) {
@@ -199,7 +200,7 @@ function activateTab(tab) {
             url = tab.displayURL;
         } else {
             try {
-                hostname = new URL(tab.view.getURL()).hostname;
+                hostname = createHostname(tab.view.getURL()).hostname;
                 url = tab.view.getURL();
             } catch (e) {
                 hostname = tab.view.getURL();
@@ -208,6 +209,10 @@ function activateTab(tab) {
         }
         updateOmniboxHostname(hostname, url);
         document.getElementById("url-box").value = url;
+        const webContentsId = tab.view.getWebContentsId ? tab.view.getWebContentsId() : tab.view.getAttribute("data-webcontents-id");
+        if (tab.view && webContentsId) {
+            window.electronAPI.sendTabActivated(webContentsId);
+        }
     });
     try {
         changeWindowTitle(tab.view.getTitle());
@@ -237,7 +242,7 @@ function closeTab(tab) {
     }
     if (tabs[idx - 1] != null) {
         const hostTab = tabs[idx - 1];
-        updateOmniboxHostname(hostTab.displayURL || new URL(hostTab.view.getURL()).hostname, hostTab.displayURL || hostTab.view.getURL());
+        updateOmniboxHostname(hostTab.displayURL || createHostname(hostTab.view.getURL()).hostname, hostTab.displayURL || hostTab.view.getURL());
     }
     if (idx !== -1) {
         tabs.splice(idx, 1);
@@ -282,7 +287,7 @@ function truncateString(str, num) {
 
 function updateOmniboxHostname(hostname, url) {
     const omniboxtxt = document.getElementById("url-txt");
-    omniboxtxt.textContent = hostname || url || "";
+    omniboxtxt.textContent = truncateString((hostname || url || ""), truncateAmount);
     const omniSecure = document.getElementById("omniSecure") || document.createElement("img");
     omniSecure.style.width = "16px";
     omniSecure.style.height = "16px";
@@ -293,6 +298,9 @@ function updateOmniboxHostname(hostname, url) {
         omniSecure.classList.remove("svg-grey");
     } else if (url.startsWith("http:")) {
         omniSecure.src = "../assets/unlock-solid-full.svg";
+        omniSecure.classList.add("svg-grey");
+    } else if (url.startsWith("chrome-extension:")) {
+        omniSecure.src = "../assets/chrome-brands-solid-full.svg";
         omniSecure.classList.add("svg-grey");
     }
     for (const [protocol, protoItems] of Object.entries(customLinks)) {
@@ -341,7 +349,7 @@ function createTabInstance(url = "https://google.com") {
     const btn = createTabButton(tab);
     var urlObj;
     try {
-        urlObj = new URL(url);
+        urlObj = createHostname(url);
     } catch (e) {
         log(e);
         urlObj = null;
@@ -374,7 +382,7 @@ function createTabInstance(url = "https://google.com") {
     tab.view.addEventListener("did-navigate", (event) => {
         checkNavigation(tab);
         console.log(tab.displayURL);
-        updateOmniboxHostname(tab.displayURL || new URL(tab.view.getURL()).hostname, tab.displayURL || tab.view.getURL());
+        updateOmniboxHostname(tab.displayURL || createHostname(tab.view.getURL()).hostname, tab.displayURL || tab.view.getURL());
         document.getElementById("url-box").value = tab.displayURL || tab.view.getURL();
         browseHistory.push({
             url: tab.displayURL || tab.view?.getURL() || "about:blank",
@@ -385,18 +393,25 @@ function createTabInstance(url = "https://google.com") {
         console.log(browseHistory);
     })
     tab.view.addEventListener("page-favicon-updated", (event) => {
-        const favicon = event.favicons[0];
-        if (favicon) {
-            lastFavicon = favicon;
-            btn.icon.src = lastFavicon;
-            localStorage.setItem(`favicon:${urlObj?.hostname}`, lastFavicon);
+        if (tab.view.getURL().startsWith("chrome-extension://")) {
+            btn.icon.src = "../assets/chrome-brands-solid-full.svg";
+            lastFavicon = btn.icon.src;
+        } else {
+            const favicon = event.favicons[0];
+            if (favicon) {
+                lastFavicon = favicon;
+                btn.icon.src = lastFavicon;
+                localStorage.setItem(`favicon:${urlObj?.hostname}`, lastFavicon);
+            }
         }
     });
     tab.view.addEventListener("did-start-loading", () => {
         btn.icon.src = "../assets/loading.gif";
     });
     tab.view.addEventListener("did-stop-loading", () => {
-        if (lastFavicon) {
+        if (tab.view.getURL().startsWith("chrome-extension://")) {
+            btn.icon.src = "../assets/chrome-brands-solid-full.svg";
+        } else if (lastFavicon) {
             btn.icon.src = lastFavicon;
         } else {
             const cached = localStorage.getItem(`favicon:${urlObj?.hostname}`);
@@ -461,6 +476,7 @@ document.getElementById("create-tab").addEventListener("click", () => {
 window.addEventListener("keyup", (event) => {
     if (event.ctrlKey && event.key.toLowerCase() == "t") return activateTab(createTabInstance());
     if (event.ctrlKey && event.key.toLowerCase() == "w") return closeTab(getActiveTab());
+    if (event.ctrlKey && event.key.toLowerCase() == "f") return findInPage("Charlie");
 })
 document.getElementById("url-box").addEventListener("keyup", (event) => {
     if (event.key == "Enter") {
@@ -511,7 +527,7 @@ urlBox.addEventListener("keyup", () => {
 })
 
 function goToLink(txt, activeTab = getActiveTab()) {
-    var pattern = /^((http|https|chrome):\/\/)/; /* https://stackoverflow.com/a/11300963 */
+    var pattern = /^((http|https|chrome|chrome-extension):\/\/)/; /* https://stackoverflow.com/a/11300963 */
     var dm_regex = /^(?:(?:(?:[a-zA-z\-]+):\/{1,3})?(?:[a-zA-Z0-9])(?:[a-zA-Z0-9\-\.]){1,61}(?:\.[a-zA-Z]{2,})+|\[(?:(?:(?:[a-fA-F0-9]){1,4})(?::(?:[a-fA-F0-9]){1,4}){7}|::1|::)\]|(?:(?:[0-9]{1,3})(?:\.[0-9]{1,3}){3}))(?:\:[0-9]{1,5})?$/; /* https://stackoverflow.com/a/38578855 */
 
     var formedProtocol;
@@ -719,3 +735,13 @@ window.electronAPI.sendToRenderer((data) => {
         unpinTab(json.tabId);
     }
 });
+
+function findInPage(txt) {
+    const tab = getActiveTab();
+    const view = tab.view;
+}
+
+function createHostname(url) {
+    if (url.startsWith("chrome-extension://")) return url;
+    return new URL(url);
+}

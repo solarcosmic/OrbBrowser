@@ -16,21 +16,54 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-const { app, BrowserWindow, WebContentsView, session, ipcMain, globalShortcut, components, Menu } = require("electron");
+const { app, BrowserWindow, WebContentsView, session, ipcMain, globalShortcut, components, Menu, webContents } = require("electron");
 const { default: buildChromeContextMenu } = require("electron-chrome-context-menu");
+const {ElectronChromeExtensions} = require("electron-chrome-extensions");
+const {installChromeWebStore} = require("electron-chrome-web-store");
 const path = require("node:path");
 
 var win;
+var extensions;
+var browserSession;
 function createMainWindow() {
+    browserSession = session.defaultSession;
+    ElectronChromeExtensions.handleCRXProtocol(browserSession);
+    extensions = new ElectronChromeExtensions({
+        license: "GPL-3.0",
+        session: browserSession,
+        createTab(details) {
+            if (win) win.webContents.send("open-link", details.url);
+        },
+        selectTab(tab, browserWindow) {
+            //console.log("SELECT TAB CALLED: ", tab, browserWindow);
+        },
+        removeTab(tab, browserWindow) {
+            //console.log("REMOVE TAB CALLED: ", tab, browserWindow);
+        },
+        createWindow(details) {
+            if (win) {
+                win.webContents.send("open-link", details.url)
+                handleRendererLog(null, "A chrome extension attempted to open a new window, Orb opened a new tab instead.");
+                //console.log(details);
+            };
+        },
+        removeWindow(browserWindow) {
+            //console.log("REMOVE WINDOW CALLED: ", browserWindow);
+        },
+        requestPermissions(extension, permissions) {
+            log("Permissions requested: ", extension, permissions);
+        }
+    });
     win = new BrowserWindow({
         width: 1280,
         height: 720,
         show: false,
         frame: false,
         webPreferences: {
-            preload: path.join(__dirname, "preload.js"),
-            webviewTag: true
-        }
+            preload: path.join(__dirname, "dist/preload.bundle.js"),
+            webviewTag: true,
+            session: browserSession
+        },
     })
     win.setMenu(null);
     win.setBackgroundColor("#000000");
@@ -46,7 +79,14 @@ function createMainWindow() {
     win.on("blur", () => {
         if (win) win.webContents.send("app-blur");
     });
+    installChromeWebStore({session: browserSession});
 }
+function onTabCreate(wc) {
+    if (extensions && wc && wc.getType && wc.getType() == "webview" && win && typeof win.id != "undefined") {
+        extensions.addTab(wc, win);
+    }
+}
+
 app.whenReady().then(async () => {
     if (process.platform != "linux") await components.whenReady();
     createMainWindow();
@@ -54,11 +94,11 @@ app.whenReady().then(async () => {
     ipcMain.on("renderer:open-new-tab", openLinkInNewTab);
     ipcMain.on("renderer:clear-browsing-history", clearBrowsingHistory);
     ipcMain.on("menu:context-menu-show", contextMenuShow);
+    ipcMain.on("main:tab-activated", onTabActivated);
 });
 app.on("web-contents-created", (evt, webContents) => {
+    onTabCreate(webContents);
     webContents.on("context-menu", (e, params) => {
-        const isWebView = webContents.getType && webContents.getType() == "webview";
-        if (!isWebView) return;
         buildChromeContextMenu({
             params,
             webContents,
@@ -117,4 +157,10 @@ function contextMenuShow(evt, menu, args) {
         ]);
     }
     if (curmenu) curmenu.popup();
+}
+function onTabActivated(evt, wvId) {
+    const wc = webContents.fromId(wvId);
+    if (wc && extensions) {
+        extensions.selectTab(wc);
+    }
 }
