@@ -43,7 +43,7 @@ function createTab(url = "https://www.google.com", preloadPath = null) {
     }
     log(tab.view.id);
     tab.view.classList.add("tab-view");
-    tab.view.setAttribute("partition", "persist:custom");
+    //tab.view.setAttribute("partition", "persist:default");
     tab.view.style.display = "none";
     tab.view.src = url;
     if (preloadPath) {
@@ -708,24 +708,6 @@ document.addEventListener("DOMContentLoaded", async () => {
         var newTab = createTabInstance();
         activateTab(newTab);
     }
-    const extensions = await window.electronAPI.getExtensions();
-    const toolbar = document.getElementById("extension-toolbar");
-    extensions.forEach(ext => {
-        const iconPath = ext.icons && ext.icons["32"] || ext.icons["16"] || ext.icons[Object.keys(ext.icons)[0]];
-        const iconUrl = iconPath ? `chrome-extension://${ext.id}/${iconPath}` : "fallback.png";
-        const btn = document.createElement("img");
-        btn.src = iconUrl;
-        btn.className = "extension-icon";
-        btn.title = ext.name;
-        btn.addEventListener("click", () => {
-            window.electronAPI.activateExtension(ext.id);
-        })
-        btn.addEventListener("contextmenu", (e) => {
-            e.preventDefault();
-            window.electronAPI.activateExtensionContextMenu(ext.id);
-        })
-        toolbar.appendChild(btn);
-    })
 })
 window.electronAPI.sendToRenderer((data) => {
     const json = JSON.parse(data);

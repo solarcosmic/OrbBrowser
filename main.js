@@ -27,11 +27,31 @@ var extensions;
 var browserSession;
 function createMainWindow() {
     browserSession = session.defaultSession;
+    ElectronChromeExtensions.handleCRXProtocol(browserSession);
     extensions = new ElectronChromeExtensions({
         license: "GPL-3.0",
         session: browserSession,
         createTab(details) {
             if (win) win.webContents.send("open-link", details.url);
+        },
+        selectTab(tab, browserWindow) {
+            console.log("SELECT TAB CALLED: ", tab, browserWindow);
+        },
+        removeTab(tab, browserWindow) {
+            console.log("REMOVE TAB CALLED: ", tab, browserWindow);
+        },
+        createWindow(details) {
+            if (win) {
+                win.webContents.send("open-link", details.url)
+                handleRendererLog(null, "A chrome extension attempted to open a new window, Orb opened a new tab instead.");
+                console.log(details);
+            };
+        },
+        removeWindow(browserWindow) {
+            console.log("REMOVE WINDOW CALLED: ", browserWindow);
+        },
+        requestPermissions(extension, permissions) {
+            console.log("REQUEST PERMISSIONS CALLED: ", extension, permissions);
         }
     })
     win = new BrowserWindow({
@@ -40,7 +60,7 @@ function createMainWindow() {
         show: false,
         frame: false,
         webPreferences: {
-            preload: path.join(__dirname, "preload.js"),
+            preload: path.join(__dirname, "dist/preload.bundle.js"),
             webviewTag: true,
             session: browserSession
         },
@@ -74,9 +94,6 @@ app.whenReady().then(async () => {
     ipcMain.on("renderer:open-new-tab", openLinkInNewTab);
     ipcMain.on("renderer:clear-browsing-history", clearBrowsingHistory);
     ipcMain.on("menu:context-menu-show", contextMenuShow);
-    ipcMain.handle("extensions:get-extensions", getChromeExtensions);
-    ipcMain.on("extensions:activate-extension", activateChromeExtension);
-    ipcMain.on("extensions:activate-extension-context-menu", activateChromeExtensionContextMenu);
 });
 app.on("web-contents-created", (evt, webContents) => {
     onTabCreate(webContents);
@@ -139,24 +156,4 @@ function contextMenuShow(evt, menu, args) {
         ]);
     }
     if (curmenu) curmenu.popup();
-}
-function getChromeExtensions() {
-    console.log(extensions.store);
-    return Array.from(extensions.store.extensions.values()).map(ext => ({
-        id: ext.id,
-        name: ext.name,
-        icons: ext.manifest.icons,
-        manifest: ext.manifest
-    }));
-}
-function activateChromeExtension(event, extId) {
-    console.log("Extension activated DEMO");
-}
-function activateChromeExtensionContextMenu(event, extId) {
-    const menu = Menu.buildFromTemplate([
-        {label: "Options", click: () => {}},
-        {label: "Remove", click: () => {}},
-        {label: "Manage Extension", click: () => {}},
-    ])
-    menu.popup();
 }

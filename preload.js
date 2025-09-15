@@ -1,4 +1,9 @@
 const { contextBridge, ipcRenderer } = require("electron");
+const { injectBrowserAction } = require("electron-chrome-extensions/browser-action");
+
+if (location.href.startsWith("file://") || location.href.startsWith("index.html")) {
+    injectBrowserAction();
+}
 
 contextBridge.exposeInMainWorld("electronAPI", {
     onMouseClick: (callback) => ipcRenderer.on("mouse-click", (_evt, x, y) => callback(x, y)),
@@ -10,8 +15,4 @@ contextBridge.exposeInMainWorld("electronAPI", {
     clearBrowsingHistory: () => ipcRenderer.send("renderer:clear-browsing-history"),
     sendToRenderer: (callback) => ipcRenderer.on("send-to-renderer", (_evt, data) => callback(data)),
     contextMenuShow: (menu, args) => ipcRenderer.send("menu:context-menu-show", menu, args),
-    // extension jazz
-    getExtensions: () => ipcRenderer.invoke("extensions:get-extensions"),
-    activateExtension: (extId) => ipcRenderer.send("extensions:activate-extension", extId),
-    activateExtensionContextMenu: (extId) => ipcRenderer.send("extensions:activate-extension-context-menu", extId),
 });
