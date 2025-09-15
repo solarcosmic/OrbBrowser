@@ -8,7 +8,7 @@
   "type": "commonjs",
   "main": "main.js",
   "scripts": {
-    "start": "electron .",
+    "start": "webpack && electron .",
     "app:dir": "electron-builder --dir",
     "app:dist": "electron-builder",
     "build-preload": "webpack"

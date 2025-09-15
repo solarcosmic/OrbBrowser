@@ -226,8 +226,12 @@
         #navigations {
             display: flex;
             justify-content: flex-end;
-            margin-right: 15px;
+            align-items: center;
             margin-top: 10px;
+            margin-left: 15px;
+        }
+        #navigations browser-action-list {
+            margin-right: auto;
         }
         .navigation-button {
             padding: 5px 5px;
@@ -282,9 +286,11 @@
     <div id="container">
         <div id="sidebar">
             <div id="navigations">
+                <browser-action-list></browser-action-list>
                 <img class="navigation-button" id="left-nav" src="../assets/arrow-left-solid-full.svg"></img>
                 <img class="navigation-button" id="right-nav" src="../assets/arrow-right-solid-full.svg"></img>
                 <img class="navigation-button" id="refresh-nav" src="../assets/rotate-right-solid-full.svg"></img>
+                
             </div>
             <button id="omnibox-entry"><span id="url-txt">google.com</span></button>
             <div id="omnibox" style="display: none;">
@@ -299,9 +305,6 @@
             <!-- <div id="space">
                 <p style="color: #9c9c9c; font-size: 15px; margin-left: 15px;">This Space</p>
             </div> -->
-            <div id="extension-toolbar">
-                <browser-action-list></browser-action-list>
-            </div>
             <div id="tablist">
                 <div id="pinned-tab-buttons"></div>
                 <hr>

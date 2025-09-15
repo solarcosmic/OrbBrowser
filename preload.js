@@ -15,4 +15,5 @@ contextBridge.exposeInMainWorld("electronAPI", {
     clearBrowsingHistory: () => ipcRenderer.send("renderer:clear-browsing-history"),
     sendToRenderer: (callback) => ipcRenderer.on("send-to-renderer", (_evt, data) => callback(data)),
     contextMenuShow: (menu, args) => ipcRenderer.send("menu:context-menu-show", menu, args),
+    sendTabActivated: (wvId) => ipcRenderer.send("main:tab-activated", wvId),
 });
