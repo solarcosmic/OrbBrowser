@@ -18,13 +18,30 @@
 
 const { app, BrowserWindow, WebContentsView, session, ipcMain, globalShortcut, components, Menu } = require("electron");
 const { default: buildChromeContextMenu } = require("electron-chrome-context-menu");
+<<<<<<< Updated upstream
 const { ElectronChromeExtensions } = require("electron-chrome-extensions");
 const { installChromeWebStore } = require("electron-chrome-web-store");
+=======
+const {ElectronChromeExtensions} = require("electron-chrome-extensions");
+const {installChromeWebStore} = require("electron-chrome-web-store");
+>>>>>>> Stashed changes
 const path = require("node:path");
 
 var win;
 var extensions;
+<<<<<<< Updated upstream
+=======
+var browserSession;
+>>>>>>> Stashed changes
 function createMainWindow() {
+    browserSession = session.defaultSession;
+    extensions = new ElectronChromeExtensions({
+        license: "GPL-3.0",
+        session: browserSession,
+        createTab(details) {
+            if (win) win.webContents.send("open-link", details.url);
+        }
+    })
     win = new BrowserWindow({
         width: 1280,
         height: 720,
@@ -32,8 +49,9 @@ function createMainWindow() {
         frame: false,
         webPreferences: {
             preload: path.join(__dirname, "preload.js"),
-            webviewTag: true
-        }
+            webviewTag: true,
+            session: browserSession
+        },
     })
     win.setMenu(null);
     win.setBackgroundColor("#000000");
@@ -49,6 +67,7 @@ function createMainWindow() {
     win.on("blur", () => {
         if (win) win.webContents.send("app-blur");
     });
+<<<<<<< Updated upstream
     const browserSession = session.fromPartition("persist:custom");
     extensions = new ElectronChromeExtensions({
         license: "GPL-3.0",
@@ -60,8 +79,16 @@ function createMainWindow() {
             }
         }
     });
+=======
+>>>>>>> Stashed changes
     installChromeWebStore({session: browserSession});
 }
+function onTabCreate(wc) {
+    if (extensions && wc && wc.getType && wc.getType() == "webview" && win && typeof win.id != "undefined") {
+        extensions.addTab(wc, win);
+    }
+}
+
 app.whenReady().then(async () => {
     if (process.platform != "linux") await components.whenReady();
     createMainWindow();
@@ -69,12 +96,19 @@ app.whenReady().then(async () => {
     ipcMain.on("renderer:open-new-tab", openLinkInNewTab);
     ipcMain.on("renderer:clear-browsing-history", clearBrowsingHistory);
     ipcMain.on("menu:context-menu-show", contextMenuShow);
+    ipcMain.handle("extensions:get-extensions", getChromeExtensions);
+    ipcMain.on("extensions:activate-extension", activateChromeExtension);
+    ipcMain.on("extensions:activate-extension-context-menu", activateChromeExtensionContextMenu);
 });
 app.on("web-contents-created", (evt, webContents) => {
+<<<<<<< Updated upstream
     const isWebView = webContents.getType && webContents.getType() == "webview";
     if (!isWebView) return;
     //console.log(extensions, webContents, win);
     if (extensions) extensions.addTab(webContents, win);
+=======
+    onTabCreate(webContents);
+>>>>>>> Stashed changes
     webContents.on("context-menu", (e, params) => {
         buildChromeContextMenu({
             params,
@@ -134,4 +168,24 @@ function contextMenuShow(evt, menu, args) {
         ]);
     }
     if (curmenu) curmenu.popup();
+}
+function getChromeExtensions() {
+    console.log(extensions.store);
+    return Array.from(extensions.store.extensions.values()).map(ext => ({
+        id: ext.id,
+        name: ext.name,
+        icons: ext.manifest.icons,
+        manifest: ext.manifest
+    }));
+}
+function activateChromeExtension(event, extId) {
+    console.log("Extension activated DEMO");
+}
+function activateChromeExtensionContextMenu(event, extId) {
+    const menu = Menu.buildFromTemplate([
+        {label: "Options", click: () => {}},
+        {label: "Remove", click: () => {}},
+        {label: "Manage Extension", click: () => {}},
+    ])
+    menu.popup();
 }

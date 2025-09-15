@@ -10,6 +10,13 @@ contextBridge.exposeInMainWorld("electronAPI", {
     clearBrowsingHistory: () => ipcRenderer.send("renderer:clear-browsing-history"),
     sendToRenderer: (callback) => ipcRenderer.on("send-to-renderer", (_evt, data) => callback(data)),
     contextMenuShow: (menu, args) => ipcRenderer.send("menu:context-menu-show", menu, args),
+<<<<<<< Updated upstream
     loadExtension: (path) => ipcRenderer.send("renderer:load-extension", path),
     getExtensions: () => ipcRenderer.send("renderer:get-extensions"),
+=======
+    // extension jazz
+    getExtensions: () => ipcRenderer.invoke("extensions:get-extensions"),
+    activateExtension: (extId) => ipcRenderer.send("extensions:activate-extension", extId),
+    activateExtensionContextMenu: (extId) => ipcRenderer.send("extensions:activate-extension-context-menu", extId),
+>>>>>>> Stashed changes
 });

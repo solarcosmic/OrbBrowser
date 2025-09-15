@@ -41,6 +41,7 @@ function createTab(url = "https://www.google.com", preloadPath = null) {
         view: document.createElement("webview"),
         pinned: false
     }
+    log(tab.view.id);
     tab.view.classList.add("tab-view");
     tab.view.setAttribute("partition", "persist:custom");
     tab.view.style.display = "none";
@@ -462,6 +463,7 @@ document.getElementById("create-tab").addEventListener("click", () => {
 window.addEventListener("keyup", (event) => {
     if (event.ctrlKey && event.key.toLowerCase() == "t") return activateTab(createTabInstance());
     if (event.ctrlKey && event.key.toLowerCase() == "w") return closeTab(getActiveTab());
+    if (event.ctrlKey && event.key.toLowerCase() == "f") return findInPage("Charlie");
 })
 document.getElementById("url-box").addEventListener("keyup", (event) => {
     if (event.key == "Enter") {
@@ -706,6 +708,24 @@ document.addEventListener("DOMContentLoaded", async () => {
         var newTab = createTabInstance();
         activateTab(newTab);
     }
+    const extensions = await window.electronAPI.getExtensions();
+    const toolbar = document.getElementById("extension-toolbar");
+    extensions.forEach(ext => {
+        const iconPath = ext.icons && ext.icons["32"] || ext.icons["16"] || ext.icons[Object.keys(ext.icons)[0]];
+        const iconUrl = iconPath ? `chrome-extension://${ext.id}/${iconPath}` : "fallback.png";
+        const btn = document.createElement("img");
+        btn.src = iconUrl;
+        btn.className = "extension-icon";
+        btn.title = ext.name;
+        btn.addEventListener("click", () => {
+            window.electronAPI.activateExtension(ext.id);
+        })
+        btn.addEventListener("contextmenu", (e) => {
+            e.preventDefault();
+            window.electronAPI.activateExtensionContextMenu(ext.id);
+        })
+        toolbar.appendChild(btn);
+    })
 })
 window.electronAPI.sendToRenderer((data) => {
     const json = JSON.parse(data);
@@ -720,3 +740,8 @@ window.electronAPI.sendToRenderer((data) => {
         unpinTab(json.tabId);
     }
 });
+
+function findInPage(txt) {
+    const tab = getActiveTab();
+    const view = tab.view;
+}
