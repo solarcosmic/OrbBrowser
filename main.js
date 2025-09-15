@@ -18,21 +18,13 @@
 
 const { app, BrowserWindow, WebContentsView, session, ipcMain, globalShortcut, components, Menu } = require("electron");
 const { default: buildChromeContextMenu } = require("electron-chrome-context-menu");
-<<<<<<< Updated upstream
-const { ElectronChromeExtensions } = require("electron-chrome-extensions");
-const { installChromeWebStore } = require("electron-chrome-web-store");
-=======
 const {ElectronChromeExtensions} = require("electron-chrome-extensions");
 const {installChromeWebStore} = require("electron-chrome-web-store");
->>>>>>> Stashed changes
 const path = require("node:path");
 
 var win;
 var extensions;
-<<<<<<< Updated upstream
-=======
 var browserSession;
->>>>>>> Stashed changes
 function createMainWindow() {
     browserSession = session.defaultSession;
     extensions = new ElectronChromeExtensions({
@@ -67,20 +59,6 @@ function createMainWindow() {
     win.on("blur", () => {
         if (win) win.webContents.send("app-blur");
     });
-<<<<<<< Updated upstream
-    const browserSession = session.fromPartition("persist:custom");
-    extensions = new ElectronChromeExtensions({
-        license: "GPL-3.0",
-        session: browserSession,
-        createTab(details) {
-            console.log("Create tab called:", details);
-            for (const key in details) {
-                console.log("Create tab key: " + key);
-            }
-        }
-    });
-=======
->>>>>>> Stashed changes
     installChromeWebStore({session: browserSession});
 }
 function onTabCreate(wc) {
@@ -101,14 +79,7 @@ app.whenReady().then(async () => {
     ipcMain.on("extensions:activate-extension-context-menu", activateChromeExtensionContextMenu);
 });
 app.on("web-contents-created", (evt, webContents) => {
-<<<<<<< Updated upstream
-    const isWebView = webContents.getType && webContents.getType() == "webview";
-    if (!isWebView) return;
-    //console.log(extensions, webContents, win);
-    if (extensions) extensions.addTab(webContents, win);
-=======
     onTabCreate(webContents);
->>>>>>> Stashed changes
     webContents.on("context-menu", (e, params) => {
         buildChromeContextMenu({
             params,
