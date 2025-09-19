@@ -21,15 +21,15 @@ const truncateAmount = 25;
 const views = document.getElementById("webviews");
 
 var customLinks = {
-    "orb": {
+    "orbbeta": {
         "history": {
-            file: "history.html"
+            file: "orbbeta://src/history.html"
         },
         "settings": {
-            file: "settings.html"
+            file: "orbbeta://src/settings.html"
         }
     }
-}
+};
 var browseHistory = JSON.parse(localStorage.getItem("orb:browsing_history") || "[]");
 
 /*
@@ -531,7 +531,7 @@ urlBox.addEventListener("keyup", () => {
 })
 
 function goToLink(txt, activeTab = getActiveTab()) {
-    var pattern = /^((http|https|chrome|chrome-extension):\/\/)/; /* https://stackoverflow.com/a/11300963 */
+    var pattern = /^((http|https|chrome|chrome-extension|orbbeta):\/\/)/; /* https://stackoverflow.com/a/11300963 */
     var dm_regex = /^(?:(?:(?:[a-zA-z\-]+):\/{1,3})?(?:[a-zA-Z0-9])(?:[a-zA-Z0-9\-\.]){1,61}(?:\.[a-zA-Z]{2,})+|\[(?:(?:(?:[a-fA-F0-9]){1,4})(?::(?:[a-fA-F0-9]){1,4}){7}|::1|::)\]|(?:(?:[0-9]{1,3})(?:\.[0-9]{1,3}){3}))(?:\:[0-9]{1,5})?$/; /* https://stackoverflow.com/a/38578855 */
 
     var formedProtocol;
@@ -626,7 +626,7 @@ var lists = [
         icon: "../assets/gear-solid-full.svg",
         action: (table) => {
             log(table);
-            goToLink("orb://history");
+            goToLink("orbbeta://src/history.html");
         }
     }
 ];
