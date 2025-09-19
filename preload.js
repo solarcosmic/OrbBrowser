@@ -1,9 +1,16 @@
 const { contextBridge, ipcRenderer } = require("electron");
-const { injectBrowserAction } = require("electron-chrome-extensions/browser-action");
 
-if (location.href.startsWith("file://") || location.href.startsWith("index.html")) {
+if (location.href.startsWith("index.html")) {
+    const { injectBrowserAction } = require("electron-chrome-extensions/browser-action");
     injectBrowserAction();
 }
+
+/*
+reminder:
+* renderer to main: ipcRenderer.send()
+* main to renderer: ipcRenderer.on()
+* renderer to main (two-way): ipcRenderer.invoke()
+*/
 
 contextBridge.exposeInMainWorld("electronAPI", {
     onMouseClick: (callback) => ipcRenderer.on("mouse-click", (_evt, x, y) => callback(x, y)),
@@ -16,4 +23,6 @@ contextBridge.exposeInMainWorld("electronAPI", {
     sendToRenderer: (callback) => ipcRenderer.on("send-to-renderer", (_evt, data) => callback(data)),
     contextMenuShow: (menu, args) => ipcRenderer.send("menu:context-menu-show", menu, args),
     sendTabActivated: (wvId) => ipcRenderer.send("main:tab-activated", wvId),
+    showMainDropdown: (wvId) => ipcRenderer.send("renderer:toggle-main-dropdown"),
+    printTab: (wvId) => ipcRenderer.send("renderer:print-tab", wvId),
 });

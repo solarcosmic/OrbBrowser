@@ -51,7 +51,7 @@ function createMainWindow() {
             //console.log("REMOVE WINDOW CALLED: ", browserWindow);
         },
         requestPermissions(extension, permissions) {
-            log("Permissions requested: ", extension, permissions);
+            handleRendererLog("Permissions requested: ", extension, permissions);
         }
     });
     win = new BrowserWindow({
@@ -95,6 +95,8 @@ app.whenReady().then(async () => {
     ipcMain.on("renderer:clear-browsing-history", clearBrowsingHistory);
     ipcMain.on("menu:context-menu-show", contextMenuShow);
     ipcMain.on("main:tab-activated", onTabActivated);
+    ipcMain.on("renderer:toggle-main-dropdown", showMainDropdown);
+    ipcMain.on("renderer:print-tab", printTab);
 });
 app.on("web-contents-created", (evt, webContents) => {
     onTabCreate(webContents);
@@ -163,4 +165,79 @@ function onTabActivated(evt, wvId) {
     if (wc && extensions) {
         extensions.selectTab(wc);
     }
+}
+function showMainDropdown() {
+    curmenu = Menu.buildFromTemplate([
+        {
+            label: "New Tab",
+            click: () => {
+                if (win) win.webContents.send("send-to-renderer", JSON.stringify({
+                    action: "new-tab",
+                    success: true,
+                    //tabId: args["tabId"]
+                }));
+            }
+        },
+        {
+            label: "History",
+            click: () => {
+                if (win) win.webContents.send("send-to-renderer", JSON.stringify({
+                    action: "menu-history",
+                    success: true,
+                    //tabId: args["tabId"]
+                }));
+            }
+        },
+        {
+            label: "Print",
+            click: () => {
+                if (win) win.webContents.send("send-to-renderer", JSON.stringify({
+                    action: "menu-print",
+                    success: true,
+                    //tabId: args["tabId"]
+                }));
+            }
+        },
+        {
+            type: "separator"
+        },
+        {
+            label: "About",
+            click: () => {
+                if (win) win.webContents.send("send-to-renderer", JSON.stringify({
+                    action: "menu-quit",
+                    success: true,
+                    //tabId: args["tabId"]
+                }));
+            }
+        },
+        {
+            label: "Help",
+            click: () => {
+                if (win) win.webContents.send("send-to-renderer", JSON.stringify({
+                    action: "menu-quit",
+                    success: true,
+                    //tabId: args["tabId"]
+                }));
+            }
+        },
+        {
+            type: "separator"
+        },
+        {
+            label: "Quit Orb",
+            click: () => {
+                if (win) win.webContents.send("send-to-renderer", JSON.stringify({
+                    action: "menu-quit",
+                    success: true,
+                    //tabId: args["tabId"]
+                }));
+            }
+        },
+    ]);
+    if (curmenu) curmenu.popup();
+}
+function printTab(evt, wvId) {
+    const wc = webContents.fromId(wvId);
+    if (wc) wc.print();
 }

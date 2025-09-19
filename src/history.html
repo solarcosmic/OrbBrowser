@@ -15,7 +15,7 @@
             background-color: #0f0f0f;
             color: #ffffff;
             height: 100%;
-            overflow: hidden;
+            margin-left: 10px;
         }
         * {
             font-family: "Golos Text";
@@ -38,8 +38,20 @@
             cursor: pointer;
             padding: 5px 5px;
         }
+        #clear-browsing-data {
+            padding: 12px 12px;
+            color: #ffffff;
+            background-color: #1b1b1b;
+            cursor: pointer;
+            border: none;
+            border-radius: 4px;
+            font-size: 15px;
+            position: fixed;
+            right: 20px;
+            top: 20px;
+        }
     </style>
-    <link rel="icon" type="image/svg" href="../assets/gear-solid-full.svg">
+    <link rel="icon" type="image/svg" href="../assets/history-solid.svg">
 </head>
 <body>
     <h1>History</h1>
@@ -53,33 +65,39 @@
     </div>
     <script>
         const history = JSON.parse(localStorage.getItem("orb:browsing_history"));
-        for (const item of history.reverse()) {
-            var hostname = item.url;
-            try {
-                hostname = new URL(item.url).hostname;
-            } catch (e) {}
-            const date_then = new Date(item.timestamp);
-            const li_element = document.createElement("li");
-            const grey_text_1 = document.createElement("span");
-            grey_text_1.classList.add("grey-text");
-            grey_text_1.style.marginRight = "10px";
-            grey_text_1.textContent = date_then.getHours() + ":" + date_then.getMinutes();
-            const grey_text_2 = document.createElement("span");
-            grey_text_2.classList.add("grey-text");
-            grey_text_2.textContent = truncateString(hostname, 25);
-            const main_text = document.createElement("span");
-            main_text.textContent = truncateString((item.title || item.url), 50);
-            li_element.appendChild(grey_text_1);
-            li_element.appendChild(main_text);
-            li_element.appendChild(grey_text_2);
-            document.querySelector(".vertical-list").appendChild(li_element);
-            li_element.addEventListener("click", () => {
-                console.log(item.url);
-                window.electronAPI.requestTabOpen(item.url);
-            });
-            /*document.querySelector(".vertical-list").innerHTML += `
-            <li><span class="grey-text" style="margin-right: 10px;"></span></li>
-            `*/
+        function doHistory() {
+            if (!history || history.length == 0) {
+                document.getElementsByClassName("vertical-list")[0].textContent = "Nothing here!";
+                return;
+            }
+            for (const item of history.reverse()) {
+                var hostname = item.url;
+                try {
+                    hostname = new URL(item.url).hostname;
+                } catch (e) {}
+                const date_then = new Date(item.timestamp);
+                const li_element = document.createElement("li");
+                const grey_text_1 = document.createElement("span");
+                grey_text_1.classList.add("grey-text");
+                grey_text_1.style.marginRight = "10px";
+                grey_text_1.textContent = date_then.getHours() + ":" + date_then.getMinutes();
+                const grey_text_2 = document.createElement("span");
+                grey_text_2.classList.add("grey-text");
+                grey_text_2.textContent = truncateString(hostname, 25);
+                const main_text = document.createElement("span");
+                main_text.textContent = truncateString((item.title || item.url), 50);
+                li_element.appendChild(grey_text_1);
+                li_element.appendChild(main_text);
+                li_element.appendChild(grey_text_2);
+                document.querySelector(".vertical-list").appendChild(li_element);
+                li_element.addEventListener("click", () => {
+                    console.log(item.url);
+                    window.electronAPI.requestTabOpen(item.url);
+                });
+                /*document.querySelector(".vertical-list").innerHTML += `
+                <li><span class="grey-text" style="margin-right: 10px;"></span></li>
+                `*/
+            }
         }
 
         /* https://stackoverflow.com/a/53637828 */
@@ -94,7 +112,9 @@
         document.getElementById("clear-browsing-data").addEventListener("click", () => {
             window.electronAPI.clearBrowsingHistory();
             document.querySelector(".vertical-list").innerHTML = "";
+            document.getElementsByClassName("vertical-list")[0].textContent = "Nothing here!";
         })
+        doHistory();
     </script>
 </body>
 </html>

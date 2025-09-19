@@ -458,6 +458,7 @@ function navigate(tab = getActiveTab(), direction) {
 const left_nav = document.getElementById("left-nav");
 const right_nav = document.getElementById("right-nav");
 const refresh_nav = document.getElementById("refresh-nav");
+const main_dropdown = document.getElementById("main-dropdown");
 left_nav.addEventListener("click", () => {
     if (!left_nav.classList.contains("greyed-out")) navigate(getActiveTab(), "back");
 });
@@ -466,6 +467,9 @@ right_nav.addEventListener("click", () => {
 });
 refresh_nav.addEventListener("click", () => {
     if (!refresh_nav.classList.contains("greyed-out")) navigate(getActiveTab(), "refresh");
+});
+main_dropdown.addEventListener("click", () => {
+    if (!main_dropdown.classList.contains("greyed-out")) window.electronAPI.showMainDropdown();
 });
 
 document.getElementById("create-tab").addEventListener("click", () => {
@@ -733,6 +737,8 @@ window.electronAPI.sendToRenderer((data) => {
     } else if (json.action == "unpin-tab") {
         if (!json.tabId) return log("Missing tab ID on pin tab!");
         unpinTab(json.tabId);
+    } else if (json.action.startsWith("menu-")) {
+        doMenuAction(json.action.slice(5));
     }
 });
 
@@ -744,4 +750,13 @@ function findInPage(txt) {
 function createHostname(url) {
     if (url.startsWith("chrome-extension://")) return url;
     return new URL(url);
+}
+
+function doMenuAction(action) {
+    if (action == "print") {
+        const currentTab = getActiveTab();
+        if (!currentTab) return;
+        const wvId = currentTab.view.getWebContentsId();
+        if (wvId) window.electronAPI.printTab(wvId);
+    }
 }
