@@ -172,7 +172,7 @@ function showMainDropdown() {
             label: "New Tab",
             click: () => {
                 if (win) win.webContents.send("send-to-renderer", JSON.stringify({
-                    action: "new-tab",
+                    action: "menu-new-tab",
                     success: true,
                     //tabId: args["tabId"]
                 }));
@@ -205,7 +205,7 @@ function showMainDropdown() {
             label: "About",
             click: () => {
                 if (win) win.webContents.send("send-to-renderer", JSON.stringify({
-                    action: "menu-quit",
+                    action: "menu-about",
                     success: true,
                     //tabId: args["tabId"]
                 }));
@@ -215,7 +215,7 @@ function showMainDropdown() {
             label: "Help",
             click: () => {
                 if (win) win.webContents.send("send-to-renderer", JSON.stringify({
-                    action: "menu-quit",
+                    action: "menu-help",
                     success: true,
                     //tabId: args["tabId"]
                 }));
