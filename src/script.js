@@ -424,6 +424,7 @@ function createTabInstance(url = "https://google.com") {
             const cached = localStorage.getItem(`favicon:${urlObj?.hostname}`);
             btn.icon.src = cached || "";
         }
+        
     });
     tab.view.addEventListener("did-fail-load", (evt) => {
         goToLink("orb://404", tab);

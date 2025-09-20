@@ -20,11 +20,13 @@ const { app, BrowserWindow, WebContentsView, session, ipcMain, globalShortcut, c
 const { default: buildChromeContextMenu } = require("electron-chrome-context-menu");
 const {ElectronChromeExtensions} = require("electron-chrome-extensions");
 const {installChromeWebStore} = require("electron-chrome-web-store");
+const {ElectronBlocker} = require("@ghostery/adblocker-electron");
 const path = require("node:path");
 
 var win;
 var extensions;
 var browserSession;
+var sentinel;
 function createMainWindow() {
     browserSession = session.defaultSession;
     ElectronChromeExtensions.handleCRXProtocol(browserSession);
@@ -54,6 +56,10 @@ function createMainWindow() {
             console.log(null, "Permissions requested: ", extension, permissions);
         }
     });
+    /*ElectronBlocker.fromPrebuiltAdsAndTracking(fetch).then((blocker) => {
+        sentinel = blocker;
+        blocker.enableBlockingInSession(session.defaultSession);
+    })*/
     win = new BrowserWindow({
         width: 1280,
         height: 720,

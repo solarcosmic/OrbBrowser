@@ -28,7 +28,7 @@
             flex: 1;
             height: 98%;
             border-radius: 12px;
-            -electron-corner-smoothing: 60%; /* apparently this does something but I can't quite tell */
+            /*-electron-corner-smoothing: 60%; /* apparently this does something but I can't quite tell */
             overflow: hidden;
             margin: 10px;
         }
@@ -219,13 +219,17 @@
             line-height: 1.5;
         }
         #url-txt {
-            text-align: left;
-            margin-left: 15px;
+            margin-left: 0;
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
             max-width: 100%;
             display: block;
+            width: 100%;
+            text-align: center;
+        }
+        #omnibox-entry {
+            justify-content: center;
         }
         #omnibox-entry.fade-overflow::after {
             content: "";
@@ -378,7 +382,7 @@
             <!-- <div id="space">
                 <p style="color: #9c9c9c; font-size: 15px; margin-left: 15px;">This Space</p>
             </div> -->
-            <div id="tablist">
+            <div id="tablist" style="margin-top: 40px;">
                 <div id="pinned-tab-buttons"></div>
                 <!--<hr>-->
                 <div id="extra-buttons">
