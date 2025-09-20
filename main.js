@@ -51,7 +51,7 @@ function createMainWindow() {
             //console.log("REMOVE WINDOW CALLED: ", browserWindow);
         },
         requestPermissions(extension, permissions) {
-            handleRendererLog("Permissions requested: ", extension, permissions);
+            console.log(null, "Permissions requested: ", extension, permissions);
         }
     });
     win = new BrowserWindow({
@@ -62,7 +62,8 @@ function createMainWindow() {
         webPreferences: {
             preload: path.join(__dirname, "dist/preload.bundle.js"),
             webviewTag: true,
-            session: browserSession
+            session: browserSession,
+            nativeWindowOpen: true,
         },
     })
     win.setMenu(null);
@@ -78,6 +79,16 @@ function createMainWindow() {
     });
     win.on("blur", () => {
         if (win) win.webContents.send("app-blur");
+    });
+    /* https://github.com/electron/electron/issues/40613 */
+    /* https://github.com/solarcosmic/CascadeBrowser/blob/main/main.js */
+    app.on('web-contents-created', (e, contents) => {
+        if (contents.getType() == 'webview') {
+        contents.setWindowOpenHandler((details) => {
+            console.log(details.url);
+            win.webContents.send("open-link", details.url);
+        })
+        }
     });
     installChromeWebStore({session: browserSession});
 }
@@ -97,6 +108,7 @@ app.whenReady().then(async () => {
     ipcMain.on("main:tab-activated", onTabActivated);
     ipcMain.on("renderer:toggle-main-dropdown", showMainDropdown);
     ipcMain.on("renderer:print-tab", printTab);
+    ipcMain.on("main:quit-orb", quitOrb);
 });
 app.on("web-contents-created", (evt, webContents) => {
     onTabCreate(webContents);
@@ -240,4 +252,7 @@ function showMainDropdown() {
 function printTab(evt, wvId) {
     const wc = webContents.fromId(wvId);
     if (wc) wc.print();
+}
+function quitOrb() {
+    app.quit();
 }

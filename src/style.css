@@ -1,12 +1,4 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Orb Browser</title>
-    <!--<link rel="stylesheet" href="style.css">-->
-    <style>
-                @font-face {
+        @font-face {
             font-family: "Golos Text";
             src: url("../assets/GolosText.ttf");
         }
@@ -88,44 +80,6 @@
             min-width: 90%;
             color: #202020;
         }
-        #topbar {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            width: 100%;
-            height: 40px;
-            flex-shrink: 0;
-            color: #ffffff;
-            background-color:#0c0c0c;
-            overflow-y: hidden;
-            padding: 0 10px;
-            gap: 10px;
-            -webkit-app-region: drag;
-        }
-        /* Prevent drag on interactive elements inside #topbar */
-        #topbar button,
-        #topbar input,
-        #topbar img,
-        #topbar [id],
-        #topbar [class] {
-            -webkit-app-region: no-drag;
-        }
-        #topbar-nav-buttons {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-        #topbar-action-buttons {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            margin-right: 20px;
-        }
-        browser-action-list {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
         /* https://stackoverflow.com/a/1457976 */
         input:focus,
         select:focus,
@@ -138,16 +92,9 @@
             flex-direction: row;
             height: 100vh;
         }
-        #main-content {
-            display: flex;
-            flex-direction: column;
-            flex: 1;
-            height: 100vh;
-            min-width: 0;
-        }
         #webviews {
             flex: 1;
-            height: calc(100vh - 35px);
+            height: 100vh;
             position: relative;
             overflow: hidden;
             display: flex;
@@ -179,7 +126,7 @@
             margin: 8px auto;
             display: block;
         }
-        #omnibox-entry-old {
+        #omnibox-entry {
             margin-top: 15px;
             padding: 10px 10px;
             min-width: 90%;
@@ -192,51 +139,13 @@
             border-radius: 8px;
             display: flex;
             align-items: center;
-            cursor: text;
         }
-        #omnibox-entry:hover:not(:active) {
+        #omnibox-entry:hover {
             background-color: #202020;
-        }
-        #omnibox-entry {
-            flex: 1 1 0;
-            min-width: 200px;
-            max-width: 700px;
-            height: 30px;
-            margin-right: 20px;
-            padding: 0 16px;
-            background-color: #151515;
-            color: #ffffff;
-            border: none;
-            border-radius: 8px;
-            display: flex;
-            align-items: center;
-            cursor: text;
-            box-sizing: border-box;
-            /* overflow thing */
-            max-height: 100px;
-            overflow: hidden;
-            position: relative;
-            line-height: 1.5;
         }
         #url-txt {
             text-align: left;
             margin-left: 15px;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            max-width: 100%;
-            display: block;
-        }
-        #omnibox-entry.fade-overflow::after {
-            content: "";
-            position: absolute;
-            top: 0;
-            right: 0;
-            bottom: 0;
-            width: 48px;
-            pointer-events: none;
-            background: linear-gradient(to right, transparent, #151515 80%);
-            z-index: 2;
         }
         .svg-grey {
             filter: invert(62%) sepia(0%) saturate(0%) hue-rotate(241deg) brightness(96%) contrast(90%);
@@ -314,6 +223,9 @@
             margin-top: 10px;
             margin-left: 15px;
         }
+        #navigations browser-action-list {
+            margin-right: auto;
+        }
         .navigation-button {
             padding: 5px 5px;
             width: 18px;
@@ -361,53 +273,3 @@
         #tablist [id^="tab-button-"].drag-over {
             border: 2px dashed #ffffff;
         }
-    </style>
-</head>
-<body>
-    <div id="container">
-        <div id="sidebar">
-            <div id="omnibox" style="display: none;">
-                <div id="omnibox-search-bar">
-                    <img class="svg-grey" style="margin-bottom: -2px; width: 16px; height: 16px;" src="../assets/magnifying-glass-solid-full.svg"></img>
-                    <input type="text" id="url-box" placeholder="Search with Google or enter address"></input>
-                </div>
-                <!--<hr style="max-width: 85%;">-->
-                <div id="omnibox-search-list">
-                </div>
-            </div>
-            <!-- <div id="space">
-                <p style="color: #9c9c9c; font-size: 15px; margin-left: 15px;">This Space</p>
-            </div> -->
-            <div id="tablist">
-                <div id="pinned-tab-buttons"></div>
-                <!--<hr>-->
-                <div id="extra-buttons">
-                    <button id="create-tab"><img id="tab-icon-nt" class="svg-white" style="margin-top: 2px;" src="../assets/plus-solid-full.svg"></img><span class="page-title" style="margin-top: 2px;">New Tab</span></button>
-                </div>
-                <div id="tab-buttons"></div>
-            </div>
-        </div>
-        <div id="main-content">
-            <div id="topbar">
-                <div id="topbar-nav-buttons">
-                    <img class="navigation-button" id="left-nav" src="../assets/arrow-left-solid-full.svg"></img>
-                    <img class="navigation-button" id="right-nav" src="../assets/arrow-right-solid-full.svg"></img>
-                    <img class="navigation-button" id="refresh-nav" src="../assets/rotate-right-solid-full.svg"></img>
-                </div>
-                <button id="omnibox-entry"><span id="url-txt">google.com</span></button>
-                <div id="topbar-action-buttons">
-                    <browser-action-list></browser-action-list>
-                    <img class="navigation-button" id="main-dropdown" src="../assets/ellipsis-v-solid.svg"></img>
-                    <img class="navigation-button" id="minimise-btn" src="../assets/window-minimize-solid-full.svg"></img>
-                    <img class="navigation-button" id="maximise-btn" src="../assets/window-maximize-solid-full.svg"></img>
-                    <img class="navigation-button" id="close-btn" src="../assets/times-solid.svg"></img>
-                </div>
-            </div>
-            <div id="webviews"></div>
-        </div>
-        <!--<p id="hyperlink">Hyperlink</p>-->
-    </div>
-    <script src="../assets/xml-to-json.min.js"></script>
-    <script src="script.js"></script>
-</body>
-</html>

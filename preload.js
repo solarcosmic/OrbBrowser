@@ -1,6 +1,6 @@
 const { contextBridge, ipcRenderer } = require("electron");
 
-if (location.href.startsWith("index.html")) {
+if (location.pathname.endsWith("index.html")) {
     const { injectBrowserAction } = require("electron-chrome-extensions/browser-action");
     injectBrowserAction();
 }
@@ -25,4 +25,5 @@ contextBridge.exposeInMainWorld("electronAPI", {
     sendTabActivated: (wvId) => ipcRenderer.send("main:tab-activated", wvId),
     showMainDropdown: (wvId) => ipcRenderer.send("renderer:toggle-main-dropdown"),
     printTab: (wvId) => ipcRenderer.send("renderer:print-tab", wvId),
+    quitOrb: () => ipcRenderer.send("main:quit-orb"),
 });

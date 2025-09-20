@@ -27,6 +27,12 @@ var customLinks = {
         },
         "settings": {
             file: "settings.html"
+        },
+        "about": {
+            file: "about.html"
+        },
+        "404": {
+            file: "404.html"
         }
     }
 }
@@ -287,7 +293,8 @@ function truncateString(str, num) {
 
 function updateOmniboxHostname(hostname, url) {
     const omniboxtxt = document.getElementById("url-txt");
-    omniboxtxt.textContent = truncateString((hostname || url || ""), truncateAmount);
+    omniboxtxt.textContent = hostname || url || "" //truncateString((hostname || url || ""), truncateAmount);
+    checkOmniFlow();
     const omniSecure = document.getElementById("omniSecure") || document.createElement("img");
     omniSecure.style.width = "16px";
     omniSecure.style.height = "16px";
@@ -418,6 +425,9 @@ function createTabInstance(url = "https://google.com") {
             btn.icon.src = cached || "";
         }
     });
+    tab.view.addEventListener("did-fail-load", (evt) => {
+        goToLink("orb://404", tab);
+    })
     /*tab.view.addEventListener("dom-ready", () => {
         tab.view.insertCSS(`        html {
             scroll-behavior: smooth;
@@ -503,6 +513,10 @@ window.electronAPI.onMouseClick((x, y) => {
     }
 })
 window.electronAPI.onLinkOpen((url) => {
+    ipcLinkOpen(url);
+});
+
+function ipcLinkOpen(url) {
     log("link open: " + url);
     for (const [protocol, protoItems] of Object.entries(customLinks)) {
         for (const [linkName, linkItem] of Object.entries(protoItems)) {
@@ -514,7 +528,7 @@ window.electronAPI.onLinkOpen((url) => {
         }
     }
     return activateTab(createTabInstance(url));
-})
+}
 
 /*
 KNOWN BUGS:
@@ -758,5 +772,23 @@ function doMenuAction(action) {
         if (!currentTab) return;
         const wvId = currentTab.view.getWebContentsId();
         if (wvId) window.electronAPI.printTab(wvId);
+    } else if (action == "quit") {
+        window.electronAPI.quitOrb();
+    } else if (action == "history") {
+        ipcLinkOpen("orb://history");
+    } else if (action == "new-tab") {
+        ipcLinkOpen("https://google.com");
+    } else if (action == "about") {
+        ipcLinkOpen("orb://about");
     }
 }
+function checkOmniFlow() {
+    const entry = document.getElementById("omnibox-entry");
+    const txt = document.getElementById("url-txt");
+    if (txt.scrollWidth > txt.clientWidth) {
+        entry.classList.add("fade-overflow");
+    } else {
+        entry.classList.remove("fade-overflow");
+    }
+}
+window.addEventListener("resize", checkOmniFlow);
