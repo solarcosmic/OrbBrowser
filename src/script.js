@@ -373,14 +373,14 @@ function createTabInstance(url = "https://google.com") {
         }
     }
 
-    btn.text.textContent = truncateString(url, truncateAmount);
+    btn.text.textContent = truncateString(url, truncateAmount); //url; 
     btn.icon.src = "../assets/loading.gif";
     tab.view.addEventListener("page-title-updated", (event) => {
         console.log(url);
         document.getElementById("url-box").setAttribute("value", tab.view.getURL());
         document.getElementById("url-box").value = tab.view.getURL();
         if (event.title?.trim()) {
-            btn.text.textContent = truncateString(event.title, 25);
+            btn.text.textContent = truncateString(event.title, 25); //event.title;
             if (getActiveTab()?.id == tab.id) {
                 changeWindowTitle(event.title);
             }
@@ -435,6 +435,7 @@ function createTabInstance(url = "https://google.com") {
         }  
         `);
     }) */
+    checkTabTitleFlow();
     return tab;
 }
 
@@ -740,6 +741,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         var newTab = createTabInstance();
         activateTab(newTab);
     }
+    checkTabTitleFlow();
 })
 window.electronAPI.sendToRenderer((data) => {
     const json = JSON.parse(data);
@@ -792,4 +794,43 @@ function checkOmniFlow() {
         entry.classList.remove("fade-overflow");
     }
 }
+function checkTabTitleFlow() {
+    const tabButtons = document.querySelectorAll("#tablist [id^='tab-button-']");
+    tabButtons.forEach(button => {
+        const title = button.querySelector(".page-title");
+        if (title) {
+            if (title.scrollWidth > title.clientWidth) {
+                button.classList.add("fade-title-overflow");
+            } else {
+                button.classList.remove("fade-title-overflow");
+            }
+        }
+    });
+}
 window.addEventListener("resize", checkOmniFlow);
+window.addEventListener("resize", checkTabTitleFlow);
+
+async function getSearchTrends(country) {
+    try {
+        const trends = await window.electronAPI.getTrendingSearches(country);
+        const res = xmlToJSON.parseString(trends);
+        if (!res) throw new Error("Did not return JSON response!");
+        var items = [];
+        for (var step = 0; step < 5; step++) {
+            try {
+                items.push(res["rss"][0]["channel"][0]["item"][step]["title"][0]["_text"]);
+                //addSearchSuggestionButton(res["toplevel"][0]["CompleteSuggestion"][step]["suggestion"][0]["_attr"]["data"]["_value"]);
+            } catch (e) {
+                log("Couldn't find search suggestion #" + step + ". Possible it doesn't exist? Error: " + e);
+            }
+        }
+        return items;
+    } catch (e) {
+        log("Error while searching via Google Trends: " + e.message);
+    }
+}
+getSearchTrends("NZ").then(items => {
+    for (const item of items) {
+        log(item);
+    }
+})

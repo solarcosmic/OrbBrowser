@@ -22,6 +22,8 @@ const {ElectronChromeExtensions} = require("electron-chrome-extensions");
 const {installChromeWebStore} = require("electron-chrome-web-store");
 const {ElectronBlocker} = require("@ghostery/adblocker-electron");
 const path = require("node:path");
+const moment = require("moment-timezone");
+const ct = require("countries-and-timezones");
 
 var win;
 var extensions;
@@ -115,6 +117,7 @@ app.whenReady().then(async () => {
     ipcMain.on("renderer:toggle-main-dropdown", showMainDropdown);
     ipcMain.on("renderer:print-tab", printTab);
     ipcMain.on("main:quit-orb", quitOrb);
+    ipcMain.handle("misc:get-trending-searches", getTrendingSearches);
 });
 app.on("web-contents-created", (evt, webContents) => {
     onTabCreate(webContents);
@@ -261,4 +264,17 @@ function printTab(evt, wvId) {
 }
 function quitOrb() {
     app.quit();
+}
+/* from https://github.com/vireshshah/js-user-country/blob/master/src/index.js */
+function getCountryCode() {
+    return ct.getCountryForTimezone(moment.tz.guess());
+}
+async function getTrendingSearches(evt, country) {
+    const res = await fetch("https://trends.google.com/trending/rss?geo=" + country, {
+        headers: {
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/120.0 Safari/537.36"
+        }
+    });
+    if (!res.ok) console.log("Error while fetching trending searches: " + res.status);
+    return await res.text();
 }
