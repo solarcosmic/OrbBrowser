@@ -585,8 +585,11 @@ function goToLink(txt, activeTab = getActiveTab()) {
 async function searchSuggestions() {
     try {
         clearSearchSuggestionButtons();
-        if (urlBox.value.trim() == "") {
+        if ((urlBox.value == "" || document.getElementById("omnibox-search-list").childElementCount == 0) && trend_results) {
             clearSearchSuggestionButtons();
+            for (const item of trend_results) {
+                addSearchSuggestionButton(item);
+            }
             return;
         }
         /*if (urlBox.value.toLowerCase().startsWith("fav")) {
@@ -810,6 +813,7 @@ function checkTabTitleFlow() {
 window.addEventListener("resize", checkOmniFlow);
 window.addEventListener("resize", checkTabTitleFlow);
 
+var trend_results;
 async function getSearchTrends(country) {
     try {
         const trends = await window.electronAPI.getTrendingSearches(country);
@@ -830,7 +834,5 @@ async function getSearchTrends(country) {
     }
 }
 getSearchTrends("NZ").then(items => {
-    for (const item of items) {
-        log(item);
-    }
+    trend_results = items;
 })
