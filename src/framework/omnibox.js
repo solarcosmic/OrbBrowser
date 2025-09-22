@@ -1,4 +1,5 @@
 import * as utils from "./utils.js";
+import * as customLinks from "./customLinks.js";
 export function updateOmniboxHostname(hostname, url) {
     const omniboxtxt = document.getElementById("url-txt");
     omniboxtxt.textContent = hostname || url || "" //truncateString((hostname || url || ""), truncateAmount);

@@ -18,53 +18,25 @@
 import * as utils from "./framework/utils.js";
 import * as customLinks from "./framework/customLinks.js";
 import * as tabs from "./framework/tabs.js";
+import * as navigation from "./framework/navigation.js";
+import * as misc from "./framework/misc.js";
 
 const truncateAmount = 25;
 
 const views = document.getElementById("webviews");
-
-var browseHistory = JSON.parse(localStorage.getItem("orb:browsing_history") || "[]");
-
-function checkNavigation(tab) {
-    if (!tab.view) return log("Error: No valid tab provided for checkNavigation!");
-    var currentTab = getActiveTab();
-    if (!currentTab?.id == tab?.id) return;
-    if (tab.view.canGoBack()) {
-        document.getElementById("left-nav").classList.remove("greyed-out");
-    } else {
-        document.getElementById("left-nav").classList.add("greyed-out");
-    }
-    if (tab.view.canGoForward()) {
-        document.getElementById("right-nav").classList.remove("greyed-out");
-    } else {
-        document.getElementById("right-nav").classList.add("greyed-out");
-    }
-}
-
-/*
- * Navigates to a specific tab.
- * Defaults to the currently active tab if no tab is provided.
-*/
-function navigate(tab = getActiveTab(), direction) {
-    if (!tab.view) return;
-    if (direction == "back") tab.view.goBack();
-    if (direction == "forward") tab.view.goForward();
-    if (direction == "refresh") tab.view.reload();
-    if (direction == "refreshNoCache") tab.view.reloadIgnoringCache();
-}
 
 const left_nav = document.getElementById("left-nav");
 const right_nav = document.getElementById("right-nav");
 const refresh_nav = document.getElementById("refresh-nav");
 const main_dropdown = document.getElementById("main-dropdown");
 left_nav.addEventListener("click", () => {
-    if (!left_nav.classList.contains("greyed-out")) navigate(getActiveTab(), "back");
+    if (!left_nav.classList.contains("greyed-out")) navigation.navigate(tabs.getActiveTab(), "back");
 });
 right_nav.addEventListener("click", () => {
-    if (!right_nav.classList.contains("greyed-out")) navigate(getActiveTab(), "forward");
+    if (!right_nav.classList.contains("greyed-out")) navigation.navigate(tabs.getActiveTab(), "forward");
 });
 refresh_nav.addEventListener("click", () => {
-    if (!refresh_nav.classList.contains("greyed-out")) navigate(getActiveTab(), "refresh");
+    if (!refresh_nav.classList.contains("greyed-out")) navigation.navigate(tabs.getActiveTab(), "refresh");
 });
 main_dropdown.addEventListener("click", () => {
     if (!main_dropdown.classList.contains("greyed-out")) window.electronAPI.showMainDropdown();
@@ -72,12 +44,12 @@ main_dropdown.addEventListener("click", () => {
 
 document.getElementById("create-tab").addEventListener("click", () => {
     const tab = tabs.createTabInstance();
-    activateTab(tab);
+    tabs.activateTab(tab);
 });
 
 window.addEventListener("keyup", (event) => {
     if (event.ctrlKey && event.key.toLowerCase() == "t") return activateTab(tabs.createTabInstance());
-    if (event.ctrlKey && event.key.toLowerCase() == "w") return closeTab(getActiveTab());
+    if (event.ctrlKey && event.key.toLowerCase() == "w") return closeTab(tabs.getActiveTab());
     if (event.ctrlKey && event.key.toLowerCase() == "f") return findInPage("Charlie");
 })
 document.getElementById("url-box").addEventListener("keyup", (event) => {
@@ -101,22 +73,8 @@ window.electronAPI.onMouseClick((x, y) => {
     }
 })
 window.electronAPI.onLinkOpen((url) => {
-    ipcLinkOpen(url);
+    misc.ipcLinkOpen(url);
 });
-
-function ipcLinkOpen(url) {
-    log("link open: " + url);
-    for (const [protocol, protoItems] of Object.entries(customLinks.list)) {
-        for (const [linkName, linkItem] of Object.entries(protoItems)) {
-            if (url.replace(/^.*[\\/]/, '') == linkItem.file) {
-                log(url);
-                goToLink(url);
-                return;
-            }
-        }
-    }
-    return activateTab(tabs.createTabInstance(url));
-}
 
 /*
 KNOWN BUGS:
@@ -325,7 +283,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         var newTab = tabs.createTabInstance();
         activateTab(newTab);
     }
-    checkTabTitleFlow();
+    utils.checkTabTitleFlow();
 })
 window.electronAPI.sendToRenderer((data) => {
     const json = JSON.parse(data);
@@ -348,11 +306,6 @@ function findInPage(txt) {
     const view = tab.view;
 }
 
-function createHostname(url) {
-    if (url.startsWith("chrome-extension://")) return url;
-    return new URL(url);
-}
-
 function doMenuAction(action) {
     if (action == "print") {
         const currentTab = getActiveTab();
@@ -369,8 +322,8 @@ function doMenuAction(action) {
         ipcLinkOpen("orb://about");
     }
 }
-window.addEventListener("resize", checkOmniFlow);
-window.addEventListener("resize", checkTabTitleFlow);
+window.addEventListener("resize", utils.checkOmniFlow);
+window.addEventListener("resize", utils.checkTabTitleFlow);
 
 var trend_results;
 async function getSearchTrends(country) {

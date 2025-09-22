@@ -19,7 +19,7 @@ export function log(...args) {
  * [title]: string
 */
 export function changeWindowTitle(title) {
-    const tr = utils.truncateString(title, truncateAmount + 10);
+    const tr = truncateString(title, truncateAmount + 10);
     document.title = (tr + " ⎯ Orb Browser") || "Orb Browser";
 }
 

@@ -1,6 +1,8 @@
 import * as utils from "./utils.js";
 import * as customLinks from "./customLinks.js";
 import * as omnibox from "./omnibox.js";
+import * as misc from "./misc.js";
+import * as navigation from "./navigation.js";
 const views = document.getElementById("webviews");
 export var tabs = [];
 
@@ -176,7 +178,7 @@ export function activateTab(tab) {
             url = tab.displayURL;
         } else {
             try {
-                hostname = createHostname(tab.view.getURL()).hostname;
+                hostname = misc.createHostname(tab.view.getURL()).hostname;
                 url = tab.view.getURL();
             } catch (e) {
                 hostname = tab.view.getURL();
@@ -209,7 +211,7 @@ export function closeTab(tab) {
     }
     if (tabs[idx - 1] != null) {
         const hostTab = tabs[idx - 1];
-        omnibox.updateOmniboxHostname(hostTab.displayURL || createHostname(hostTab.view.getURL()).hostname, hostTab.displayURL || hostTab.view.getURL());
+        omnibox.updateOmniboxHostname(hostTab.displayURL || misc.createHostname(hostTab.view.getURL()).hostname, hostTab.displayURL || hostTab.view.getURL());
     }
     if (idx !== -1) {
         tabs.splice(idx, 1);
@@ -275,7 +277,7 @@ export function createTabInstance(url = "https://google.com") {
     const btn = createTabButton(tab);
     var urlObj;
     try {
-        urlObj = createHostname(url);
+        urlObj = misc.createHostname(url);
     } catch (e) {
         utils.log(e);
         urlObj = null;
@@ -301,22 +303,21 @@ export function createTabInstance(url = "https://google.com") {
         if (event.title?.trim()) {
             btn.text.textContent = utils.truncateString(event.title, 25); //event.title;
             if (getActiveTab()?.id == tab.id) {
-                changeWindowTitle(event.title);
+                utils.changeWindowTitle(event.title);
             }
         }
     });
     tab.view.addEventListener("did-navigate", (event) => {
-        checkNavigation(tab);
+        navigation.checkNavigation(tab);
         console.log(tab.displayURL);
-        omnibox.updateOmniboxHostname(tab.displayURL || createHostname(tab.view.getURL()).hostname, tab.displayURL || tab.view.getURL());
+        omnibox.updateOmniboxHostname(tab.displayURL || misc.createHostname(tab.view.getURL()).hostname, tab.displayURL || tab.view.getURL());
         document.getElementById("url-box").value = tab.displayURL || tab.view.getURL();
-        browseHistory.push({
+        misc.browseHistory.push({
             url: tab.displayURL || tab.view?.getURL() || "about:blank",
             title: tab.view?.getTitle() || "Webpage",
             timestamp: Date.now(),
         })
-        localStorage.setItem("orb:browsing_history", JSON.stringify(browseHistory));
-        console.log(browseHistory);
+        localStorage.setItem("orb:browsing_history", JSON.stringify(misc.browseHistory));
     })
     tab.view.addEventListener("page-favicon-updated", (event) => {
         if (tab.view.getURL().startsWith("chrome-extension://")) {
