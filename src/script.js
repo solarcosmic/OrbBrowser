@@ -15,27 +15,15 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
+import * as utils from "./framework/utils.js";
+import * as customLinks from "./framework/customLinks.js";
+
 var tabs = [];
 const truncateAmount = 25;
 
 const views = document.getElementById("webviews");
 
-var customLinks = {
-    "orb": {
-        "history": {
-            file: "history.html"
-        },
-        "settings": {
-            file: "settings.html"
-        },
-        "about": {
-            file: "about.html"
-        },
-        "404": {
-            file: "404.html"
-        }
-    }
-}
+
 var browseHistory = JSON.parse(localStorage.getItem("orb:browsing_history") || "[]");
 
 /*
@@ -232,7 +220,7 @@ function activateTab(tab) {
  * [title]: string
 */
 function changeWindowTitle(title) {
-    const tr = truncateString(title, truncateAmount + 10);
+    const tr = utils.truncateString(title, truncateAmount + 10);
     document.title = (tr + " ⎯ Orb Browser") || "Orb Browser";
 }
 
@@ -282,15 +270,6 @@ function switchToNextTab(idx) {
     }
 }
 
-/* https://stackoverflow.com/a/53637828 */
-function truncateString(str, num) {
-    if (str.length > num) {
-        return str.slice(0, num) + "...";
-    } else {
-        return str;
-    }
-}
-
 function updateOmniboxHostname(hostname, url) {
     const omniboxtxt = document.getElementById("url-txt");
     omniboxtxt.textContent = hostname || url || "" //truncateString((hostname || url || ""), truncateAmount);
@@ -310,7 +289,7 @@ function updateOmniboxHostname(hostname, url) {
         omniSecure.src = "../assets/chrome-brands-solid-full.svg";
         omniSecure.classList.add("svg-grey");
     }
-    for (const [protocol, protoItems] of Object.entries(customLinks)) {
+    for (const [protocol, protoItems] of Object.entries(customLinks.list)) {
         for (const [linkName, linkItem] of Object.entries(protoItems)) {
             const exampleProtocol = `${protocol.toLowerCase()}://${linkName.toLowerCase()}`;
             if (hostname == exampleProtocol) {
@@ -332,7 +311,7 @@ function createTabInstance(url = "https://google.com") {
     var preloadPath = null;
     var resolvedUrl = url;
 
-    for (const [protocol, protoItems] of Object.entries(customLinks)) {
+    for (const [protocol, protoItems] of Object.entries(customLinks.list)) {
         for (const [linkName, linkItem] of Object.entries(protoItems)) {
             const exampleProtocol = `${protocol.toLowerCase()}://${linkName.toLowerCase()}`;
             if (url == exampleProtocol) {
@@ -345,7 +324,7 @@ function createTabInstance(url = "https://google.com") {
             }
         }
     }
-    for (const [protocol, protoItems] of Object.entries(customLinks)) {
+    for (const [protocol, protoItems] of Object.entries(customLinks.list)) {
         for (const [linkName, linkItem] of Object.entries(protoItems)) {
             if (resolvedUrl.replace(/^.*[\\/]/, '') == linkItem.file) {
                 preloadPath = "../preload.js";
@@ -363,7 +342,7 @@ function createTabInstance(url = "https://google.com") {
     }
     var lastFavicon = null;
     // probably inefficient implementation with 2 for loops, but it works for now (i think)
-    for (const [protocol, protoItems] of Object.entries(customLinks)) {
+    for (const [protocol, protoItems] of Object.entries(customLinks.list)) {
         for (const [linkName, linkItem] of Object.entries(protoItems)) {
             if (resolvedUrl == linkItem.file) {
                 tab.displayURL = `${protocol.toLowerCase()}://${linkName.toLowerCase()}`;
@@ -373,14 +352,14 @@ function createTabInstance(url = "https://google.com") {
         }
     }
 
-    btn.text.textContent = truncateString(url, truncateAmount); //url; 
+    btn.text.textContent = utils.truncateString(url, truncateAmount); //url; 
     btn.icon.src = "../assets/loading.gif";
     tab.view.addEventListener("page-title-updated", (event) => {
         console.log(url);
         document.getElementById("url-box").setAttribute("value", tab.view.getURL());
         document.getElementById("url-box").value = tab.view.getURL();
         if (event.title?.trim()) {
-            btn.text.textContent = truncateString(event.title, 25); //event.title;
+            btn.text.textContent = utils.truncateString(event.title, 25); //event.title;
             if (getActiveTab()?.id == tab.id) {
                 changeWindowTitle(event.title);
             }
@@ -520,7 +499,7 @@ window.electronAPI.onLinkOpen((url) => {
 
 function ipcLinkOpen(url) {
     log("link open: " + url);
-    for (const [protocol, protoItems] of Object.entries(customLinks)) {
+    for (const [protocol, protoItems] of Object.entries(customLinks.list)) {
         for (const [linkName, linkItem] of Object.entries(protoItems)) {
             if (url.replace(/^.*[\\/]/, '') == linkItem.file) {
                 log(url);
@@ -552,7 +531,7 @@ function goToLink(txt, activeTab = getActiveTab()) {
 
     var formedProtocol;
     var protocolItems;
-    for (const [protocol, protoItems] of Object.entries(customLinks)) {
+    for (const [protocol, protoItems] of Object.entries(customLinks.list)) {
         for (const [linkName, linkItem] of Object.entries(protoItems)) {
             const exampleProtocol = `${protocol.toLowerCase()}://${linkName.toLowerCase()}`;
             if (txt == exampleProtocol) {
@@ -694,12 +673,7 @@ observer.observe(document.getElementById("url-box"), {
     subtree: false
 });
 function log(...args) {
-    console.log(...args);
-    const format = args.map(arg => typeof arg == "object" ? JSON.stringify(arg) : String(arg)).join(" "); // idk what this is lol
-    window.electronAPI.sendConsoleLog(format);
-}
-function updateHyperlink() {
-    
+    utils.log(...args);
 }
 window.electronAPI.onAppBlur(() => {
     console.log("app blur");
@@ -729,7 +703,7 @@ document.addEventListener("DOMContentLoaded", async () => {
             urls.forEach((url) => {
                 const tab = createTabInstance(url);
                 console.log("URL: " + url);
-                for (const [protocol, protoItems] of Object.entries(customLinks)) {
+                for (const [protocol, protoItems] of Object.entries(customLinks.list)) {
                     for (const [linkName, linkItem] of Object.entries(protoItems)) {
                         if (url.replace(/^.*[\\/]/, '') == linkItem.file) {
                             tab.displayURL = `${protocol.toLowerCase()}://${linkName.toLowerCase()}`;
