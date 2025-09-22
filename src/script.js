@@ -303,13 +303,13 @@ window.electronAPI.sendToRenderer((data) => {
 });
 
 function findInPage(txt) {
-    const tab = getActiveTab();
+    const tab = tabs.getActiveTab();
     const view = tab.view;
 }
 
 function doMenuAction(action) {
     if (action == "print") {
-        const currentTab = getActiveTab();
+        const currentTab = tabs.getActiveTab();
         if (!currentTab) return;
         const wvId = currentTab.view.getWebContentsId();
         if (wvId) window.electronAPI.printTab(wvId);

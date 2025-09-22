@@ -137,7 +137,7 @@ app.on("web-contents-created", (evt, webContents) => {
     });
 });
 function handleRendererLog(evt, txt) {
-    console.log("[net.solarcosmic.orbbrowser.main]: " + txt);
+    console.log(txt);
 }
 function openLinkInNewTab(evt, url) {
     win.webContents.send("open-link", url);

@@ -8,10 +8,15 @@ export function truncateString(str, num) {
     }
 }
 
-export function log(...args) {
-    console.log(...args);
-    //const format = args.map(arg => typeof arg == "object" ? JSON.stringify(arg) : String(arg)).join(" "); // idk what this is lol
-    //window.electronAPI.sendConsoleLog(format);
+export function createLogger(module) {
+    return (...args) => log(module, ...args);
+}
+
+export function log(module = "[net.solarcosmic.orbbrowser.main]", ...args) {
+    const prefix = `[${module}]:`;
+    console.log(prefix, ...args);
+    const format = [prefix, ...args].map(arg => typeof arg == "object" ? JSON.stringify(arg) : String(arg)).join(" "); // idk what this is lol
+    window.electronAPI.sendConsoleLog(format);
 }
 
 /*

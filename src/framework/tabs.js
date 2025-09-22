@@ -5,6 +5,7 @@ import * as misc from "./misc.js";
 import * as navigation from "./navigation.js";
 const views = document.getElementById("webviews");
 export var tabs = [];
+const log = utils.createLogger("net.solarcosmic.orbbrowser.tabs");
 
 /*
  * Creates a tab and loads a URL.
@@ -25,8 +26,6 @@ export function createTab(url = "https://www.google.com", preloadPath = null) {
     }
     views.appendChild(tab.view);
     tabs.push(tab);
-    console.log("tab created!!");
-    window.electronAPI.sendConsoleLog("tab created");
     return tab;
 }
 
@@ -119,18 +118,18 @@ export function getTabButtonByTabId(tabId) {
 
 export function pinTab(tabId) {
     const button = getTabButtonByTabId(tabId);
-    if (!button) return utils.log("No button!");
+    if (!button) return log("No button!");
     const tabObject = getTabObjectFromId(tabId);
-    if (!tabObject) return utils.log("No tab!");
+    if (!tabObject) return log("No tab!");
     tabObject["pinned"] = true;
     document.getElementById("pinned-tab-buttons").appendChild(button);
 }
 
 export function unpinTab(tabId) {
     const button = getTabButtonByTabId(tabId);
-    if (!button) return utils.log("No button!");
+    if (!button) return log("No button!");
     const tabObject = getTabObjectFromId(tabId);
-    if (!tabObject) return utils.log("No tab!");
+    if (!tabObject) return log("No tab!");
     tabObject["pinned"] = false;
     document.getElementById("tab-buttons").prepend(button);
 }
@@ -187,9 +186,13 @@ export function activateTab(tab) {
         }
         omnibox.updateOmniboxHostname(hostname, url);
         document.getElementById("url-box").value = url;
-        const webContentsId = tab.view.getWebContentsId ? tab.view.getWebContentsId() : tab.view.getAttribute("data-webcontents-id");
-        if (tab.view && webContentsId) {
-            window.electronAPI.sendTabActivated(webContentsId);
+        try {
+            const webContentsId = tab.view.getWebContentsId ? tab.view.getWebContentsId() : tab.view.getAttribute("data-webcontents-id");
+            if (tab.view && webContentsId) {
+                window.electronAPI.sendTabActivated(webContentsId);
+            }
+        } catch (e) {
+            log(`Request to send tab activation but tab likely wasn't ready: "${e.message}"`);
         }
     });
     try {
@@ -279,7 +282,7 @@ export function createTabInstance(url = "https://google.com") {
     try {
         urlObj = misc.createHostname(url);
     } catch (e) {
-        utils.log(e);
+        log(`Something happened while calling hostname creation: "${e.message}"`);
         urlObj = null;
     }
     var lastFavicon = null;
