@@ -20,6 +20,7 @@ import * as customLinks from "./framework/customLinks.js";
 import * as tabs from "./framework/tabs.js";
 import * as navigation from "./framework/navigation.js";
 import * as misc from "./framework/misc.js";
+import * as omnibox from "./framework/omnibox.js";
 
 const truncateAmount = 25;
 
@@ -90,7 +91,7 @@ urlBox.addEventListener("keyup", () => {
     if (urlBox.value) typeTimer = setTimeout(searchSuggestions, typeInterval);
 })
 
-function goToLink(txt, activeTab = getActiveTab()) {
+function goToLink(txt, activeTab = tabs.getActiveTab()) {
     var pattern = /^((http|https|chrome|chrome-extension):\/\/)/; /* https://stackoverflow.com/a/11300963 */
     var dm_regex = /^(?:(?:(?:[a-zA-z\-]+):\/{1,3})?(?:[a-zA-Z0-9])(?:[a-zA-Z0-9\-\.]){1,61}(?:\.[a-zA-Z]{2,})+|\[(?:(?:(?:[a-fA-F0-9]){1,4})(?::(?:[a-fA-F0-9]){1,4}){7}|::1|::)\]|(?:(?:[0-9]{1,3})(?:\.[0-9]{1,3}){3}))(?:\:[0-9]{1,5})?$/; /* https://stackoverflow.com/a/38578855 */
 
@@ -109,19 +110,19 @@ function goToLink(txt, activeTab = getActiveTab()) {
     if (txt == formedProtocol && protocolItems?.file != null) {
         const tab = tabs.createTabInstance(protocolItems.file);
         tab.displayURL = formedProtocol;
-        activateTab(tab);
+        tabs.activateTab(tab);
         tab.button.querySelector(".page-title").textContent = formedProtocol;
-        updateOmniboxHostname(formedProtocol, formedProtocol);
+        omnibox.updateOmniboxHostname(formedProtocol, formedProtocol);
         tab.button.querySelector("img").src = "../assets/star-solid-full.svg";
     } else if (pattern.test(txt)) {
-        if (!activeTab) return activateTab(tabs.createTabInstance(txt));
-        getActiveTab().view.loadURL(txt);
+        if (!activeTab) return tabs.activateTab(tabs.createTabInstance(txt));
+        tabs.getActiveTab().view.loadURL(txt);
     } else if (dm_regex.test(txt)) {
-        if (!activeTab) return activateTab(tabs.createTabInstance("http://" + txt));
-        getActiveTab().view.loadURL("http://" + txt);
+        if (!activeTab) return tabs.activateTab(tabs.createTabInstance("http://" + txt));
+        tabs.getActiveTab().view.loadURL("http://" + txt);
     } else {
-        if (!activeTab) return activateTab(tabs.createTabInstance("https://google.com/search?client=orb&q=" + txt));
-        getActiveTab().view.loadURL("https://google.com/search?client=orb&q=" + txt);
+        if (!activeTab) return tabs.activateTab(tabs.createTabInstance("https://google.com/search?client=orb&q=" + txt));
+        tabs.getActiveTab().view.loadURL("https://google.com/search?client=orb&q=" + txt);
     }
     document.getElementById("omnibox").style.display = "none";
 }
