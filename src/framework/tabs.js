@@ -1,8 +1,5 @@
-import * as utils from "./utils.js";
-import * as customLinks from "./customLinks.js";
-import * as omnibox from "./omnibox.js";
-import * as misc from "./misc.js";
-import * as navigation from "./navigation.js";
+import {utils, customLinks, omnibox, misc, navigation} from "framework/linkman";
+
 const views = document.getElementById("webviews");
 export var tabs = [];
 const log = utils.createLogger("net.solarcosmic.orbbrowser.tabs");

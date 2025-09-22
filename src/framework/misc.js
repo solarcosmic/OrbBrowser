@@ -1,4 +1,7 @@
 export var browseHistory = JSON.parse(localStorage.getItem("orb:browsing_history") || "[]");
+import {utils, customLinks, tabs} from "./linkman.js";
+const log = utils.createLogger("net.solarcosmic.orbbrowser.misc");
+
 export function createHostname(url) {
     if (url.startsWith("chrome-extension://")) return url;
     return new URL(url);
@@ -15,5 +18,5 @@ export function ipcLinkOpen(url) {
             }
         }
     }
-    return activateTab(tabs.createTabInstance(url));
+    return tabs.activateTab(tabs.createTabInstance(url));
 }

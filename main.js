@@ -16,14 +16,19 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-const { app, BrowserWindow, WebContentsView, session, ipcMain, globalShortcut, components, Menu, webContents } = require("electron");
-const { default: buildChromeContextMenu } = require("electron-chrome-context-menu");
-const {ElectronChromeExtensions} = require("electron-chrome-extensions");
-const {installChromeWebStore} = require("electron-chrome-web-store");
-const {ElectronBlocker} = require("@ghostery/adblocker-electron");
-const path = require("node:path");
-const moment = require("moment-timezone");
-const ct = require("countries-and-timezones");
+import { app, BrowserWindow, WebContentsView, session, ipcMain, globalShortcut, Menu, webContents } from "electron";
+import buildChromeContextMenu from "electron-chrome-context-menu";
+import { ElectronChromeExtensions } from "electron-chrome-extensions";
+import { installChromeWebStore } from "electron-chrome-web-store";
+import { ElectronBlocker } from "@ghostery/adblocker-electron";
+import path from "node:path";
+import moment from "moment-timezone";
+import ct from "countries-and-timezones";
+import { fileURLToPath } from 'url';
+import { dirname } from 'path';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 
 var win;
 var extensions;

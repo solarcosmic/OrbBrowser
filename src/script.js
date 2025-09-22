@@ -316,11 +316,11 @@ function doMenuAction(action) {
     } else if (action == "quit") {
         window.electronAPI.quitOrb();
     } else if (action == "history") {
-        ipcLinkOpen("orb://history");
+        misc.ipcLinkOpen("orb://history");
     } else if (action == "new-tab") {
-        ipcLinkOpen("https://google.com");
+        misc.ipcLinkOpen("https://google.com");
     } else if (action == "about") {
-        ipcLinkOpen("orb://about");
+        misc.ipcLinkOpen("orb://about");
     }
 }
 window.addEventListener("resize", utils.checkOmniFlow);

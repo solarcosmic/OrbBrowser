@@ -1,4 +1,5 @@
-import * as tabs from "./tabs.js";
+import {tabs, utils} from "./linkman.js";
+const log = utils.createLogger("net.solarcosmic.orbbrowser.navigation");
 export function checkNavigation(tab) {
     if (!tab.view) return log("Error: No valid tab provided for checkNavigation!");
     var currentTab = tabs.getActiveTab();

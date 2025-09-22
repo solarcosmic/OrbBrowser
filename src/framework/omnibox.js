@@ -1,5 +1,5 @@
-import * as utils from "./utils.js";
-import * as customLinks from "./customLinks.js";
+import {utils, customLinks} from "./linkman.js";
+const log = utils.createLogger("net.solarcosmic.orbbrowser.omnibox");
 export function updateOmniboxHostname(hostname, url) {
     const omniboxtxt = document.getElementById("url-txt");
     omniboxtxt.textContent = hostname || url || "" //truncateString((hostname || url || ""), truncateAmount);
