@@ -23,6 +23,7 @@ export function createTab(url = "https://www.google.com", preloadPath = null) {
     }
     views.appendChild(tab.view);
     tabs.push(tab);
+    saveTabs();
     return tab;
 }
 
@@ -51,7 +52,8 @@ export function createTabButton(tab) {
     closeBtn.src = "../assets/xmark-solid-full.svg";
     closeBtn.classList.add("tab-close");
     closeBtn.classList.add("svg-white");
-    closeBtn.addEventListener("click", () => {
+    closeBtn.addEventListener("click", (e) => {
+        e.stopPropagation();
         closeTab(tab);
     });
     btn.addEventListener("dragstart", (e) => {
@@ -162,6 +164,7 @@ function removeAllActiveTabs() {
 */
 export function activateTab(tab) {
     if (!(tab.view || tab.id || tab.button)) return console.error("Missing tab view and/or ID, button! Cannot activate tab.");
+    console.log(tab);
     removeAllActiveTabs();
     hideAllTabs();
     requestAnimationFrame(() => { // for some reason THIS WORKS. requestAnimationFrame is needed for it to function correctly
@@ -219,6 +222,7 @@ export function closeTab(tab) {
     tab.view.remove();
     tab.button.remove();
     switchToNextTab(idx);
+    saveTabs();
 }
 
 /*
@@ -357,4 +361,22 @@ export function createTabInstance(url = "https://google.com") {
     }) */
     utils.checkTabTitleFlow();
     return tab;
+}
+
+/*
+ * Saves tabs to local storage.
+*/
+export function saveTabs() {
+    log("Preparing to unload");
+    const collected = [];
+    for (const tab of tabs) {
+        collected.push({
+            id: tab.id,
+            url: tab.view?.src,
+            pinned: tab.pinned || false,
+            displayURL: tab.displayURL || tab.view?.src
+        });
+    };
+    console.log(collected);
+    localStorage.setItem("orb:tabs_list", JSON.stringify(collected));
 }

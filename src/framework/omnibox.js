@@ -1,4 +1,4 @@
-import {utils, customLinks} from "./linkman.js";
+import {utils, customLinks} from "framework/linkman";
 const log = utils.createLogger("net.solarcosmic.orbbrowser.omnibox");
 export function updateOmniboxHostname(hostname, url) {
     const omniboxtxt = document.getElementById("url-txt");

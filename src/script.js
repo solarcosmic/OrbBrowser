@@ -23,6 +23,7 @@ import * as misc from "./framework/misc.js";
 import * as omnibox from "./framework/omnibox.js";
 
 const truncateAmount = 25;
+const log = utils.createLogger("net.solarcosmic.orbbrowser.renderer");
 
 const views = document.getElementById("webviews");
 
@@ -49,7 +50,7 @@ document.getElementById("create-tab").addEventListener("click", () => {
 });
 
 window.addEventListener("keyup", (event) => {
-    if (event.ctrlKey && event.key.toLowerCase() == "t") return activateTab(tabs.createTabInstance());
+    if (event.ctrlKey && event.key.toLowerCase() == "t") return tabs.activateTab(tabs.createTabInstance());
     if (event.ctrlKey && event.key.toLowerCase() == "w") return closeTab(tabs.getActiveTab());
     if (event.ctrlKey && event.key.toLowerCase() == "f") return findInPage("Charlie");
 })
@@ -61,6 +62,7 @@ document.getElementById("url-box").addEventListener("keyup", (event) => {
 document.getElementById("omnibox-entry").addEventListener("click", () => {
     if (document.getElementById("omnibox").style.display == "block") return;
     document.getElementById("omnibox").style.display = "block";
+    searchSuggestions();
     document.getElementById("url-box").select();
 });
 window.electronAPI.onMouseClick((x, y) => {
@@ -128,24 +130,21 @@ function goToLink(txt, activeTab = tabs.getActiveTab()) {
 }
 
 async function searchSuggestions() {
+    console.log(urlBox.value);
     try {
-        clearSearchSuggestionButtons();
-        if ((urlBox.value == "" || document.getElementById("omnibox-search-list").childElementCount == 0) && trend_results) {
+        /*if ((urlBox.value == "" || document.getElementById("omnibox-search-list").childElementCount == 0) && trend_results) {
             clearSearchSuggestionButtons();
             for (const item of trend_results) {
                 addSearchSuggestionButton(item);
             }
             return;
-        }
+        }*/
         /*if (urlBox.value.toLowerCase().startsWith("fav")) {
             addSearchSuggestionButton("Favorite Tab", "../assets/star-solid-full.svg", "Quick Action");
         }
         if (urlBox.value.toLowerCase().startsWith("chat")) {
             addSearchSuggestionButton("Ask ChatGPT", "../assets/star-solid-full.svg", "Quick Action");
         }*/
-        if (urlBox.value.toLowerCase().startsWith("hist")) {
-            addSearchSuggestionButton("Browsing History", "../assets/gear-solid-full.svg", "Quick Action");
-        }
         await fetch("https://google.com/complete/search?output=toolbar&q=" + urlBox.value)
             .then(res => {
                 if (!res.ok) throw new Error("Fetching suggestion error: " + res.status);
@@ -154,6 +153,7 @@ async function searchSuggestions() {
             .then(data => {
                 const res = xmlToJSON.parseString(data);
                 if (!res) throw new Error("Did not return JSON response!");
+                clearSearchSuggestionButtons();
                 for (var step = 0; step < 5; step++) {
                     try {
                         addSearchSuggestionButton(res["toplevel"][0]["CompleteSuggestion"][step]["suggestion"][0]["_attr"]["data"]["_value"]);
@@ -162,6 +162,9 @@ async function searchSuggestions() {
                     }
                 }
             })
+        if (urlBox.value.toLowerCase().startsWith("hist")) {
+            addSearchSuggestionButton("Browsing History", "../assets/gear-solid-full.svg", "Quick Action", true);
+        } // to move
     } catch (err) {
         console.error(err.message);
     }
@@ -194,7 +197,7 @@ var lists = [
         }
     }
 ];
-function addSearchSuggestionButton(txt, icon = "../assets/magnifying-glass-solid-full.svg") {
+function addSearchSuggestionButton(txt, icon = "../assets/magnifying-glass-solid-full.svg", action, prepend = false) {
     const btn = document.createElement("button");
     btn.classList.add("suggestion-button");
     const text = document.createElement("p");
@@ -225,22 +228,34 @@ function addSearchSuggestionButton(txt, icon = "../assets/magnifying-glass-solid
     })
     btn.appendChild(srcimg);
     btn.appendChild(text);
-    document.getElementById("omnibox-search-list").appendChild(btn);
+    if (prepend) {
+        document.getElementById("omnibox-search-list").prepend(btn);
+        document.querySelector("#omnibox-search-list > button:last-of-type").remove();
+    } else {
+        document.getElementById("omnibox-search-list").appendChild(btn);
+    }
+    
     return btn;
 }
 document.getElementById("url-box").spellcheck = false;
 /* https://stackoverflow.com/a/56159793 */
-const observer = new MutationObserver(list => {
+/*const observer = new MutationObserver(list => {
     document.getElementById("omnibox-search-list").innerHTML = "";
 });
 observer.observe(document.getElementById("url-box"), {
     attributes: true,
     childList: false,
     subtree: false
-});
-function log(...args) {
-    utils.log(...args);
-}
+});*/
+document.getElementById("url-box").addEventListener("input", () => {
+    console.log("value: " + urlBox.value);
+    if (urlBox.value == "") {
+            clearSearchSuggestionButtons();
+            for (const item of trend_results) {
+                addSearchSuggestionButton(item);
+            }
+    }
+})
 window.electronAPI.onAppBlur(() => {
     console.log("app blur");
     document.body.style.backgroundColor = "#191919";
@@ -253,36 +268,39 @@ window.electronAPI.onAppFocus(() => {
 })
 
 window.addEventListener("beforeunload", () => {
-    const collected = [];
-    for (const tab of tabs) {
-        collected.push(tab.view?.src);
-    };
-    localStorage.setItem("orb:tabs_list", JSON.stringify(collected));
+    tabs.saveTabs();
 })
+
 document.addEventListener("DOMContentLoaded", async () => {
     let restored = false;
     const savedTabs = localStorage.getItem("orb:tabs_list");
     if (!savedTabs) return;
     try {
-        const urls = JSON.parse(savedTabs);
-        if (Array.isArray(urls) && urls.length > 0) {
-            urls.forEach((url) => {
-                const tab = tabs.createTabInstance(url);
-                console.log("URL: " + url);
+        const items = JSON.parse(savedTabs);
+        if (Array.isArray(items) && items.length > 0) {
+            items.forEach((item) => {
+                console.log(item);
+                const tab = tabs.createTabInstance(item.url);
+                if (item.pinned) {
+                    console.log("pinned: " + tab);
+                    tabs.pinTab(tab.id);
+                }
+                console.log("URL: " + item.url);
                 for (const [protocol, protoItems] of Object.entries(customLinks.list)) {
                     for (const [linkName, linkItem] of Object.entries(protoItems)) {
-                        if (url.replace(/^.*[\\/]/, '') == linkItem.file) {
+                        if (item.url.replace(/^.*[\\/]/, '') == linkItem.file) {
                             tab.displayURL = `${protocol.toLowerCase()}://${linkName.toLowerCase()}`;
                         }
                     }
                 }
-            })
+            });
+            
             restored = true;
         }
     } catch (e) {}
     if (!restored) {
         var newTab = tabs.createTabInstance();
-        activateTab(newTab);
+        tabs.activateTab(newTab);
     }
     utils.checkTabTitleFlow();
 })
@@ -293,10 +311,10 @@ window.electronAPI.sendToRenderer((data) => {
         localStorage.setItem("orb:browsing_history", JSON.stringify(browseHistory));
     } else if (json.action == "pin-tab") {
         if (!json.tabId) return log("Missing tab ID on pin tab!");
-        pinTab(json.tabId);
+        tabs.pinTab(json.tabId);
     } else if (json.action == "unpin-tab") {
         if (!json.tabId) return log("Missing tab ID on pin tab!");
-        unpinTab(json.tabId);
+        tabs.unpinTab(json.tabId);
     } else if (json.action.startsWith("menu-")) {
         doMenuAction(json.action.slice(5));
     }
@@ -346,6 +364,23 @@ async function getSearchTrends(country) {
         log("Error while searching via Google Trends: " + e.message);
     }
 }
-getSearchTrends("NZ").then(items => {
-    trend_results = items;
+async function getSearchTrendsCountry() {
+    const country = await window.electronAPI.getCountryCode();
+    getSearchTrends(country.id).then(items => {
+        trend_results = items;
+    })
+};
+
+document.getElementById("close-btn").addEventListener("click", () => {
+    window.electronAPI.quitOrb();
 })
+
+document.getElementById("minimise-btn").addEventListener("click", () => {
+    window.electronAPI.minimiseOrb();
+})
+
+document.getElementById("maximise-btn").addEventListener("click", () => {
+    window.electronAPI.maximiseOrb();
+})
+
+getSearchTrendsCountry();
