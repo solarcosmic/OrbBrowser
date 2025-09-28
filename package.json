@@ -36,7 +36,7 @@
     "appId": "net.solarcosmic.orbbrowser",
     "productName": "Orb Browser",
     "electronDownload": {
-      "mirror": "https://github.com/castlabs/electron-releases/releases/download/",
+      "mirror": "https://github.com/castlabs/electron-releases/releases/download/"
     },
     "directories": {
       "output": "dist"
