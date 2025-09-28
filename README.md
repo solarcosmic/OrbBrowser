@@ -9,6 +9,8 @@ Orb is another browser inspired by the original (Cascade) but with more function
 
 Orb is written in Electron and contains basic Widevine DRM support.
 
+**NOTE:** If on Linux, please do not run this from a shell in Electron (e.g. Visual Studio Code) but rather something like the Terminal. [This is a known bug](https://github.com/castlabs/electron-releases/issues/165).
+
 ## What can Orb actually do?
 It can do almost everything Cascade can do:
 - Back/forward and reload navigation
@@ -21,7 +23,7 @@ It can do almost everything Cascade can do:
 - Pinned tabs
 
 However, it can also do these new extra features:
-- Ultimate Omnibox! (popup, search suggestions)
+- Ultimate Omnibox! (popup, search suggestions, search trends localised)
 - Basic Chrome extension support
 - Better navigation system
 - Cached favicons (cold URL loading) * (partial)
@@ -29,24 +31,7 @@ However, it can also do these new extra features:
 - Improved design
 
 ## How does Orb work?
-Orb uses `WebView`(s) (yep, again) but uses an entirely different and more workable backend. `WebContentView`(s) were used initially, but were later replaced as they were hard to work with.
+Orb uses `WebView`(s) (yep, again) but uses an entirely different and more workable backend. `WebContentView`(s) were used initially, but were later replaced as they were hard to work with. Worked out though!
 
-## How to Build (from Cascade instructions)
-Clone the repository and open a terminal window, but make sure you run the following commands with administrative privileges (e.g. Administrator on Windows, `sudo` on Linux/macOS).
-
-In the repository main folder (where this README and main.js should be) run the following command to install dependencies, this may take a while:
-```
-npm i
-```
-To test out Cascade without building it, you can run:
-```
-npm run start
-```
-Depending on what platform you want to build for:
-```
-npm run build            # Current OS
-npm run build-win        # Windows (win32)
-npm run build-linux      # Linux
-npm run build-mac        # macOS (darwin) untested
-```
-Running in administrative mode prevents any symbolic link errors. You can find the built binary/executable once done in `/dist`.
+## AI Usage (Copilot)
+AI was used - but mostly for debugging purposes and ideas - not huge chunks of code.
