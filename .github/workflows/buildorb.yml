@@ -26,7 +26,7 @@ jobs:
         run: npm run build-preload
 
       - name: Build Electron app (dist)
-        run: npm run app:dist
+        run: npm run app:dist -- --publish=never
 
       - name: Upload build artifacts
         uses: actions/upload-artifact@v4
