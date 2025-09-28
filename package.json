@@ -14,6 +14,7 @@
     "build-preload": "webpack"
   },
   "devDependencies": {
+    "electron": "38.0.0+wvcus",
     "@babel/core": "^7.28.4",
     "@babel/preset-env": "^7.28.3",
     "babel-loader": "^10.0.0",
@@ -25,7 +26,6 @@
   "dependencies": {
     "@ghostery/adblocker-electron": "^2.11.6",
     "countries-and-timezones": "^3.8.0",
-    "electron": "^38.0.0",
     "electron-chrome-context-menu": "^1.1.0",
     "electron-chrome-extensions": "^4.9.0",
     "electron-chrome-web-store": "^0.13.0",
@@ -36,7 +36,9 @@
     "appId": "net.solarcosmic.orbbrowser",
     "productName": "Orb Browser",
     "electronDownload": {
-      "mirror": "https://github.com/castlabs/electron-releases/releases/download/v"
+      "mirror": "https://github.com/castlabs/electron-releases/releases/download/",
+      "customDir": "v38.0.0%2Bwvcus",
+      "customFilename": "electron-v38.0.0+wvcus-linux-x64.zip"
     },
     "directories": {
       "output": "dist"
@@ -44,6 +46,10 @@
     "files": [
       "**/*",
       "!dist/**/*",
+      "dist/preload.bundle.js",
+      "dist/renderer.bundle.js",
+      "dist/preload.js",
+      "dist/preload.cjs",
       "!node_modules/.bin",
       "!**/*.md",
       "!**/test{,s}/**/*",
