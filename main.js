@@ -16,7 +16,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-import { app, BrowserWindow, WebContentsView, session, ipcMain, globalShortcut, Menu, webContents } from "electron";
+import { app, BrowserWindow, WebContentsView, session, ipcMain, globalShortcut, Menu, webContents, components } from "electron";
 import { buildChromeContextMenu } from "electron-chrome-context-menu";
 import { ElectronChromeExtensions } from "electron-chrome-extensions";
 import { installChromeWebStore } from "electron-chrome-web-store";
@@ -67,7 +67,7 @@ function createMainWindow() {
             console.log(null, "Permissions requested: ", extension, permissions);
         }
     });
-    const result = JSON.parse(store.get("orb_setup_data"));
+    const result = JSON.parse(store.get("orb_setup_data") || "{}");
     if (result) {
         if (result["complete_setup"] == true) {
             win = new BrowserWindow({
@@ -329,7 +329,8 @@ function maximiseOrb() {
 function quitOrbSetup(evt, args) {
     if (appSetup) {
         store.set("orb_setup_data", args);
-        appSetup.close();
+        app.relaunch();
+        app.exit(0);
     }
 }
 function toggleOrbSentinel(evt) {
