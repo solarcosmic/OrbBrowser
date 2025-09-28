@@ -268,10 +268,10 @@ function showMainDropdown() {
             }
         },
         {
-            label: "Help",
+            label: "Settings",
             click: () => {
                 if (win) win.webContents.send("send-to-renderer", JSON.stringify({
-                    action: "menu-help",
+                    action: "menu-settings",
                     success: true,
                     //tabId: args["tabId"]
                 }));

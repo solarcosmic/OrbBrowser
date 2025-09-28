@@ -39,3 +39,20 @@ export function ipcLinkOpen(url) {
     }
     return tabs.activateTab(tabs.createTabInstance(url));
 }
+
+export function createPinDivider() {
+    if (!document.getElementById("pinned-tab-divider")) {
+        console.log("pinned tab divider!");
+        const divider = document.createElement("hr");
+        divider.setAttribute("id", "pinned-tab-divider");
+        document.getElementById("pinned-tab-buttons").parentNode.insertBefore(divider, document.getElementById("pinned-tab-buttons").nextSibling);
+    }
+}
+
+export function removePinDivider() {
+    if (document.getElementById("pinned-tab-divider")) document.getElementById("pinned-tab-divider").remove();
+}
+
+export function getPinnedTabCount() {
+    return document.getElementById("pinned-tab-buttons").childElementCount;
+}

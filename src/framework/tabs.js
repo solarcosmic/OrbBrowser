@@ -139,6 +139,7 @@ export function pinTab(tabId) {
     if (!tabObject) return log("No tab!");
     tabObject["pinned"] = true;
     document.getElementById("pinned-tab-buttons").appendChild(button);
+    if (misc.getPinnedTabCount() > 0) misc.createPinDivider();
 }
 
 export function unpinTab(tabId) {
@@ -148,6 +149,7 @@ export function unpinTab(tabId) {
     if (!tabObject) return log("No tab!");
     tabObject["pinned"] = false;
     document.getElementById("tab-buttons").prepend(button);
+    if (misc.getPinnedTabCount() <= 0) misc.removePinDivider();
 }
 
 export function getTabObjectFromId(tabId) {

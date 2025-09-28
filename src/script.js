@@ -339,6 +339,8 @@ function doMenuAction(action) {
         misc.ipcLinkOpen("https://google.com");
     } else if (action == "about") {
         misc.ipcLinkOpen("orb://about");
+    } else if (action == "settings") {
+        misc.ipcLinkOpen("orb://settings");
     }
 }
 window.addEventListener("resize", utils.checkOmniFlow);
