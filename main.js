@@ -16,19 +16,28 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-const { app, BrowserWindow, WebContentsView, session, ipcMain, globalShortcut, components, Menu, webContents } = require("electron");
-const { default: buildChromeContextMenu } = require("electron-chrome-context-menu");
-const {ElectronChromeExtensions} = require("electron-chrome-extensions");
-const {installChromeWebStore} = require("electron-chrome-web-store");
-const {ElectronBlocker} = require("@ghostery/adblocker-electron");
-const path = require("node:path");
-const moment = require("moment-timezone");
-const ct = require("countries-and-timezones");
+import { app, BrowserWindow, WebContentsView, session, ipcMain, globalShortcut, Menu, webContents } from "electron";
+import { buildChromeContextMenu } from "electron-chrome-context-menu";
+import { ElectronChromeExtensions } from "electron-chrome-extensions";
+import { installChromeWebStore } from "electron-chrome-web-store";
+import { ElectronBlocker } from "@ghostery/adblocker-electron";
+import path from "node:path";
+import moment from "moment-timezone";
+import ct from "countries-and-timezones";
+import { fileURLToPath } from 'url';
+import { dirname } from 'path';
+import Store from "electron-store";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+const store = new Store();
 
 var win;
 var extensions;
 var browserSession;
 var sentinel;
+var curmenu;
+var appSetup;
 function createMainWindow() {
     browserSession = session.defaultSession;
     ElectronChromeExtensions.handleCRXProtocol(browserSession);
@@ -58,51 +67,70 @@ function createMainWindow() {
             console.log(null, "Permissions requested: ", extension, permissions);
         }
     });
-    /*ElectronBlocker.fromPrebuiltAdsAndTracking(fetch).then((blocker) => {
-        sentinel = blocker;
-        blocker.enableBlockingInSession(session.defaultSession);
-    })*/
-    win = new BrowserWindow({
-        width: 1280,
-        height: 720,
-        show: false,
-        frame: false,
-        webPreferences: {
-            preload: path.join(__dirname, "dist/preload.bundle.js"),
-            webviewTag: true,
-            session: browserSession,
-            nativeWindowOpen: true,
-        },
-    })
-    win.setMenu(null);
-    win.setBackgroundColor("#000000");
-    win.loadFile("src/index.html");
-    win.webContents.openDevTools();
-    /*win.webContents.on("did-finish-load", function() {
-        win.show();
-    })*/
-    win.show();
-    win.on("focus", () => {
-        if (win) win.webContents.send("app-focus");
-    });
-    win.on("blur", () => {
-        if (win) win.webContents.send("app-blur");
-    });
-    /* https://github.com/electron/electron/issues/40613 */
-    /* https://github.com/solarcosmic/CascadeBrowser/blob/main/main.js */
-    app.on('web-contents-created', (e, contents) => {
-        if (contents.getType() == 'webview') {
-        contents.setWindowOpenHandler((details) => {
-            console.log(details.url);
-            win.webContents.send("open-link", details.url);
-        })
+    const result = JSON.parse(store.get("orb_setup_data"));
+    if (result) {
+        if (result["complete_setup"] == true) {
+            win = new BrowserWindow({
+                width: 1280,
+                height: 720,
+                show: false,
+                frame: false,
+                webPreferences: {
+                    preload: path.join(__dirname, "dist/preload.bundle.js"),
+                    webviewTag: true,
+                    session: browserSession,
+                    nativeWindowOpen: true,
+                },
+            })
+            win.setMenu(null);
+            win.setBackgroundColor("#000000");
+            win.loadFile("src/index.html");
+            win.webContents.openDevTools();
+            /*win.webContents.on("did-finish-load", function() {
+                win.show();
+            })*/
+            win.show();
+            win.on("focus", () => {
+                if (win) win.webContents.send("app-focus");
+            });
+            win.on("blur", () => {
+                if (win) win.webContents.send("app-blur");
+            });
+            /* https://github.com/electron/electron/issues/40613 */
+            /* https://github.com/solarcosmic/CascadeBrowser/blob/main/main.js */
+            app.on('web-contents-created', (e, contents) => {
+                if (contents.getType() == 'webview') {
+                contents.setWindowOpenHandler((details) => {
+                    console.log(details.url);
+                    win.webContents.send("open-link", details.url);
+                })
+                }
+            });
+            installChromeWebStore({session: browserSession});
+            ElectronBlocker.fromPrebuiltAdsAndTracking(fetch).then((blocker) => {
+                sentinel = blocker;
+                if (result["orb_sentinel"] == true) {
+                    blocker.enableBlockingInSession(session.defaultSession);
+                } else {
+                    blocker.disableBlockingInSession(session.defaultSession);
+                }
+            });
+        } else {
+            appSetup = new BrowserWindow({
+                width: 640,
+                height: 480,
+                show: true,
+                frame: false,
+                backgroundColor: "#000000",
+                webPreferences: {
+                    preload: path.join(__dirname, "dist/preload.bundle.js"),
+                    webviewTag: true,
+                    session: browserSession,
+                    nativeWindowOpen: true,
+                },
+            });
+            appSetup.loadFile("src/welcome.html");
         }
-    });
-    installChromeWebStore({session: browserSession});
-}
-function onTabCreate(wc) {
-    if (extensions && wc && wc.getType && wc.getType() == "webview" && win && typeof win.id != "undefined") {
-        extensions.addTab(wc, win);
     }
 }
 
@@ -118,26 +146,34 @@ app.whenReady().then(async () => {
     ipcMain.on("renderer:print-tab", printTab);
     ipcMain.on("main:quit-orb", quitOrb);
     ipcMain.handle("misc:get-trending-searches", getTrendingSearches);
+    ipcMain.on("main:minimise-orb", minimiseOrb);
+    ipcMain.on("main:maximise-orb", maximiseOrb);
+    ipcMain.handle("misc:get-country-code", getCountryCode);
+    ipcMain.on("main:quit-orb-setup", quitOrbSetup)
+    ipcMain.handle("misc:orb-sentinel-enabled", toggleOrbSentinel);
+    ipcMain.handle("misc:get-orb-sentinel-status", getOrbSentinelStatus);
 });
 app.on("web-contents-created", (evt, webContents) => {
-    onTabCreate(webContents);
-    webContents.on("context-menu", (e, params) => {
-        buildChromeContextMenu({
-            params,
-            webContents,
-            openLink: (url, dis) => {
-                if (win) win.webContents.send("open-link", url);
+    if (extensions && webContents && webContents.getType && webContents.getType() == "webview" && win && typeof win.id != "undefined") {
+        extensions.addTab(webContents, win);
+        webContents.on("context-menu", (e, params) => {
+            buildChromeContextMenu({
+                params,
+                webContents,
+                openLink: (url, dis) => {
+                    if (win) win.webContents.send("open-link", url);
+                }
+            }).popup();
+        });
+        webContents.on("before-mouse-event", (evt, mouse) => { // TODO: check to make sure this won't memory leak?
+            if (mouse.type == "mouseDown") {
+                if (win) win.webContents.send("mouse-click", mouse.x, mouse.y); // can add x and y args later
             }
-        }).popup();
-    });
-    webContents.on("before-mouse-event", (evt, mouse) => { // TODO: check to make sure this won't memory leak?
-        if (mouse.type == "mouseDown") {
-            if (win) win.webContents.send("mouse-click", mouse.x, mouse.y); // can add x and y args later
-        }
-    });
+        });
+    }
 });
 function handleRendererLog(evt, txt) {
-    console.log("[net.solarcosmic.orbbrowser.main]: " + txt);
+    console.log(txt);
 }
 function openLinkInNewTab(evt, url) {
     win.webContents.send("open-link", url);
@@ -151,7 +187,6 @@ function clearBrowsingHistory() {
 function contextMenuShow(evt, menu, args) {
     console.log(menu, args);
     // right-click-button is the name
-    var curmenu = null;
     if (args["isPinned"] == true) {
         curmenu = Menu.buildFromTemplate([
             {
@@ -267,7 +302,9 @@ function quitOrb() {
 }
 /* from https://github.com/vireshshah/js-user-country/blob/master/src/index.js */
 function getCountryCode() {
-    return ct.getCountryForTimezone(moment.tz.guess());
+    const code = ct.getCountryForTimezone(moment.tz.guess());
+    console.log(code);
+    return code;
 }
 async function getTrendingSearches(evt, country) {
     const res = await fetch("https://trends.google.com/trending/rss?geo=" + country, {
@@ -277,4 +314,51 @@ async function getTrendingSearches(evt, country) {
     });
     if (!res.ok) console.log("Error while fetching trending searches: " + res.status);
     return await res.text();
+}
+function minimiseOrb() {
+    if (win) win.minimize();
+}
+function maximiseOrb() {
+    if (win) {
+        if (!win.isMaximized()) {
+            win.maximize();
+        } else {
+            win.unmaximize();
+        }
+    }
+}
+function quitOrbSetup(evt, args) {
+    if (appSetup) {
+        store.set("orb_setup_data", args);
+        appSetup.close();
+    }
+}
+function toggleOrbSentinel(evt) {
+    const result = JSON.parse(store.get("orb_setup_data"));
+    if (result) {
+        if (result["orb_sentinel"] == true) {
+            console.log("[net.solarcosmic.orbbrowser.main:sentinel] Orb Sentinel is currently true - disabling now!");
+            sentinel.disableBlockingInSession(session.defaultSession);
+            store.set("orb_setup_data", JSON.stringify({
+                complete_setup: true,
+                orb_sentinel: false
+            }));
+            return false;
+        } else {
+            console.log("[net.solarcosmic.orbbrowser.main:sentinel] Orb Sentinel is currently false - enabling now!");
+            sentinel.enableBlockingInSession(session.defaultSession);
+            store.set("orb_setup_data", JSON.stringify({
+                complete_setup: true,
+                orb_sentinel: true
+            }));
+            return true;
+        }
+    }
+    return false;
+}
+function getOrbSentinelStatus(evt) {
+    const result = JSON.parse(store.get("orb_setup_data"));
+    if (result) {
+        return result["orb_sentinel"];
+    }
 }

@@ -45,21 +45,68 @@
             flex-direction: column;
             border-radius: 8px;
         }
+        #orb-settings {
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+            margin-top: 30px;
+            width: 100%;
+            align-items: flex-start;
+        }
+        .setting-item {
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            justify-content: space-between;
+            padding: 18px 20px;
+            min-width: 600px;
+            max-width: 600px;
+            margin-bottom: 0;
+            width: 100%;
+        }
+        .setting-toggle {
+            align-self: flex-end;
+            margin-top: 0;
+            width: 100px;
+            height: 40px;
+            font-size: 12px;
+        }
+        .light-up-toggle {
+            border-color: #0066ff;
+        }
+        .light-up-toggle:hover {
+            border-color: #00aeff;
+        }
+        button {
+            padding: 8px 8px;
+            background-color: #00000000;
+            color: #ffffff;
+            border-radius: 8px;
+            border: 1px solid #ffffff5e;
+        }
+        button:hover {
+            border: 1px solid #ffffff27;
+        }
+        .light-up-toggle {
+            border-color: #0066ff;
+        }
+        .light-up-toggle:hover {
+            border-color: #00aeff;
+        }
     </style>
     <link rel="icon" type="image/svg" href="../assets/gear-solid-full.svg">
 </head>
 <body>
     <h1>Orb Settings</h1>
-    <button id="clear-browsing-data">Clear Browsing Data</button>
     <div id="container">
-        <div history-date="23/05/2025">
-            <p>Today - Saturday 23 August 2025</p>
-            <ul class="vertical-list">
-            </ul>
-        </div>
-        <div id="orb-sentinel">
-            <span style="font-size: 25px;">Orb Sentinel</span>
-            <span>Block ads and trackers, all built in to your browser.</span>
+        <div id="orb-settings">
+            <div class="setting-item">
+                <div class="setting-texts">
+                    <span style="font-size: 20px;">Orb Sentinel</span><br>
+                    <span>Blocks ads and trackers when you browse.</span>
+                </div>
+                <button class="setting-toggle" id="orb-sentinel-toggle">Disabled</button>
+            </div>
         </div>
     </div>
     <script>
@@ -71,6 +118,29 @@
                 return str;
             }
         }
+        document.getElementById("orb-sentinel-toggle").addEventListener("click", async () => {
+            console.log("clicked!");
+            const resp = await window.electronAPI.toggleOrbSentinel();
+            console.log(resp);
+            if (resp) {
+                document.getElementById("orb-sentinel-toggle").textContent = "Enabled";
+                document.getElementById("orb-sentinel-toggle").classList.add("light-up-toggle");
+            } else {
+                document.getElementById("orb-sentinel-toggle").textContent = "Disabled";
+                document.getElementById("orb-sentinel-toggle").classList.remove("light-up-toggle");
+            }
+        });
+        document.addEventListener("DOMContentLoaded", async () => {
+            const resp = await window.electronAPI.getOrbSentinelStatus();
+            console.log(resp);
+            if (resp) {
+                document.getElementById("orb-sentinel-toggle").textContent = "Enabled";
+                document.getElementById("orb-sentinel-toggle").classList.add("light-up-toggle");
+            } else {
+                document.getElementById("orb-sentinel-toggle").textContent = "Disabled";
+                document.getElementById("orb-sentinel-toggle").classList.remove("light-up-toggle");
+            }
+        })
     </script>
 </body>
 </html>
