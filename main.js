@@ -67,6 +67,10 @@ function createMainWindow() {
             console.log(null, "Permissions requested: ", extension, permissions);
         }
     });
+    /*store.set("orb_setup_data", JSON.stringify({
+        complete_setup: false,
+        orb_sentinel: false
+    }));*/
     const result = JSON.parse(store.get("orb_setup_data") || "{}");
     if (result) {
         if (result["complete_setup"] == true) {

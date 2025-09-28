@@ -1,7 +1,7 @@
 {
   "name": "orbbrowser",
   "productName": "Orb Browser",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "Orb Browser",
   "license": "GPL-3.0-only",
   "author": "solarcosmic",
@@ -14,11 +14,11 @@
     "build-preload": "webpack"
   },
   "devDependencies": {
-    "electron": "38.0.0+wvcus",
     "@babel/core": "^7.28.4",
     "@babel/preset-env": "^7.28.3",
     "babel-loader": "^10.0.0",
     "copy-webpack-plugin": "^13.0.1",
+    "electron": "github:castlabs/electron-releases#v38.0.0+wvcus",
     "electron-builder": "^26.0.12",
     "webpack": "^5.101.3",
     "webpack-cli": "^6.0.1"
@@ -38,7 +38,7 @@
     "electronDownload": {
       "mirror": "https://github.com/castlabs/electron-releases/releases/download/",
       "customDir": "v38.0.0%2Bwvcus",
-      "customFilename": "electron-v38.0.0+wvcus-linux-x64.zip"
+      "customFilename": "electron-v38.0.0+wvcus-win32-x64.zip"
     },
     "directories": {
       "output": "dist"
