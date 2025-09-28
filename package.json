@@ -36,9 +36,7 @@
     "appId": "net.solarcosmic.orbbrowser",
     "productName": "Orb Browser",
     "electronDownload": {
-      "mirror": "https://github.com/castlabs/electron-releases/releases/download/",
-      "customDir": "v38.0.0%2Bwvcus",
-      "customFilename": "electron-v38.0.0+wvcus-win32-x64.zip"
+      "mirror": "https://github.com/castlabs/electron-releases/releases/download/"
     },
     "directories": {
       "output": "dist"
