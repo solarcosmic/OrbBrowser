@@ -31,5 +31,6 @@ contextBridge.exposeInMainWorld("electronAPI", {
     maximiseOrb: () => ipcRenderer.send("main:maximise-orb"),
     getCountryCode: () => ipcRenderer.invoke("misc:get-country-code"),
     quitOrbSetup: (args) => ipcRenderer.send("main:quit-orb-setup", args),
-    toggleOrbSentinel: (bool) => ipcRenderer.invoke("misc:orb-sentinel-enabled", bool)
+    toggleOrbSentinel: () => ipcRenderer.invoke("misc:orb-sentinel-enabled"),
+    getOrbSentinelStatus: () => ipcRenderer.invoke("misc:get-orb-sentinel-status")
 });

@@ -118,7 +118,29 @@
                 return str;
             }
         }
-
+        document.getElementById("orb-sentinel-toggle").addEventListener("click", async () => {
+            console.log("clicked!");
+            const resp = await window.electronAPI.toggleOrbSentinel();
+            console.log(resp);
+            if (resp) {
+                document.getElementById("orb-sentinel-toggle").textContent = "Enabled";
+                document.getElementById("orb-sentinel-toggle").classList.add("light-up-toggle");
+            } else {
+                document.getElementById("orb-sentinel-toggle").textContent = "Disabled";
+                document.getElementById("orb-sentinel-toggle").classList.remove("light-up-toggle");
+            }
+        });
+        document.addEventListener("DOMContentLoaded", async () => {
+            const resp = await window.electronAPI.getOrbSentinelStatus();
+            console.log(resp);
+            if (resp) {
+                document.getElementById("orb-sentinel-toggle").textContent = "Enabled";
+                document.getElementById("orb-sentinel-toggle").classList.add("light-up-toggle");
+            } else {
+                document.getElementById("orb-sentinel-toggle").textContent = "Disabled";
+                document.getElementById("orb-sentinel-toggle").classList.remove("light-up-toggle");
+            }
+        })
     </script>
 </body>
 </html>

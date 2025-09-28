@@ -273,7 +273,7 @@ export function createTabInstance(url = "https://google.com") {
     for (const [protocol, protoItems] of Object.entries(customLinks.list)) {
         for (const [linkName, linkItem] of Object.entries(protoItems)) {
             if (resolvedUrl.replace(/^.*[\\/]/, '') == linkItem.file) {
-                preloadPath = "../preload.js";
+                preloadPath = "../dist/preload.bundle.js";
             }
         }
     }
