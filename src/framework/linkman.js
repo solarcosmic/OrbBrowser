@@ -15,24 +15,19 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
-const path = require("path");
-const CopyWebpackPlugin = require("copy-webpack-plugin");
 
-module.exports = {
-    target: "electron-preload",
-    entry: "./preload.js",
-    output: {
-        filename: "preload.bundle.js",
-        path: path.resolve(__dirname, "dist"),
-    },
-    plugins: [
-        new CopyWebpackPlugin({
-            patterns: [
-                { from: require.resolve("./node_modules/electron-chrome-extensions/dist/chrome-extension-api.preload.js"), to: "preload.js" }
-            ]
-        })
-    ],
-    resolve: {
-        extensions: [".js"]
-    },
+import * as utils from "./utils.js";
+import * as customLinks from "./customLinks.js";
+import * as omnibox from "./omnibox.js";
+import * as misc from "./misc.js";
+import * as navigation from "./navigation.js";
+import * as tabs from "./tabs.js";
+
+export {
+    utils,
+    customLinks,
+    tabs,
+    navigation,
+    misc,
+    omnibox
 };

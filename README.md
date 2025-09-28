@@ -20,12 +20,11 @@ It can do almost everything Cascade can do:
 - Widevine DRM support (Windows/macOS)
 - Pinned tabs
 
-However, it can also do these new extra features (ones with * are planned):
+However, it can also do these new extra features:
 - Ultimate Omnibox! (popup, search suggestions)
-- Tab folders *
-- Basic Chrome extension support *
+- Basic Chrome extension support
 - Better navigation system
-- Cached favicons (cold URL loading) *
+- Cached favicons (cold URL loading) * (partial)
 - Animations!
 - Improved design
 
