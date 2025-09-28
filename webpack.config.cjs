@@ -19,20 +19,27 @@ const path = require("path");
 const CopyWebpackPlugin = require("copy-webpack-plugin");
 
 module.exports = {
+    mode: "development",
     target: "electron-preload",
-    entry: "./preload.js",
+    entry: {
+        preload: "./preload.cjs",
+        renderer: "./src/script.js",
+    },
     output: {
-        filename: "preload.bundle.js",
+        filename: "[name].bundle.js",
         path: path.resolve(__dirname, "dist"),
     },
     plugins: [
         new CopyWebpackPlugin({
             patterns: [
-                { from: require.resolve("./node_modules/electron-chrome-extensions/dist/chrome-extension-api.preload.js"), to: "preload.js" }
+                { from: require.resolve("./node_modules/electron-chrome-extensions/dist/chrome-extension-api.preload.js"), to: "preload.cjs" }
             ]
         })
     ],
     resolve: {
-        extensions: [".js"]
+        extensions: [".js"],
+        alias: {
+            framework: path.resolve(__dirname, "src/framework/")
+        }
     },
 };

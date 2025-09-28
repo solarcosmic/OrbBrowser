@@ -44,4 +44,10 @@ contextBridge.exposeInMainWorld("electronAPI", {
     printTab: (wvId) => ipcRenderer.send("renderer:print-tab", wvId),
     quitOrb: () => ipcRenderer.send("main:quit-orb"),
     getTrendingSearches: (country) => ipcRenderer.invoke("misc:get-trending-searches", country),
+    minimiseOrb: () => ipcRenderer.send("main:minimise-orb"),
+    maximiseOrb: () => ipcRenderer.send("main:maximise-orb"),
+    getCountryCode: () => ipcRenderer.invoke("misc:get-country-code"),
+    quitOrbSetup: (args) => ipcRenderer.send("main:quit-orb-setup", args),
+    toggleOrbSentinel: () => ipcRenderer.invoke("misc:orb-sentinel-enabled"),
+    getOrbSentinelStatus: () => ipcRenderer.invoke("misc:get-orb-sentinel-status")
 });
