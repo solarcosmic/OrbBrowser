@@ -28,6 +28,12 @@ import { fileURLToPath } from 'url';
 import { dirname } from 'path';
 import Store from "electron-store";
 
+// for Arch Linux installs, only enable when testing on Arch Linux or a Linux distro that doesn't let Orb start
+/*app.commandLine.appendSwitch("no-sandbox");
+app.commandLine.appendSwitch("disable-gpu");
+app.commandLine.appendSwitch("disable-gpu-sandbox");
+app.commandLine.appendSwitch("disable-software-rasterizer");*/
+
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 const store = new Store();

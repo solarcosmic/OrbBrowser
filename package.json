@@ -9,6 +9,7 @@
   "main": "main.js",
   "scripts": {
     "start": "webpack && electron .",
+    "start-sandbox": "webpack && electron . --no-sandbox --no-zygote",
     "app:dir": "electron-builder --dir",
     "app:dist": "electron-builder",
     "build-preload": "webpack"
