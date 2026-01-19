@@ -42,6 +42,7 @@ var win;
 var extensions;
 var browserSession;
 var sentinel;
+var theme;
 var curmenu;
 var appSetup;
 function createMainWindow() {
@@ -162,6 +163,8 @@ app.whenReady().then(async () => {
     ipcMain.on("main:quit-orb-setup", quitOrbSetup)
     ipcMain.handle("misc:orb-sentinel-enabled", toggleOrbSentinel);
     ipcMain.handle("misc:get-orb-sentinel-status", getOrbSentinelStatus);
+    ipcMain.handle("misc:orb-theme-enabled", toggleOrbTheme);
+    ipcMain.handle("misc:get-orb-theme-status", getOrbThemeStatus);
 });
 app.on("web-contents-created", (evt, webContents) => {
     if (extensions && webContents && webContents.getType && webContents.getType() == "webview" && win && typeof win.id != "undefined") {
@@ -352,7 +355,8 @@ function toggleOrbSentinel(evt) {
             sentinel.disableBlockingInSession(session.defaultSession);
             store.set("orb_setup_data", JSON.stringify({
                 complete_setup: true,
-                orb_sentinel: false
+                orb_sentinel: false,
+                orb_theme: result["orb_theme"] || true
             }));
             return false;
         } else {
@@ -360,12 +364,44 @@ function toggleOrbSentinel(evt) {
             sentinel.enableBlockingInSession(session.defaultSession);
             store.set("orb_setup_data", JSON.stringify({
                 complete_setup: true,
-                orb_sentinel: true
+                orb_sentinel: true,
+                orb_theme: result["orb_theme"] || true
             }));
             return true;
         }
     }
     return false;
+}
+function toggleOrbTheme(evt) {
+    const result = JSON.parse(store.get("orb_setup_data"));
+    if (result) {
+        if (result["orb_theme"] == "dark") {
+            console.log("[net.solarcosmic.orbbrowser.main:theme] Orb Theme is currently dark - changing to light now!");
+            theme = "light";
+            store.set("orb_setup_data", JSON.stringify({
+                complete_setup: true,
+                orb_sentinel: result["orb_sentinel"] || false,
+                orb_theme: "light"
+            }));
+            return "light";
+        } else {
+            console.log("[net.solarcosmic.orbbrowser.main:theme] Orb Theme is currently light - changing to dark now!");
+            theme = "dark";
+            store.set("orb_setup_data", JSON.stringify({
+                complete_setup: true,
+                orb_sentinel: result["orb_sentinel"] || false,
+                orb_theme: "dark"
+            }));
+            return "dark";
+        }
+    }
+    return false;
+}
+function getOrbThemeStatus(evt) {
+    const result = JSON.parse(store.get("orb_setup_data"));
+    if (result) {
+        return result["orb_theme"];
+    }
 }
 function getOrbSentinelStatus(evt) {
     const result = JSON.parse(store.get("orb_setup_data"));

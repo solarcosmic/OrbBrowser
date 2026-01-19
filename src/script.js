@@ -331,6 +331,7 @@ window.electronAPI.sendToRenderer((data) => {
     }
 });
 
+// is this function being used?
 function findInPage(txt) {
     const tab = tabs.getActiveTab();
     const view = tab.view;

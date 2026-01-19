@@ -67,7 +67,20 @@
                 document.getElementById("orb-sentinel-toggle").classList.remove("light-up-toggle");
             }
         });
+        document.getElementById("orb-theme-toggle").addEventListener("click", async () => {
+            console.log("clicked!");
+            const resp = await window.electronAPI.toggleOrbTheme();
+            console.log(resp);
+            if (resp == "dark") {
+                document.getElementById("orb-theme-toggle").textContent = "Dark";
+                document.getElementById("orb-theme-toggle").classList.add("light-up-toggle");
+            } else {
+                document.getElementById("orb-theme-toggle").textContent = "Light";
+                document.getElementById("orb-theme-toggle").classList.remove("light-up-toggle");
+            }
+        });
         document.addEventListener("DOMContentLoaded", async () => {
+            // Orb: Sentinel
             const resp = await window.electronAPI.getOrbSentinelStatus();
             console.log(resp);
             if (resp) {
@@ -77,7 +90,17 @@
                 document.getElementById("orb-sentinel-toggle").textContent = "Disabled";
                 document.getElementById("orb-sentinel-toggle").classList.remove("light-up-toggle");
             }
-        })
+            // Orb: Theme (light/dark) - might add more later
+            const resp2 = await window.electronAPI.getOrbThemeStatus();
+            console.log("Orb: Theme (light/dark): " + resp2);
+            if (resp2 == "dark") {
+                document.getElementById("orb-theme-toggle").textContent = "Dark";
+                document.getElementById("orb-theme-toggle").classList.add("light-up-toggle");
+            } else {
+                document.getElementById("orb-theme-toggle").textContent = "Light";
+                document.getElementById("orb-theme-toggle").classList.remove("light-up-toggle");
+            }
+        });
     </script>
 </body>
 </html>
