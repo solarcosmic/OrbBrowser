@@ -315,15 +315,13 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
     utils.checkTabTitleFlow();
 })
-document.addEventListener("DOMContentLoaded", () => {
+document.addEventListener("DOMContentLoaded", async () => {
     // todo: replace with actual logic to get it from main
-    const setupData = JSON.parse(localStorage.getItem("orb:setup_data"));
-    if (setupData?.orb_theme == "dark" || setupData?.orb_theme == null) {
-        console.log("Theme is dark or null. Loading dark theme.");
-        document.getElementById("theme-style").href = "theme_dark.css";
-    } else if (setupData?.orb_theme == "light") {
-        console.log("Theme is light. Loading light theme.");
+    const orbTheme = await window.electronAPI.getOrbThemeStatus();
+    if (orbTheme == "light") {
         document.getElementById("theme-style").href = "theme_light.css";
+    } else {
+        document.getElementById("theme-style").href = "theme_dark.css";
     }
 });
 window.electronAPI.sendToRenderer((data) => {
