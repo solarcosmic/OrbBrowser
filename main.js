@@ -93,6 +93,7 @@ function createMainWindow() {
                 },
             })
             win.setMenu(null);
+            win.webContents.openDevTools();
             win.setBackgroundColor("#000000");
             win.loadFile("src/index.html");
             /*win.webContents.on("did-finish-load", function() {
