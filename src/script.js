@@ -324,6 +324,13 @@ document.addEventListener("DOMContentLoaded", async () => {
         document.getElementById("theme-style").href = "theme_dark.css";
     }
 });
+window.electronAPI.onUpdateThemeImmediately((theme) => {
+    if (theme == "light") {
+        document.getElementById("theme-style").href = "theme_light.css";
+    } else {
+        document.getElementById("theme-style").href = "theme_dark.css";
+    }
+})
 window.electronAPI.sendToRenderer((data) => {
     const json = JSON.parse(data);
     if (json.action == "clear-browsing-data") {

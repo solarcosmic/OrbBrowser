@@ -383,7 +383,6 @@ function toggleOrbTheme(evt) {
                 orb_sentinel: result["orb_sentinel"] || false,
                 orb_theme: "light"
             }));
-            return "light";
         } else {
             console.log("[net.solarcosmic.orbbrowser.main:theme] Orb Theme is currently light - changing to dark now!");
             theme = "dark";
@@ -392,8 +391,9 @@ function toggleOrbTheme(evt) {
                 orb_sentinel: result["orb_sentinel"] || false,
                 orb_theme: "dark"
             }));
-            return "dark";
         }
+        if (win) win.webContents.send("theme-update-immediately", theme);
+        return theme;
     }
     return false;
 }

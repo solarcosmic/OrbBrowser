@@ -51,5 +51,6 @@ contextBridge.exposeInMainWorld("electronAPI", {
     toggleOrbSentinel: () => ipcRenderer.invoke("misc:orb-sentinel-enabled"),
     getOrbSentinelStatus: () => ipcRenderer.invoke("misc:get-orb-sentinel-status"),
     toggleOrbTheme: () => ipcRenderer.invoke("misc:orb-theme-enabled"),
-    getOrbThemeStatus: () => ipcRenderer.invoke("misc:get-orb-theme-status")
+    getOrbThemeStatus: () => ipcRenderer.invoke("misc:get-orb-theme-status"),
+    onUpdateThemeImmediately: (callback) => ipcRenderer.on("theme-update-immediately", (_evt, theme) => callback(theme)),
 });
