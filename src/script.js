@@ -315,21 +315,19 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
     utils.checkTabTitleFlow();
 })
-document.addEventListener("DOMContentLoaded", async () => {
-    // todo: replace with actual logic to get it from main
-    const orbTheme = await window.electronAPI.getOrbThemeStatus();
-    if (orbTheme == "light") {
-        document.getElementById("theme-style").href = "theme_light.css";
-    } else {
-        document.getElementById("theme-style").href = "theme_dark.css";
-    }
-});
-window.electronAPI.onUpdateThemeImmediately((theme) => {
+function changeTheme(theme) {
     if (theme == "light") {
         document.getElementById("theme-style").href = "theme_light.css";
     } else {
         document.getElementById("theme-style").href = "theme_dark.css";
     }
+}
+document.addEventListener("DOMContentLoaded", async () => {
+    const orbTheme = await window.electronAPI.getOrbThemeStatus();
+    changeTheme(orbTheme);
+});
+window.electronAPI.onUpdateThemeImmediately((theme) => {
+    changeTheme(theme);
 })
 window.electronAPI.sendToRenderer((data) => {
     const json = JSON.parse(data);
