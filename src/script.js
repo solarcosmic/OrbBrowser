@@ -256,15 +256,26 @@ document.getElementById("url-box").addEventListener("input", () => {
             }
     }
 })
+var theme = "light";
 window.electronAPI.onAppBlur(() => {
     console.log("app blur");
-    document.body.style.backgroundColor = "#191919";
-    document.getElementById("sidebar").style.backgroundColor = "#161616";
+    if (theme == "light") {
+        document.body.style.backgroundColor = "#bbbbbb";
+        document.getElementById("sidebar").style.backgroundColor = "#8d8d8d";
+    } else {
+        document.body.style.backgroundColor = "#191919";
+        document.getElementById("sidebar").style.backgroundColor = "#161616";
+    }
 })
 window.electronAPI.onAppFocus(() => {
     console.log("app focus");
-    document.body.style.backgroundColor = "#0f0f0f";
-    document.getElementById("sidebar").style.backgroundColor = "#0c0c0c";
+    if (theme == "light") {
+        document.body.style.backgroundColor = "#f0f0f0";
+        document.getElementById("sidebar").style.backgroundColor = "#c0c0c0";
+    } else {
+        document.body.style.backgroundColor = "#0f0f0f";
+        document.getElementById("sidebar").style.backgroundColor = "#0c0c0c";
+    }
 })
 
 window.addEventListener("beforeunload", () => {

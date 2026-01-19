@@ -58,11 +58,15 @@
             width: 100%;
         }
         .setting-toggle {
+            color: #000000;
             align-self: flex-end;
             margin-top: 0;
             width: 100px;
             height: 40px;
             font-size: 12px;
+        }
+        .setting-toggle:not(.light-up-toggle) {
+            border-color: #000000;
         }
         .light-up-toggle {
             border-color: #0066ff;
@@ -85,4 +89,23 @@
         }
         .light-up-toggle:hover {
             border-color: #00aeff;
+        }
+        .setting-icon {
+            width: 14px;
+            height: 14px;
+            margin-right: 8px;
+        }
+        .setting-item {
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            justify-content: space-between;
+            gap: 24px;
+            padding: 18px 20px;
+            min-width: 600px;
+            max-width: 600px;
+            width: 100%;
+        }
+        .setting-texts {
+            flex: 1;
         }
