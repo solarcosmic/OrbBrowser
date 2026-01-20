@@ -165,6 +165,8 @@ app.whenReady().then(async () => {
     ipcMain.handle("misc:get-orb-sentinel-status", getOrbSentinelStatus);
     ipcMain.handle("misc:orb-theme-enabled", toggleOrbTheme);
     ipcMain.handle("misc:get-orb-theme-status", getOrbThemeStatus);
+    ipcMain.handle("misc:orb-sidebar-lr-toggle", toggleOrbSidebarPosition);
+    ipcMain.handle("misc:get-orb-sidebar-lr-status", getOrbSidebarPositionStatus);
 });
 app.on("web-contents-created", (evt, webContents) => {
     if (extensions && webContents && webContents.getType && webContents.getType() == "webview" && win && typeof win.id != "undefined") {
@@ -428,4 +430,25 @@ function getOrbSentinelStatus(evt) {
     if (result) {
         return result["orb_sentinel"];
     }
+}
+function toggleOrbSidebarPosition(evt) {
+    const result = JSON.parse(store.get("orb_setup_data"));
+    const newPos = result["orb_sidebar_position"] == "Left" ? "Right" : "Left";
+    store.set("orb_setup_data", JSON.stringify({
+        complete_setup: true,
+        orb_sentinel: result["orb_sentinel"] || false,
+        orb_theme: result["orb_theme"] || "dark",
+        orb_sidebar_position: newPos
+    }));
+    if (win) win.webContents.send("send-to-renderer", JSON.stringify({
+        action: "change-sidebar-position",
+        success: true,
+        position: newPos
+    }));
+    if (win) win.webContents.send("toggle-sidebar-lr-immediately", newPos);
+    return newPos;
+}
+function getOrbSidebarPositionStatus(evt) {
+    const result = JSON.parse(store.get("orb_setup_data"));
+    return result["orb_sidebar_position"] || "Left";
 }

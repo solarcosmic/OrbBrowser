@@ -85,6 +85,22 @@
                     //window.electronAPI.toggleOrbTheme(isDark ? "dark" : "light");
                 }
             },
+            {
+                id: "orb-sidebar-lr-toggle",
+                label: "Sidebar Position",
+                description: "Change the sidebar to be positioned either left or right.",
+                icon: "../assets/moon-solid-full.svg",
+                getStatus: () => window.electronAPI.getOrbSidebarPositionStatus(),
+                toggle: async () => { return await window.electronAPI.toggleOrbSidebarPosition() }, // is async needed? should test
+                onUpdate: (option, el) => {
+                    console.log(option, el);
+                    console.log("updated: orb-sidebar-lr-toggle");
+                    const isDark = option == "Left";
+                    el.textContent = isDark ? "Left" : "Right";
+                    el.classList.toggle("light-up-toggle", isDark);
+                    //window.electronAPI.toggleOrbTheme(isDark ? "dark" : "light");
+                }
+            },
         ];
 
         function setupButtons() {

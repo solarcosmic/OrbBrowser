@@ -53,4 +53,7 @@ contextBridge.exposeInMainWorld("electronAPI", {
     toggleOrbTheme: () => ipcRenderer.invoke("misc:orb-theme-enabled"),
     getOrbThemeStatus: () => ipcRenderer.invoke("misc:get-orb-theme-status"),
     onUpdateThemeImmediately: (callback) => ipcRenderer.on("theme-update-immediately", (_evt, theme) => callback(theme)),
+    toggleOrbSidebarPosition: () => ipcRenderer.invoke("misc:orb-sidebar-lr-toggle"),
+    getOrbSidebarPositionStatus: () => ipcRenderer.invoke("misc:get-orb-sidebar-lr-status"),
+    onToggleSidebarPositionImmediately: (callback) => ipcRenderer.on("toggle-sidebar-lr-immediately", (_evt, theme) => callback(theme)),
 });

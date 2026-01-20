@@ -344,6 +344,8 @@ function changeTheme(theme) {
 document.addEventListener("DOMContentLoaded", async () => {
     const orbTheme = await window.electronAPI.getOrbThemeStatus();
     changeTheme(orbTheme);
+    const sidebarPosition = await window.electronAPI.getOrbSidebarPositionStatus();
+    toggleSidebarPosition(sidebarPosition);
     const timeThen = Date.now();
     const loadedBangs = await utils.getBangs();
     if (!loadedBangs) return log("Bangs failed to load!");
@@ -370,6 +372,8 @@ window.electronAPI.sendToRenderer((data) => {
     }  else if (json.action == "duplicate-tab") {
         if (!json.tabId) return log("Missing tab ID on pin tab!");
         tabs.activateTab(tabs.createTabInstance(tabs.getTabObjectFromId(json.tabId).view.getURL()));
+    } else if (json.action == "change-sidebar-position") {
+        console.log(json);
     } else if (json.action.startsWith("menu-")) {
         doMenuAction(json.action.slice(5));
     }
@@ -380,6 +384,17 @@ function findInPage(txt) {
     const tab = tabs.getActiveTab();
     const view = tab.view;
 }
+
+function toggleSidebarPosition(position) {
+    if (position == "Right") {
+        document.getElementById("container").style.flexDirection = "row-reverse";
+    } else {
+        document.getElementById("container").style.flexDirection = "row";
+    }
+}
+window.electronAPI.onToggleSidebarPositionImmediately((position) => { // super long name
+    toggleSidebarPosition(position);
+})
 
 function doMenuAction(action) {
     if (action == "print") {
