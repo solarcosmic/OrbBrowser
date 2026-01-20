@@ -86,6 +86,7 @@ KNOWN BUGS:
 */
 var typeTimer;
 var typeInterval = 150;
+var bangs;
 var urlBox = document.getElementById("url-box");
 
 urlBox.addEventListener("keyup", () => {
@@ -96,6 +97,7 @@ urlBox.addEventListener("keyup", () => {
 function goToLink(txt, activeTab = tabs.getActiveTab()) {
     var pattern = /^((http|https|chrome|chrome-extension):\/\/)/; /* https://stackoverflow.com/a/11300963 */
     var dm_regex = /^(?:(?:(?:[a-zA-z\-]+):\/{1,3})?(?:[a-zA-Z0-9])(?:[a-zA-Z0-9\-\.]){1,61}(?:\.[a-zA-Z]{2,})+|\[(?:(?:(?:[a-fA-F0-9]){1,4})(?::(?:[a-fA-F0-9]){1,4}){7}|::1|::)\]|(?:(?:[0-9]{1,3})(?:\.[0-9]{1,3}){3}))(?:\:[0-9]{1,5})?$/; /* https://stackoverflow.com/a/38578855 */
+    var bangs_match = txt.match(/^!([^\s]+)\s+(.+)/);
 
     var formedProtocol;
     var protocolItems;
@@ -116,6 +118,14 @@ function goToLink(txt, activeTab = tabs.getActiveTab()) {
         tab.button.querySelector(".page-title").textContent = formedProtocol;
         omnibox.updateOmniboxHostname(formedProtocol, formedProtocol);
         tab.button.querySelector("img").src = "../assets/star-solid-full.svg";
+    } if (bangs && bangs_match && Array.isArray(bangs)) {
+        const bangCode = bangs_match[1].toLowerCase();
+        const bangQuery = bangs_match[2];
+        console.log(bangs, bangCode, bangQuery);
+        const bangFound = bangs.find(b => b.ts && b.ts.map(t => t.toLowerCase()).includes(bangCode));
+        if (bangFound && bangFound.u) { // may be different for another provider but Helium is like this now
+            tabs.getActiveTab().view.loadURL(bangFound.u.replace("{searchTerms}", bangQuery));
+        }
     } else if (pattern.test(txt)) {
         if (!activeTab) return tabs.activateTab(tabs.createTabInstance(txt));
         tabs.getActiveTab().view.loadURL(txt);
@@ -334,6 +344,11 @@ function changeTheme(theme) {
 document.addEventListener("DOMContentLoaded", async () => {
     const orbTheme = await window.electronAPI.getOrbThemeStatus();
     changeTheme(orbTheme);
+    const timeThen = Date.now();
+    const loadedBangs = await utils.getBangs();
+    if (!loadedBangs) return log("Bangs failed to load!");
+    bangs = loadedBangs;
+    log("Loaded " + bangs.length + " bangs from provider Helium in ~" + (Date.now() - timeThen) + "ms.");
 });
 window.electronAPI.onUpdateThemeImmediately((theme) => {
     changeTheme(theme);

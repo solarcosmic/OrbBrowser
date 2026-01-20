@@ -15,6 +15,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
+import JSON5 from 'json5';
 export var truncateAmount = 25;
 /* https://stackoverflow.com/a/53637828 */
 export function truncateString(str, num) {
@@ -66,4 +67,14 @@ export function checkTabTitleFlow() {
             }
         }
     });
+}
+export async function getBangs() {
+    try {
+        const url = await fetch("https://files.helium.computer/bangs.json");
+        const text = await url.text();
+        const json = JSON5.parse(text); // to stringify use JSON.stringify(json);
+        return json;
+    } catch (e) {
+        console.error(e.message);
+    }
 }
