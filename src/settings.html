@@ -28,7 +28,7 @@
     <h1>Orb Settings</h1>
     <div id="container">
         <div id="orb-settings">
-            <div class="setting-item">
+            <!--<div class="setting-item">
                 <div class="setting-texts">
                     <img src="../assets/shield-solid-full.svg" class="setting-icon"></img>
                     <span style="font-size: 20px;">Orb Sentinel</span><br>
@@ -43,7 +43,7 @@
                     <span>Change the current theme of Orb.</span>
                 </div>
                 <button class="setting-toggle" id="orb-theme-toggle">Dark</button>
-            </div>
+            </div>-->
         </div>
     </div>
     <script>
@@ -55,7 +55,85 @@
                 return str;
             }
         }
-        document.getElementById("orb-sentinel-toggle").addEventListener("click", async () => {
+
+        const settings = [
+            {
+                id: "orb-sentinel-toggle",
+                label: "Orb Sentinel",
+                description: "Blocks ads and trackers when you browse.",
+                icon: "../assets/shield-solid-full.svg",
+                getStatus: () => window.electronAPI.getOrbSentinelStatus(),
+                toggle: async () => { return await window.electronAPI.toggleOrbSentinel() },
+                onUpdate: (enabled, el) => {
+                    el.textContent = enabled ? "Enabled" : "Disabled";
+                    el.classList.toggle("light-up-toggle", enabled);
+                }
+            },
+            {
+                id: "orb-theme-toggle",
+                label: "Dark/Light Mode",
+                description: "Change the current theme of Orb.",
+                icon: "../assets/moon-solid-full.svg",
+                getStatus: () => window.electronAPI.getOrbThemeStatus(),
+                toggle: async () => { return await window.electronAPI.toggleOrbTheme() },
+                onUpdate: (theme, el) => {
+                    console.log(theme, el);
+                    console.log("updated: orb-theme");
+                    const isDark = theme == "dark";
+                    el.textContent = isDark ? "Dark" : "Light";
+                    el.classList.toggle("light-up-toggle", isDark);
+                    //window.electronAPI.toggleOrbTheme(isDark ? "dark" : "light");
+                }
+            },
+        ];
+
+        function setupButtons() {
+            for (const settingsItem of settings) {
+                const item = document.createElement("div");
+                item.classList.add("setting-item");
+                document.getElementById("orb-settings").appendChild(item);
+                const setting_texts = document.createElement("div");
+                setting_texts.classList.add("setting-texts");
+                item.appendChild(setting_texts);
+                const img = document.createElement("img");
+                img.classList.add("setting-icon");
+                img.src = settingsItem.icon;
+                const title = document.createElement("span");
+                title.style.fontSize = "20px";
+                title.textContent = settingsItem.label;
+                const br = document.createElement("br");
+                const desc = document.createElement("span");
+                desc.textContent = settingsItem.description;
+                setting_texts.appendChild(img);
+                setting_texts.appendChild(title);
+                setting_texts.appendChild(br);
+                setting_texts.appendChild(desc);
+                const activeButton = document.createElement("button");
+                activeButton.classList.add("setting-toggle");
+                activeButton.setAttribute("id", settingsItem.id);
+                activeButton.textContent = "Disabled";
+                item.appendChild(activeButton);
+            }
+
+        }
+        
+        document.addEventListener("DOMContentLoaded", async () => {
+            setupButtons();
+            for (const setting of settings) {
+                const element = document.getElementById(setting.id);
+                if (!element) continue; // to avoid confusion: this means continue to the next iteration, not next lines
+
+                const status = await setting.getStatus();
+                setting.onUpdate(status, element); // updates button look & text
+
+                element.addEventListener("click", async () => {
+                    const newStatus = await setting.toggle(); // toggles setting
+                    setting.onUpdate(newStatus, element); // called to update button look & text again..
+                });
+            }
+        });
+
+        /*document.getElementById("orb-sentinel-toggle").addEventListener("click", async () => {
             console.log("clicked!");
             const resp = await window.electronAPI.toggleOrbSentinel();
             console.log(resp);
@@ -101,7 +179,7 @@
                 document.getElementById("orb-theme-toggle").textContent = "Light";
                 document.getElementById("orb-theme-toggle").classList.remove("light-up-toggle");
             }
-        });
+        });*/
     </script>
 </body>
 </html>
