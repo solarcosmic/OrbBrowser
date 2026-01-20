@@ -224,6 +224,26 @@ function contextMenuShow(evt, menu, args) {
                         tabId: args["tabId"]
                     }));
                 }
+            },
+            {
+                label: "Close Tab",
+                click: () => {
+                    if (win) win.webContents.send("send-to-renderer", JSON.stringify({
+                        action: "close-tab",
+                        success: true,
+                        tabId: args["tabId"]
+                    }));
+                }
+            },
+            {
+                label: "Duplicate Tab",
+                click: () => {
+                    if (win) win.webContents.send("send-to-renderer", JSON.stringify({
+                        action: "duplicate-tab",
+                        success: true,
+                        tabId: args["tabId"]
+                    }));
+                }
             }
         ]);
     }

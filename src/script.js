@@ -256,10 +256,9 @@ document.getElementById("url-box").addEventListener("input", () => {
             }
     }
 })
-var theme = "light";
+var chosenTheme = "light";
 window.electronAPI.onAppBlur(() => {
-    console.log("app blur");
-    if (theme == "light") {
+    if (chosenTheme == "light") {
         document.body.style.backgroundColor = "#bbbbbb";
         document.getElementById("sidebar").style.backgroundColor = "#8d8d8d";
     } else {
@@ -268,8 +267,7 @@ window.electronAPI.onAppBlur(() => {
     }
 })
 window.electronAPI.onAppFocus(() => {
-    console.log("app focus");
-    if (theme == "light") {
+    if (chosenTheme == "light") {
         document.body.style.backgroundColor = "#f0f0f0";
         document.getElementById("sidebar").style.backgroundColor = "#c0c0c0";
     } else {
@@ -285,6 +283,9 @@ window.addEventListener("beforeunload", () => {
 document.addEventListener("DOMContentLoaded", async () => {
     let restored = false;
     const savedTabs = localStorage.getItem("orb:tabs_list");
+    /*var lastFocusedTabId = localStorage.getItem("orb:last_active_tab");
+    var lastFocusedTab;*/
+
     if (!savedTabs) return;
     try {
         const items = JSON.parse(savedTabs);
@@ -296,6 +297,7 @@ document.addEventListener("DOMContentLoaded", async () => {
                     console.log("pinned: " + tab);
                     tabs.pinTab(tab.id);
                 }
+                //if (tab.id == lastFocusedTabId) lastFocusedTab = tab;
                 console.log("URL: " + item.url);
                 for (const [protocol, protoItems] of Object.entries(customLinks.list)) {
                     for (const [linkName, linkItem] of Object.entries(protoItems)) {
@@ -307,15 +309,22 @@ document.addEventListener("DOMContentLoaded", async () => {
             });
             
             restored = true;
+
         }
     } catch (e) {}
-    if (!restored) {
+    /*if (restored && lastFocusedTab) {
+        tabs.activateTab(lastFocusedTab);
+    } else if (restored && !lastFocusedTab) {
+        tabs.activateTab(tabs.tabs[0]);
+    } else {
         var newTab = tabs.createTabInstance();
         tabs.activateTab(newTab);
-    }
+    }*/
+    if (!restored) tabs.activateTab(tabs.createTabInstance());
     utils.checkTabTitleFlow();
 })
 function changeTheme(theme) {
+    chosenTheme = theme;
     if (theme == "light") {
         document.getElementById("theme-style").href = "theme_light.css";
     } else {
@@ -340,6 +349,12 @@ window.electronAPI.sendToRenderer((data) => {
     } else if (json.action == "unpin-tab") {
         if (!json.tabId) return log("Missing tab ID on pin tab!");
         tabs.unpinTab(json.tabId);
+    } else if (json.action == "close-tab") {
+        if (!json.tabId) return log("Missing tab ID on pin tab!");
+        tabs.closeTab(tabs.getTabObjectFromId(json.tabId));
+    }  else if (json.action == "duplicate-tab") {
+        if (!json.tabId) return log("Missing tab ID on pin tab!");
+        tabs.activateTab(tabs.createTabInstance(tabs.getTabObjectFromId(json.tabId).view.getURL()));
     } else if (json.action.startsWith("menu-")) {
         doMenuAction(json.action.slice(5));
     }

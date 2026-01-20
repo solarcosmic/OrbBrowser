@@ -191,6 +191,7 @@ export function activateTab(tab) {
         tab.view.style.display = "flex";
         var hostname;
         var url;
+        localStorage.setItem("orb:last_active_tab", tab.id);
         if (tab.displayURL) {
             hostname = tab.displayURL;
             url = tab.displayURL;
@@ -325,6 +326,7 @@ export function createTabInstance(url = "https://google.com") {
         document.getElementById("url-box").value = tab.view.getURL();
         if (event.title?.trim()) {
             btn.text.textContent = utils.truncateString(event.title, 25); //event.title;
+            btn.button.title = event.title;
             if (getActiveTab()?.id == tab.id) {
                 utils.changeWindowTitle(event.title);
             }
@@ -334,6 +336,7 @@ export function createTabInstance(url = "https://google.com") {
         navigation.checkNavigation(tab);
         console.log(tab.displayURL);
         omnibox.updateOmniboxHostname(tab.displayURL || misc.createHostname(tab.view.getURL()).hostname, tab.displayURL || tab.view.getURL());
+        document.getElementById("omnibox-entry").title = tab.displayURL || tab.view.getURL();
         document.getElementById("url-box").value = tab.displayURL || tab.view.getURL();
         misc.browseHistory.push({
             url: tab.displayURL || tab.view?.getURL() || "about:blank",
