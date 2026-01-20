@@ -20,6 +20,7 @@ import {utils, customLinks, tabs} from "framework/linkman";
 const log = utils.createLogger("net.solarcosmic.orbbrowser.misc");
 
 export var browseHistory = JSON.parse(localStorage.getItem("orb:browsing_history") || "[]");
+export var bookmarks = JSON.parse(localStorage.getItem("orb:bookmarks") || "[]");
 
 export function createHostname(url) {
     if (url.startsWith("chrome-extension://")) return url;

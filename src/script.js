@@ -369,10 +369,16 @@ window.electronAPI.sendToRenderer((data) => {
     } else if (json.action == "close-tab") {
         if (!json.tabId) return log("Missing tab ID on pin tab!");
         tabs.closeTab(tabs.getTabObjectFromId(json.tabId));
-    }  else if (json.action == "duplicate-tab") {
+    } else if (json.action == "duplicate-tab") {
         if (!json.tabId) return log("Missing tab ID on pin tab!");
         tabs.activateTab(tabs.createTabInstance(tabs.getTabObjectFromId(json.tabId).view.getURL()));
-    } else if (json.action == "change-sidebar-position") {
+    } else if (json.action == "create-bookmark") {
+        if (!json.tabId) return log("Missing tab ID on pin tab!");
+        createBookmark(tabs.getTabObjectFromId(json.tabId));
+    } else if (json.action == "clear-bookmarks") {
+        misc.bookmarks.length = 0;
+        localStorage.setItem("orb:bookmarks", JSON.stringify([]));
+    } else if (json.action == "change-sidebar-position") { //create-bookmark
         console.log(json);
     } else if (json.action.startsWith("menu-")) {
         doMenuAction(json.action.slice(5));
@@ -383,6 +389,15 @@ window.electronAPI.sendToRenderer((data) => {
 function findInPage(txt) {
     const tab = tabs.getActiveTab();
     const view = tab.view;
+}
+
+function createBookmark(tab) {
+    misc.bookmarks.push({
+        url: tab.displayURL || tab.view?.getURL() || "about:blank",
+        title: tab.view?.getTitle() || "Webpage",
+        timestamp: Date.now(),
+    });
+    localStorage.setItem("orb:bookmarks", JSON.stringify(misc.bookmarks));
 }
 
 function toggleSidebarPosition(position) {
@@ -412,6 +427,8 @@ function doMenuAction(action) {
         misc.ipcLinkOpen("orb://about");
     } else if (action == "settings") {
         misc.ipcLinkOpen("orb://settings");
+    } else if (action == "bookmarks") {
+        misc.ipcLinkOpen("orb://bookmarks");
     }
 }
 window.addEventListener("resize", utils.checkOmniFlow);

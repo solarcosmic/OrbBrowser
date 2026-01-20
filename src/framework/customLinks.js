@@ -29,6 +29,9 @@ export var list = {
         },
         "404": {
             file: "404.html"
+        },
+        "bookmarks": {
+            file: "bookmarks.html"
         }
     }
 }

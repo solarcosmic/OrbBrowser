@@ -264,7 +264,7 @@
         }
         #url-box::selection {
             color: #0c0c0c;
-            background-color: #c0c0c0;
+            background-color: #ffffff;
         }
         #omnibox-search-bar {
             display: flex;

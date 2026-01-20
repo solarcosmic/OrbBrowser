@@ -167,6 +167,7 @@ app.whenReady().then(async () => {
     ipcMain.handle("misc:get-orb-theme-status", getOrbThemeStatus);
     ipcMain.handle("misc:orb-sidebar-lr-toggle", toggleOrbSidebarPosition);
     ipcMain.handle("misc:get-orb-sidebar-lr-status", getOrbSidebarPositionStatus);
+    ipcMain.on("renderer:clear-bookmarks", clearBookmarks);
 });
 app.on("web-contents-created", (evt, webContents) => {
     if (extensions && webContents && webContents.getType && webContents.getType() == "webview" && win && typeof win.id != "undefined") {
@@ -196,6 +197,12 @@ function openLinkInNewTab(evt, url) {
 function clearBrowsingHistory() {
     if (win) win.webContents.send("send-to-renderer", JSON.stringify({
         action: "clear-browsing-data",
+        success: true
+    }));
+}
+function clearBookmarks() {
+    if (win) win.webContents.send("send-to-renderer", JSON.stringify({
+        action: "clear-bookmarks",
         success: true
     }));
 }
@@ -246,6 +253,16 @@ function contextMenuShow(evt, menu, args) {
                         tabId: args["tabId"]
                     }));
                 }
+            },
+            {
+                label: "Add to Bookmarks",
+                click: () => {
+                    if (win) win.webContents.send("send-to-renderer", JSON.stringify({
+                        action: "create-bookmark",
+                        success: true,
+                        tabId: args["tabId"]
+                    }));
+                }
             }
         ]);
     }
@@ -264,6 +281,16 @@ function showMainDropdown() {
             click: () => {
                 if (win) win.webContents.send("send-to-renderer", JSON.stringify({
                     action: "menu-new-tab",
+                    success: true,
+                    //tabId: args["tabId"]
+                }));
+            }
+        },
+        {
+            label: "Bookmarks",
+            click: () => {
+                if (win) win.webContents.send("send-to-renderer", JSON.stringify({
+                    action: "menu-bookmarks",
                     success: true,
                     //tabId: args["tabId"]
                 }));

@@ -1,0 +1,137 @@
+<!--
+ * Orb Browser
+ * Copyright (c) 2025 solarcosmic.
+
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+-->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bookmarks</title>
+    <style>
+        @font-face {
+            font-family: "Golos Text";
+            src: url("../assets/GolosText.ttf");
+        }
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: #0f0f0f;
+            color: #ffffff;
+            height: 100%;
+            margin-left: 10px;
+        }
+        * {
+            font-family: "Golos Text";
+            font-smooth: 2em;
+            user-select: none;
+        }
+        #container {
+            padding: 5px 5px;
+        }
+        .vertical-list {
+            list-style: none;
+            margin: 0;
+            padding: 0;
+        }
+        .grey-text {
+            color: grey;
+            margin-left: 10px;
+        }
+        .vertical-list li {
+            cursor: pointer;
+            padding: 5px 5px;
+        }
+        #clear-browsing-data {
+            padding: 12px 12px;
+            color: #ffffff;
+            background-color: #1b1b1b;
+            cursor: pointer;
+            border: none;
+            border-radius: 4px;
+            font-size: 15px;
+            position: fixed;
+            right: 20px;
+            top: 20px;
+        }
+    </style>
+    <link rel="icon" type="image/svg" href="../assets/history-solid.svg">
+</head>
+<body>
+    <h1>Bookmarks</h1>
+    <button id="clear-browsing-data">Clear Bookmarks</button>
+    <div id="container">
+        <div history-date="23/05/2025">
+            <p>List of Bookmarks</p>
+            <ul class="vertical-list">
+            </ul>
+        </div>
+    </div>
+    <script>
+        const history = JSON.parse(localStorage.getItem("orb:bookmarks"));
+        function doHistory() {
+            if (!history || history.length == 0) {
+                document.getElementsByClassName("vertical-list")[0].textContent = "Nothing here!";
+                return;
+            }
+            for (const item of history.reverse()) {
+                var hostname = item.url;
+                try {
+                    hostname = new URL(item.url).hostname;
+                } catch (e) {}
+                const date_then = new Date(item.timestamp);
+                const li_element = document.createElement("li");
+                const grey_text_1 = document.createElement("span");
+                grey_text_1.classList.add("grey-text");
+                grey_text_1.style.marginRight = "10px";
+                grey_text_1.textContent = date_then.getHours() + ":" + date_then.getMinutes();
+                const grey_text_2 = document.createElement("span");
+                grey_text_2.classList.add("grey-text");
+                grey_text_2.textContent = truncateString(hostname, 25);
+                const main_text = document.createElement("span");
+                main_text.textContent = truncateString((item.title || item.url), 50);
+                li_element.appendChild(grey_text_1);
+                li_element.appendChild(main_text);
+                li_element.appendChild(grey_text_2);
+                document.querySelector(".vertical-list").appendChild(li_element);
+                li_element.addEventListener("click", () => {
+                    console.log(item.url);
+                    window.electronAPI.requestTabOpen(item.url);
+                });
+                /*document.querySelector(".vertical-list").innerHTML += `
+                <li><span class="grey-text" style="margin-right: 10px;"></span></li>
+                `*/
+            }
+        }
+
+        /* https://stackoverflow.com/a/53637828 */
+        function truncateString(str, num) {
+            if (str.length > num) {
+                return str.slice(0, num) + "...";
+            } else {
+                return str;
+            }
+        }
+
+        document.getElementById("clear-browsing-data").addEventListener("click", () => {
+            window.electronAPI.clearBookmarks();
+            document.querySelector(".vertical-list").innerHTML = "";
+            document.getElementsByClassName("vertical-list")[0].textContent = "Nothing here!";
+        })
+        doHistory();
+    </script>
+</body>
+</html>
