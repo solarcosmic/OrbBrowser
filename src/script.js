@@ -58,7 +58,7 @@ document.getElementById("url-box").addEventListener("keyup", (event) => {
     if (event.key == "Enter") {
         goToLink(document.getElementById("url-box").value);
     }
-})
+});
 document.getElementById("omnibox-entry").addEventListener("click", () => {
     if (document.getElementById("omnibox").style.display == "block") return;
     document.getElementById("omnibox").style.display = "block";
@@ -275,7 +275,7 @@ window.electronAPI.onAppBlur(() => {
         document.body.style.backgroundColor = "#191919";
         document.getElementById("sidebar").style.backgroundColor = "#161616";
     }
-})
+});
 window.electronAPI.onAppFocus(() => {
     if (chosenTheme == "light") {
         document.body.style.backgroundColor = "#f0f0f0";
@@ -284,7 +284,15 @@ window.electronAPI.onAppFocus(() => {
         document.body.style.backgroundColor = "#0f0f0f";
         document.getElementById("sidebar").style.backgroundColor = "#0c0c0c";
     }
-})
+});
+window.electronAPI.zoomInActiveTab(() => {
+    const activeTabId = tabs.getActiveTab()?.view?.getWebContentsId();
+    window.electronAPI.zoomInWithTabID(activeTabId);
+});
+window.electronAPI.zoomOutActiveTab(() => {
+    const activeTabId = tabs.getActiveTab()?.view?.getWebContentsId();
+    window.electronAPI.zoomOutWithTabID(activeTabId);
+});
 
 window.addEventListener("beforeunload", () => {
     tabs.saveTabs();

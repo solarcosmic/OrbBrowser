@@ -58,4 +58,8 @@ contextBridge.exposeInMainWorld("electronAPI", {
     onToggleSidebarPositionImmediately: (callback) => ipcRenderer.on("toggle-sidebar-lr-immediately", (_evt, theme) => callback(theme)),
     clearBookmarks: () => ipcRenderer.send("renderer:clear-bookmarks"),
     onCloseActiveTab: (callback) => ipcRenderer.on("renderer:close-active-tab", (_evt) => callback()),
+    zoomInActiveTab: (callback) => ipcRenderer.on("renderer:zoom-in-active-tab", (_evt) => callback()),
+    zoomOutActiveTab: (callback) => ipcRenderer.on("renderer:zoom-out-active-tab", (_evt) => callback()),
+    zoomInWithTabID: (id) => ipcRenderer.send("main:zoom-in-with-tab-id", id),
+    zoomOutWithTabID: (id) => ipcRenderer.send("main:zoom-out-with-tab-id", id)
 });

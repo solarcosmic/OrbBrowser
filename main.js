@@ -84,8 +84,15 @@ function createMainWindow() {
     if (!newTabShortcut) console.error("New tab shortcut registration failed.");
     const closeTabShortcut = globalShortcut.register("CommandOrControl+W", () => {
         if (win && win.isFocused()) win.webContents.send("renderer:close-active-tab");
-    })
-    if (!closeTabShortcut) console.error("Close tab shortcut registration failed.");
+    });
+    const zoomInShortcut = globalShortcut.register("CommandOrControl+=", () => {
+        if (win && win.isFocused()) win.webContents.send("renderer:zoom-in-active-tab");
+    });
+    if (!zoomInShortcut) console.error("Zoom in active tab shortcut registration failed.");
+    const zoomOutShortcut = globalShortcut.register("CommandOrControl+-", () => {
+        if (win && win.isFocused()) win.webContents.send("renderer:zoom-out-active-tab");
+    });
+    if (!zoomOutShortcut) console.error("Zoom out active tab shortcut registration failed.");
     const result = JSON.parse(store.get("orb_setup_data") || "{}");
     if (result) {
         if (result["complete_setup"] == true) {
@@ -180,6 +187,8 @@ app.whenReady().then(async () => {
     ipcMain.handle("misc:orb-sidebar-lr-toggle", toggleOrbSidebarPosition);
     ipcMain.handle("misc:get-orb-sidebar-lr-status", getOrbSidebarPositionStatus);
     ipcMain.on("renderer:clear-bookmarks", clearBookmarks);
+    ipcMain.on("main:zoom-in-with-tab-id", zoomInTab);
+    ipcMain.on("main:zoom-out-with-tab-id", zoomOutTab);
 });
 app.on("web-contents-created", (evt, webContents) => {
     if (extensions && webContents && webContents.getType && webContents.getType() == "webview" && win && typeof win.id != "undefined") {
@@ -490,4 +499,19 @@ function toggleOrbSidebarPosition(evt) {
 function getOrbSidebarPositionStatus(evt) {
     const result = JSON.parse(store.get("orb_setup_data"));
     return result["orb_sidebar_position"] || "Left";
+}
+function zoomInTab(evt, tabId) {
+    const wc = webContents.fromId(tabId);
+    if (!wc) return;
+    const newFactor = clamp(wc.getZoomFactor() + 0.1, 0.1, 5);
+    wc.setZoomFactor(newFactor);
+}
+function zoomOutTab(evt, tabId) {
+    const wc = webContents.fromId(tabId);
+    if (!wc) return;
+    const newFactor = clamp(wc.getZoomFactor() - 0.1, 0.1, 5);
+    wc.setZoomFactor(newFactor);
+}
+function clamp(num, min, max) {
+    return Math.min(max, Math.max(num, min)); // https://stackoverflow.com/a/11409944
 }
