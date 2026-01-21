@@ -49,11 +49,11 @@ document.getElementById("create-tab").addEventListener("click", () => {
     tabs.activateTab(tab);
 });
 
-window.addEventListener("keyup", (event) => {
+/*window.addEventListener("keyup", (event) => {
     if (event.ctrlKey && event.key.toLowerCase() == "t") return tabs.activateTab(tabs.createTabInstance());
-    if (event.ctrlKey && event.key.toLowerCase() == "w") return closeTab(tabs.getActiveTab());
+    if (event.ctrlKey && event.key.toLowerCase() == "w") return tabs.closeTab(tabs.getActiveTab());
     if (event.ctrlKey && event.key.toLowerCase() == "f") return findInPage("Charlie");
-})
+})*/
 document.getElementById("url-box").addEventListener("keyup", (event) => {
     if (event.key == "Enter") {
         goToLink(document.getElementById("url-box").value);
@@ -409,7 +409,12 @@ function toggleSidebarPosition(position) {
 }
 window.electronAPI.onToggleSidebarPositionImmediately((position) => { // super long name
     toggleSidebarPosition(position);
-})
+});
+
+window.electronAPI.onCloseActiveTab(() => {
+    const activeTab = tabs.getActiveTab();
+    tabs.closeTab(activeTab);
+});
 
 function doMenuAction(action) {
     if (action == "print") {

@@ -78,6 +78,14 @@ function createMainWindow() {
         complete_setup: false,
         orb_sentinel: false
     }));*/
+    const newTabShortcut = globalShortcut.register("CommandOrControl+T", () => {
+        if (win && win.isFocused()) openLinkInNewTab(null, "https://google.com");
+    })
+    if (!newTabShortcut) console.error("New tab shortcut registration failed.");
+    const closeTabShortcut = globalShortcut.register("CommandOrControl+W", () => {
+        if (win && win.isFocused()) win.webContents.send("renderer:close-active-tab");
+    })
+    if (!closeTabShortcut) console.error("Close tab shortcut registration failed.");
     const result = JSON.parse(store.get("orb_setup_data") || "{}");
     if (result) {
         if (result["complete_setup"] == true) {
@@ -144,6 +152,10 @@ function createMainWindow() {
         }
     }
 }
+
+app.on("will-quit", () => {
+    globalShortcut.unregister("CommandOrControl+T");
+})
 
 app.whenReady().then(async () => {
     if (process.platform != "linux") await components.whenReady();

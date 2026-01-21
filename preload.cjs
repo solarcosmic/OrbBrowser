@@ -56,5 +56,6 @@ contextBridge.exposeInMainWorld("electronAPI", {
     toggleOrbSidebarPosition: () => ipcRenderer.invoke("misc:orb-sidebar-lr-toggle"),
     getOrbSidebarPositionStatus: () => ipcRenderer.invoke("misc:get-orb-sidebar-lr-status"),
     onToggleSidebarPositionImmediately: (callback) => ipcRenderer.on("toggle-sidebar-lr-immediately", (_evt, theme) => callback(theme)),
-    clearBookmarks: () => ipcRenderer.send("renderer:clear-bookmarks")
+    clearBookmarks: () => ipcRenderer.send("renderer:clear-bookmarks"),
+    onCloseActiveTab: (callback) => ipcRenderer.on("renderer:close-active-tab", (_evt) => callback()),
 });
