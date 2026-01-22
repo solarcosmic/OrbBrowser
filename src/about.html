@@ -21,44 +21,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>About Orb</title>
-    <style>
-        @font-face {
-            font-family: "Golos Text";
-            src: url("../assets/GolosText.ttf");
-        }
-        body {
-            margin: 0;
-            padding: 0;
-            background-color: #0f0f0f;
-            color: #ffffff;
-            height: 100%;
-            overflow: hidden;
-        }
-        * {
-            font-family: "Golos Text";
-            font-smooth: 2em;
-            user-select: none;
-        }
-        #container {
-            padding: 5px 5px;
-        }
-        .vertical-list {
-            list-style: none;
-            margin: 0;
-            padding: 0;
-        }
-        .grey-text {
-            color: grey;
-            margin-left: 10px;
-        }
-        .vertical-list li {
-            cursor: pointer;
-            padding: 5px 5px;
-        }
-        a {
-            color: #ffffff;
-        }
-    </style>
     <link rel="icon" type="image/svg" href="../assets/gear-solid-full.svg">
 </head>
 <body>
@@ -78,6 +40,15 @@
                 return str;
             }
         }
+        document.addEventListener("DOMContentLoaded", async () => {
+            const theme = await window.electronAPI.getOrbThemeStatus();
+            const stylesheet = document.createElement("link");
+            stylesheet.setAttribute("rel", "stylesheet");
+            stylesheet.setAttribute("id", "theme-style");
+            if (theme == "dark") stylesheet.setAttribute("href", "themes/dark/about.css"); //return; //return stylesheet.href = "themes/dark/history.css";
+            if (theme == "light") stylesheet.setAttribute("href", "themes/light/about.css");
+            document.head.appendChild(stylesheet);
+        });
     </script>
 </body>
 </html>

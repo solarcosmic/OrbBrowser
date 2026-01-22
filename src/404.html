@@ -21,73 +21,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>404 Not Found</title>
-    <style>
-        @font-face {
-            font-family: "Golos Text";
-            src: url("../assets/GolosText.ttf");
-        }
-        body {
-            margin: 0;
-            padding: 0;
-            background-color: #0f0f0f;
-            color: #ffffff;
-            height: 100%;
-            overflow: hidden;
-        }
-        * {
-            font-family: "Golos Text";
-            font-smooth: 2em;
-            user-select: none;
-        }
-        #container {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            padding: 5px 5px;
-            flex-direction: column;
-        }
-        .vertical-list {
-            list-style: none;
-            margin: 0;
-            padding: 0;
-        }
-        .grey-text {
-            color: grey;
-            margin-left: 10px;
-        }
-        li {
-            margin-bottom: 5px;
-        }
-        #try-again {
-            padding: 12px 12px;
-            color: #ffffff;
-            background-color: #1b1b1b;
-            cursor: pointer;
-            border: none;
-            border-radius: 4px;
-            font-size: 15px;
-        }
-        #try-again:hover {
-            background-color: #202020;
-        }
-        /* https://stackoverflow.com/a/39669911 */
-        .fade-in-element {
-            opacity: 1;
-            animation-name: fadeIn;
-            animation-iteration-count: 1;
-            animation-timing-function: ease-in;
-            animation-duration: 0.5s;
-        }
-        @keyframes fadeIn {
-            0% {
-                opacity: 0;
-            }
-            100% {
-                opacity: 1;
-            }
-        }
-    </style>
     <link rel="icon" type="image/svg" href="../assets/gear-solid-full.svg">
 </head>
 <body>
@@ -111,6 +44,15 @@
                 return str;
             }
         }
+        document.addEventListener("DOMContentLoaded", async () => {
+            const theme = await window.electronAPI.getOrbThemeStatus();
+            const stylesheet = document.createElement("link");
+            stylesheet.setAttribute("rel", "stylesheet");
+            stylesheet.setAttribute("id", "theme-style");
+            if (theme == "dark") stylesheet.setAttribute("href", "themes/dark/404.css"); //return; //return stylesheet.href = "themes/dark/history.css";
+            if (theme == "light") stylesheet.setAttribute("href", "themes/light/404.css");
+            document.head.appendChild(stylesheet);
+        });
     </script>
 </body>
 </html>

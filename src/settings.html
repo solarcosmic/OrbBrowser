@@ -21,7 +21,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Orb Settings</title>
-    <link rel="stylesheet" href="themes/light/settings.css"></link>
     <link rel="icon" type="image/svg" href="../assets/gear-solid-full.svg">
 </head>
 <body>
@@ -147,6 +146,16 @@
                     setting.onUpdate(newStatus, element); // called to update button look & text again..
                 });
             }
+        });
+
+        document.addEventListener("DOMContentLoaded", async () => {
+            const theme = await window.electronAPI.getOrbThemeStatus();
+            const stylesheet = document.createElement("link");
+            stylesheet.setAttribute("rel", "stylesheet");
+            stylesheet.setAttribute("id", "theme-style");
+            if (theme == "dark") stylesheet.setAttribute("href", "themes/dark/settings.css"); //return; //return stylesheet.href = "themes/dark/history.css";
+            if (theme == "light") stylesheet.setAttribute("href", "themes/light/settings.css");
+            document.head.appendChild(stylesheet);
         });
 
         /*document.getElementById("orb-sentinel-toggle").addEventListener("click", async () => {

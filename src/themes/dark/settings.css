@@ -1,6 +1,6 @@
         @font-face {
             font-family: "Golos Text";
-            src: url("../assets/GolosText.ttf");
+            src: url("../../../assets/GolosText.ttf");
         }
         body {
             margin: 0;
@@ -41,10 +41,20 @@
         #orb-settings {
             display: flex;
             flex-direction: column;
-            gap: 24px;
             margin-top: 30px;
             width: 100%;
             align-items: flex-start;
+        }
+        .setting-icon {
+            width: 14px;
+            height: 14px;
+            margin-right: 8px;
+            /*
+            Source - https://stackoverflow.com/a
+            Posted by Oriol, modified by community. See post 'Timeline' for change history
+            Retrieved 2026-01-23, License - CC BY-SA 3.0
+            */
+            filter: brightness(0) invert(1);
         }
         .setting-item {
             display: flex;

@@ -391,7 +391,7 @@ export function createTabInstance(url = "https://google.com") {
             scroll-behavior: smooth;
         }  
         `);
-    }) */
+    })*/
     utils.checkTabTitleFlow();
     return tab;
 }
