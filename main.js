@@ -82,25 +82,11 @@ function createMainWindow() {
         if (win && win.isFocused()) openLinkInNewTab(null, "https://google.com");
     })
     if (!newTabShortcut) console.error("New tab shortcut registration failed.");
-    const closeTabShortcut = globalShortcut.register("CommandOrControl+W", () => {
-        if (win && win.isFocused()) win.webContents.send("renderer:close-active-tab");
-    });
-    const zoomInShortcut = globalShortcut.register("CommandOrControl+=", () => {
-        if (win && win.isFocused()) win.webContents.send("renderer:zoom-in-active-tab");
-    });
-    if (!zoomInShortcut) console.error("Zoom in active tab shortcut registration failed.");
-    const zoomOutShortcut = globalShortcut.register("CommandOrControl+-", () => {
-        if (win && win.isFocused()) win.webContents.send("renderer:zoom-out-active-tab");
-    });
-    if (!zoomOutShortcut) console.error("Zoom out active tab shortcut registration failed.");
-    const refreshShortcut = globalShortcut.register("F5", () => {
-        if (win && win.isFocused()) win.webContents.send("renderer:refresh-active-tab");
-    });
-    if (!refreshShortcut) console.error("Refresh active tab shortcut registration failed.");
-    const findInPageShortcut = globalShortcut.register("CommandOrControl+F", () => {
-        if (win && win.isFocused()) win.webContents.send("renderer:find-in-page-toggle");
-    });
-    if (!findInPageShortcut) console.error("Find in active tab page shortcut registration failed.");
+    registerShortcut("CommandOrControl+W", "renderer:close-active-tab");
+    registerShortcut("CommandOrControl+=", "renderer:zoom-in-active-tab");
+    registerShortcut("CommandOrControl+-", "renderer:zoom-out-active-tab");
+    registerShortcut("F5", "renderer:refresh-active-tab");
+    registerShortcut("CommandOrControl+F", "renderer:find-in-page-toggle"); // initial
     const result = JSON.parse(store.get("orb_setup_data") || "{}");
     if (result) {
         if (result["complete_setup"] == true) {
@@ -171,6 +157,13 @@ function createMainWindow() {
 app.on("will-quit", () => {
     globalShortcut.unregister("CommandOrControl+T");
 })
+
+function registerShortcut(keybind, pointTo) {
+    const shortcut = globalShortcut.register(keybind, () => {
+        if (win && win.isFocused()) win.webContents.send(pointTo);
+    });
+    if (!shortcut) console.error(`Shortcut registration for ${keybind} (${pointTo}) failed.`);
+}
 
 app.whenReady().then(async () => {
     if (process.platform != "linux") await components.whenReady();
