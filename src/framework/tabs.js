@@ -41,6 +41,14 @@ export function createTab(url = "https://www.google.com", preloadPath = null) {
     views.appendChild(tab.view);
     tabs.push(tab);
     saveTabs();
+    tab.view.addEventListener("found-in-page", (e) => {
+        const result = e.result;
+        document.getElementById("finder-matches").textContent = result.matches + " matches";
+
+        if (result.matches == result.activeMatchOrdinal) {
+            activeTab?.view.stopFindInPage("keepSelection");
+        }
+    });
     return tab;
 }
 

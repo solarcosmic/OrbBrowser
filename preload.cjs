@@ -61,5 +61,7 @@ contextBridge.exposeInMainWorld("electronAPI", {
     zoomInActiveTab: (callback) => ipcRenderer.on("renderer:zoom-in-active-tab", (_evt) => callback()),
     zoomOutActiveTab: (callback) => ipcRenderer.on("renderer:zoom-out-active-tab", (_evt) => callback()),
     zoomInWithTabID: (id) => ipcRenderer.send("main:zoom-in-with-tab-id", id),
-    zoomOutWithTabID: (id) => ipcRenderer.send("main:zoom-out-with-tab-id", id)
+    zoomOutWithTabID: (id) => ipcRenderer.send("main:zoom-out-with-tab-id", id),
+    refreshActiveTab: (callback) => ipcRenderer.on("renderer:refresh-active-tab", (_evt) => callback()),
+    findInPageToggle: (callback) => ipcRenderer.on("renderer:find-in-page-toggle", (_evt) => callback()),
 });

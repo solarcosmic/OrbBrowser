@@ -293,10 +293,42 @@ window.electronAPI.zoomOutActiveTab(() => {
     const activeTabId = tabs.getActiveTab()?.view?.getWebContentsId();
     window.electronAPI.zoomOutWithTabID(activeTabId);
 });
+window.electronAPI.refreshActiveTab(() => {
+    const activeTab = tabs.getActiveTab();
+    if (activeTab) navigation.navigate(activeTab, "refresh");
+});
+window.electronAPI.findInPageToggle(() => {
+    toggleFinder();
+});
+
+const finder_txt = document.getElementById("finder-textbox");
+finder_txt.addEventListener("input", (e) => {
+    const activeTab = tabs.getActiveTab();
+    if (!activeTab) return;
+    const newText = finder_txt.value;
+    if (newText == "") {
+        activeTab.view.stopFindInPage("clearSelection");
+        document.getElementById("finder-matches").textContent = "Type to search for matches";
+        return;
+    }
+    const reqId = activeTab.view.findInPage(newText);
+});
 
 window.addEventListener("beforeunload", () => {
     tabs.saveTabs();
-})
+});
+
+function toggleFinder() {
+    const activeTab = tabs.getActiveTab();
+    if (!activeTab) return;
+    const finder = document.getElementById("finder");
+    if (finder.style.display == "none") {
+        finder.style.display = "block";
+        document.getElementById("finder-textbox").focus();
+    } else {
+        finder.style.display = "none";
+    }
+}
 
 document.addEventListener("DOMContentLoaded", async () => {
     let restored = false;

@@ -93,6 +93,14 @@ function createMainWindow() {
         if (win && win.isFocused()) win.webContents.send("renderer:zoom-out-active-tab");
     });
     if (!zoomOutShortcut) console.error("Zoom out active tab shortcut registration failed.");
+    const refreshShortcut = globalShortcut.register("F5", () => {
+        if (win && win.isFocused()) win.webContents.send("renderer:refresh-active-tab");
+    });
+    if (!refreshShortcut) console.error("Refresh active tab shortcut registration failed.");
+    const findInPageShortcut = globalShortcut.register("CommandOrControl+F", () => {
+        if (win && win.isFocused()) win.webContents.send("renderer:find-in-page-toggle");
+    });
+    if (!findInPageShortcut) console.error("Find in active tab page shortcut registration failed.");
     const result = JSON.parse(store.get("orb_setup_data") || "{}");
     if (result) {
         if (result["complete_setup"] == true) {

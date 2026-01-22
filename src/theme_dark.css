@@ -357,3 +357,18 @@
         #tablist [id^="tab-button-"].drag-over {
             border: 2px dashed #ffffff;
         }
+        /* Finder - Ctrl+F */
+        #finder {
+            padding: 4px 4px;
+            background-color: #151515;
+        }
+        #finder input {
+            border: none;
+            border-radius: 4px;
+            background-color: #070707;
+            color: #ffffff;
+            margin-right: 10px;
+        }
+        #finder span {
+            font-size: 14px;
+        }
