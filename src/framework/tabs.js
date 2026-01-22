@@ -16,6 +16,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 import {utils, customLinks, omnibox, misc, navigation} from "framework/linkman";
+import { goToLink } from "../script.js";
 
 const views = document.getElementById("webviews");
 export var tabs = [];
@@ -28,7 +29,8 @@ export function createTab(url = "https://www.google.com", preloadPath = null) {
     const tab = {
         id: crypto.randomUUID(),
         view: document.createElement("webview"),
-        pinned: false
+        pinned: false,
+        isLoading: false
     }
     tab.view.classList.add("tab-view");
     //tab.view.setAttribute("partition", "persist:default");
@@ -217,6 +219,7 @@ export function activateTab(tab) {
         }
         omnibox.updateOmniboxHostname(hostname, url);
         misc.triggerTabCount();
+        tabLoadingCheck(tab);
         document.getElementById("url-box").value = url;
         try {
             const webContentsId = tab.view.getWebContentsId ? tab.view.getWebContentsId() : tab.view.getAttribute("data-webcontents-id");
@@ -231,6 +234,22 @@ export function activateTab(tab) {
         changeWindowTitle(tab.view.getTitle());
     } catch (e) {
         //log("Failed to change window title: " + e);
+    }
+}
+
+function tabLoadingCheck(tab) {
+    if (tab.isLoading) {
+        document.getElementById("refresh-nav").src = "../assets/xmark-solid-full.svg";
+    } else {
+        document.getElementById("refresh-nav").src = "../assets/rotate-right-solid-full.svg";
+    }
+}
+
+export function reloadAndCancelNavigation(tab) {
+    if (document.getElementById("refresh-nav").src == "../assets/xmark-solid-full.svg") {
+        tab.view?.stop();
+    } else {
+        navigation.navigate(getActiveTab(), "refresh");
     }
 }
 
@@ -335,6 +354,7 @@ export function createTabInstance(url = "https://google.com") {
     btn.text.textContent = utils.truncateString(url, utils.truncateAmount); //url; 
     btn.icon.src = "../assets/loading.gif";
     tab.view.addEventListener("page-title-updated", (event) => {
+        tab.isLoading = tab.view.isLoading();
         console.log(url);
         document.getElementById("url-box").setAttribute("value", tab.view.getURL());
         document.getElementById("url-box").value = tab.view.getURL();
@@ -347,6 +367,7 @@ export function createTabInstance(url = "https://google.com") {
         }
     });
     tab.view.addEventListener("did-navigate", (event) => {
+        tab.isLoading = tab.view.isLoading();
         navigation.checkNavigation(tab);
         console.log(tab.displayURL);
         omnibox.updateOmniboxHostname(tab.displayURL || misc.createHostname(tab.view.getURL()).hostname, tab.displayURL || tab.view.getURL());
@@ -360,6 +381,7 @@ export function createTabInstance(url = "https://google.com") {
         localStorage.setItem("orb:browsing_history", JSON.stringify(misc.browseHistory));
     })
     tab.view.addEventListener("page-favicon-updated", (event) => {
+        tab.isLoading = tab.view.isLoading();
         if (tab.view.getURL().startsWith("chrome-extension://")) {
             btn.icon.src = "../assets/chrome-brands-solid-full.svg";
             lastFavicon = btn.icon.src;
@@ -373,9 +395,13 @@ export function createTabInstance(url = "https://google.com") {
         }
     });
     tab.view.addEventListener("did-start-loading", () => {
+        tab.isLoading = true;
         btn.icon.src = "../assets/loading.gif";
+        document.getElementById("refresh-nav").src = "../assets/xmark-solid-full.svg";
     });
     tab.didStopLoadingHandler = function() {
+        tab.isLoading = false;
+        document.getElementById("refresh-nav").src = "../assets/rotate-right-solid-full.svg"
         if (tab.view.getURL().startsWith("chrome-extension://")) {
             btn.icon.src = "../assets/chrome-brands-solid-full.svg";
         } else if (lastFavicon) {

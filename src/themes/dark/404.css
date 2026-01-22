@@ -1,6 +1,6 @@
         @font-face {
             font-family: "Golos Text";
-            src: url("../assets/GolosText.ttf");
+            src: url("../../../assets/GolosText.ttf");
         }
         body {
             margin: 0;

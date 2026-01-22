@@ -38,7 +38,9 @@ right_nav.addEventListener("click", () => {
     if (!right_nav.classList.contains("greyed-out")) navigation.navigate(tabs.getActiveTab(), "forward");
 });
 refresh_nav.addEventListener("click", () => {
-    if (!refresh_nav.classList.contains("greyed-out")) navigation.navigate(tabs.getActiveTab(), "refresh");
+    if (!refresh_nav.classList.contains("greyed-out")) {
+        tabs.reloadAndCancelNavigation();
+    }
 });
 main_dropdown.addEventListener("click", () => {
     if (!main_dropdown.classList.contains("greyed-out")) window.electronAPI.showMainDropdown();
@@ -97,7 +99,7 @@ urlBox.addEventListener("keyup", () => {
     if (urlBox.value) typeTimer = setTimeout(searchSuggestions, typeInterval);
 })
 
-function goToLink(txt, activeTab = tabs.getActiveTab()) {
+export function goToLink(txt, activeTab = tabs.getActiveTab()) {
     var pattern = /^((http|https|chrome|chrome-extension):\/\/)/; /* https://stackoverflow.com/a/11300963 */
     var dm_regex = /^(?:(?:(?:[a-zA-z\-]+):\/{1,3})?(?:[a-zA-Z0-9])(?:[a-zA-Z0-9\-\.]){1,61}(?:\.[a-zA-Z]{2,})+|\[(?:(?:(?:[a-fA-F0-9]){1,4})(?::(?:[a-fA-F0-9]){1,4}){7}|::1|::)\]|(?:(?:[0-9]{1,3})(?:\.[0-9]{1,3}){3}))(?:\:[0-9]{1,5})?$/; /* https://stackoverflow.com/a/38578855 */
     var bangs_match = txt.match(/^!([^\s]+)\s+(.+)/);
