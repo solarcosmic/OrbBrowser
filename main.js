@@ -87,6 +87,10 @@ function createMainWindow() {
     registerShortcut("CommandOrControl+-", "renderer:zoom-out-active-tab");
     registerShortcut("F5", "renderer:refresh-active-tab");
     registerShortcut("CommandOrControl+F", "renderer:find-in-page-toggle"); // initial
+    registerShortcut("CommandOrControl+L", "renderer:switch-to-omnibox");
+    registerShortcut("F6", "renderer:switch-to-omnibox");
+    registerShortcut("CommandOrControl+Shift+F5", "renderer:cache-refresh");
+    registerShortcut("CommandOrControl+R", "renderer:refresh-active-tab");
     const result = JSON.parse(store.get("orb_setup_data") || "{}");
     if (result) {
         if (result["complete_setup"] == true) {

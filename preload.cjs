@@ -64,4 +64,6 @@ contextBridge.exposeInMainWorld("electronAPI", {
     zoomOutWithTabID: (id) => ipcRenderer.send("main:zoom-out-with-tab-id", id),
     refreshActiveTab: (callback) => ipcRenderer.on("renderer:refresh-active-tab", (_evt) => callback()),
     findInPageToggle: (callback) => ipcRenderer.on("renderer:find-in-page-toggle", (_evt) => callback()),
+    switchToOmnibox: (callback) => ipcRenderer.on("renderer:switch-to-omnibox", (_evt) => callback()),
+    cacheRefresh: (callback) => ipcRenderer.on("renderer:cache-refresh", (_evt) => callback()),
 });

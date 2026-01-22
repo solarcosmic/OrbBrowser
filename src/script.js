@@ -60,11 +60,14 @@ document.getElementById("url-box").addEventListener("keyup", (event) => {
     }
 });
 document.getElementById("omnibox-entry").addEventListener("click", () => {
+    openOmnibox();
+});
+function openOmnibox() {
     if (document.getElementById("omnibox").style.display == "block") return;
     document.getElementById("omnibox").style.display = "block";
     searchSuggestions();
     document.getElementById("url-box").select();
-});
+}
 window.electronAPI.onMouseClick((x, y) => {
     const omnibox = document.getElementById("omnibox");
     const element = document.elementFromPoint(x, y);
@@ -300,6 +303,15 @@ window.electronAPI.refreshActiveTab(() => {
 window.electronAPI.findInPageToggle(() => {
     toggleFinder();
 });
+window.electronAPI.switchToOmnibox(() => {
+    openOmnibox();
+});
+window.electronAPI.cacheRefresh(() => {
+    console.log("Cache Refresh");
+    const activeTab = tabs.getActiveTab();
+    activeTab.view?.reloadIgnoringCache();
+    console.log("Done");
+})
 
 const finder_txt = document.getElementById("finder-textbox");
 finder_txt.addEventListener("input", (e) => {
