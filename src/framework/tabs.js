@@ -251,6 +251,7 @@ export function closeTab(tab) {
     }
     tab.view.remove();
     tab.button.remove();
+    tab.view.removeEventListener("did-stop-loading", tab.didStopLoadingHandler); // prevents warning if tabs are too high
     switchToNextTab(idx);
     saveTabs();
 }
@@ -371,7 +372,7 @@ export function createTabInstance(url = "https://google.com") {
     tab.view.addEventListener("did-start-loading", () => {
         btn.icon.src = "../assets/loading.gif";
     });
-    tab.view.addEventListener("did-stop-loading", () => {
+    tab.didStopLoadingHandler = function() {
         if (tab.view.getURL().startsWith("chrome-extension://")) {
             btn.icon.src = "../assets/chrome-brands-solid-full.svg";
         } else if (lastFavicon) {
@@ -380,8 +381,8 @@ export function createTabInstance(url = "https://google.com") {
             const cached = localStorage.getItem(`favicon:${urlObj?.hostname}`);
             btn.icon.src = cached || "";
         }
-        
-    });
+    };
+    tab.view.addEventListener("did-stop-loading", tab.didStopLoadingHandler);
     tab.view.addEventListener("did-fail-load", (evt) => {
         goToLink("orb://404", tab);
     })
