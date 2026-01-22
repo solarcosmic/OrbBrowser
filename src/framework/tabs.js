@@ -181,6 +181,8 @@ function hideAllTabs() {
 */
 function removeAllActiveTabs() {
     Array.from(document.querySelectorAll("[id^=tab-button-]")).forEach((item) => {
+        //item.view?.stopFindInPage("clearSelection");
+        document.getElementById("finder").style.display = "none";
         item.classList.remove("active-tab");
     });
 }
