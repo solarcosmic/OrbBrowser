@@ -49,6 +49,7 @@ export function createTab(url = "https://www.google.com", preloadPath = null) {
             activeTab?.view.stopFindInPage("keepSelection");
         }
     });
+    misc.triggerTabCount();
     return tab;
 }
 
@@ -215,6 +216,7 @@ export function activateTab(tab) {
             }
         }
         omnibox.updateOmniboxHostname(hostname, url);
+        misc.triggerTabCount();
         document.getElementById("url-box").value = url;
         try {
             const webContentsId = tab.view.getWebContentsId ? tab.view.getWebContentsId() : tab.view.getAttribute("data-webcontents-id");
@@ -251,6 +253,7 @@ export function closeTab(tab) {
     }
     tab.view.remove();
     tab.button.remove();
+    misc.triggerTabCount();
     tab.view.removeEventListener("did-stop-loading", tab.didStopLoadingHandler); // prevents warning if tabs are too high
     switchToNextTab(idx);
     saveTabs();
@@ -412,4 +415,8 @@ export function saveTabs() {
     };
     console.log(collected);
     localStorage.setItem("orb:tabs_list", JSON.stringify(collected));
+}
+
+export function getTabCount() {
+    return tabs.length;
 }

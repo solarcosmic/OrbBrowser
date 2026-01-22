@@ -57,3 +57,9 @@ export function removePinDivider() {
 export function getPinnedTabCount() {
     return document.getElementById("pinned-tab-buttons").childElementCount;
 }
+
+export function triggerTabCount() {
+    //console.log(tabs.getTabCount());
+    const count = tabs.getTabCount();
+    if (count) document.getElementById("tab-count").textContent = "(" + count + ")";
+}
