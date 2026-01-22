@@ -311,7 +311,15 @@ window.electronAPI.cacheRefresh(() => {
     const activeTab = tabs.getActiveTab();
     activeTab.view?.reloadIgnoringCache();
     console.log("Done");
-})
+});
+window.electronAPI.toggleAudioMuteActiveTab(() => {
+    const activeTab = tabs.getActiveTab();
+    if (!activeTab.isAudioMuted()) {
+        activeTab.setAudioMuted(true);
+    } else {
+        activeTab.setAudioMuted(false);
+    }
+});
 
 const finder_txt = document.getElementById("finder-textbox");
 finder_txt.addEventListener("input", (e) => {

@@ -91,6 +91,7 @@ function createMainWindow() {
     registerShortcut("F6", "renderer:switch-to-omnibox");
     registerShortcut("CommandOrControl+Shift+F5", "renderer:cache-refresh");
     registerShortcut("CommandOrControl+R", "renderer:refresh-active-tab");
+    registerShortcut("CommandOrControl+M", "renderer:toggle-audio-mute-active-tab");
     const result = JSON.parse(store.get("orb_setup_data") || "{}");
     if (result) {
         if (result["complete_setup"] == true) {

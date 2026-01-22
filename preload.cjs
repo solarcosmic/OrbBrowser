@@ -66,4 +66,5 @@ contextBridge.exposeInMainWorld("electronAPI", {
     findInPageToggle: (callback) => ipcRenderer.on("renderer:find-in-page-toggle", (_evt) => callback()),
     switchToOmnibox: (callback) => ipcRenderer.on("renderer:switch-to-omnibox", (_evt) => callback()),
     cacheRefresh: (callback) => ipcRenderer.on("renderer:cache-refresh", (_evt) => callback()),
+    toggleAudioMuteActiveTab: (callback) => ipcRenderer.on("renderer:toggle-audio-mute-active-tab", (_evt) => callback())
 });
