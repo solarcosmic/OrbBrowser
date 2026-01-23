@@ -139,10 +139,17 @@ export function reorderTabs(dragId, targetId) {
 
 //* tab helpers *//
 
+/*
+ * Returns a tab button by its provided UUID.
+*/
 export function getTabButtonByTabId(tabId) {
     return document.getElementById("tab-button-" + tabId);
 }
 
+/*
+ * Pins a tab on the sidebar.
+ * Requires: tabId (tab UUID)
+*/
 export function pinTab(tabId) {
     const button = getTabButtonByTabId(tabId);
     if (!button) return log("No button!");
@@ -152,6 +159,11 @@ export function pinTab(tabId) {
     document.getElementById("pinned-tab-buttons").appendChild(button);
     if (misc.getPinnedTabCount() > 0) misc.createPinDivider();
 }
+
+/*
+ * Unpins an already pinned tab.
+ * Requires: tabId (pinned tab UUID)
+*/
 
 export function unpinTab(tabId) {
     const button = getTabButtonByTabId(tabId);
@@ -163,6 +175,11 @@ export function unpinTab(tabId) {
     if (misc.getPinnedTabCount() <= 0) misc.removePinDivider();
 }
 
+/*
+ * Returns the tab object from its ID.
+ * The tab object consists of id, view, pinned, and isLoading.
+ * Requires: tabID (tab UUID)
+*/
 export function getTabObjectFromId(tabId) {
     for (const item of tabs) {
         if (item.id == tabId) return item;
